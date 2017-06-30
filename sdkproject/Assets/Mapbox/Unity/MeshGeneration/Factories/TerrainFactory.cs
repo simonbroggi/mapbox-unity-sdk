@@ -175,6 +175,15 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 			tile.HeightDataState = TilePropertyState.Loading;
 			var pngRasterTile = new RawPngRasterTile();
 
+			var terrainVt = new TerrainVectorTile();
+			terrainVt.Initialize(_fileSource, tile.CanonicalTileId, "terrain-vector-tiles", () =>
+			{
+				if (terrainVt.HasError)
+				{
+					Debug.Log(terrainVt.ExceptionsAsString);
+				}
+			});
+
 			tile.AddTile(pngRasterTile);
 			Progress++;
 
