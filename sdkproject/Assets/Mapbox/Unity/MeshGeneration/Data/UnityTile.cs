@@ -11,7 +11,7 @@ namespace Mapbox.Unity.MeshGeneration.Data
 
 	public class UnityTile : MonoBehaviour
 	{
-		float[] _heightData;
+		float[,] _heightData;
 		Texture2D _rasterData;
 		float _relativeScale;
 
@@ -140,33 +140,62 @@ namespace Mapbox.Unity.MeshGeneration.Data
 			OnRecycled(this);
 		}
 
-		internal void SetHeightData(byte[] data, float heightMultiplier = 1f)
+		//internal void SetHeightData(byte[] data, float heightMultiplier = 1f)
+		//{
+		//	// HACK: compute height values for terrain. We could probably do this without a texture2d.
+		//	if (_heightTexture == null)
+		//	{
+		//		_heightTexture = new Texture2D(0, 0);
+		//	}
+
+		//	_heightTexture.LoadImage(data);
+		//	byte[] rgbData = _heightTexture.GetRawTextureData();
+
+		//	// Get rid of this temporary texture. We don't need to bloat memory.
+		//	_heightTexture.LoadImage(null);
+
+		//	if (_heightData == null)
+		//	{
+		//		_heightData = new float[256 * 256];
+		//	}
+
+		//	for (int xx = 0; xx < 256; ++xx)
+		//	{
+		//		for (int yy = 0; yy < 256; ++yy)
+		//		{
+		//			float r = rgbData[(xx * 256 + yy) * 4 + 1];
+		//			float g = rgbData[(xx * 256 + yy) * 4 + 2];
+		//			float b = rgbData[(xx * 256 + yy) * 4 + 3];
+		//			_heightData[xx * 256 + yy] = Conversions.GetAbsoluteHeightFromColor(r, g, b) * _relativeScale * heightMultiplier;
+		//		}
+		//	}
+
+		//	HeightDataState = TilePropertyState.Loaded;
+		//	OnHeightDataChanged(this);
+		//}
+
+
+		internal void SetHeightData(float[,] data, float heightMultiplier = 1f)
 		{
-			// HACK: compute height values for terrain. We could probably do this without a texture2d.
-			if (_heightTexture == null)
-			{
-				_heightTexture = new Texture2D(0, 0);
-			}
-
-			_heightTexture.LoadImage(data);
-			byte[] rgbData = _heightTexture.GetRawTextureData();
-
-			// Get rid of this temporary texture. We don't need to bloat memory.
-			_heightTexture.LoadImage(null);
 
 			if (_heightData == null)
 			{
-				_heightData = new float[256 * 256];
+				//TODO: change logic to be size independant, as vt terrain tiles are 258x258
+				_heightData = new float[256, 256];
+				//_heightData = new float[data.GetLength(0), data.GetLength(1)];
 			}
 
+			//TODO: change logic to be size independant, as vt terrain tiles are 258x258
 			for (int xx = 0; xx < 256; ++xx)
 			{
+				//TODO: change logic to be size independant, as vt terrain tiles are 258x258
 				for (int yy = 0; yy < 256; ++yy)
 				{
-					float r = rgbData[(xx * 256 + yy) * 4 + 1];
-					float g = rgbData[(xx * 256 + yy) * 4 + 2];
-					float b = rgbData[(xx * 256 + yy) * 4 + 3];
-					_heightData[xx * 256 + yy] = Conversions.GetAbsoluteHeightFromColor(r, g, b) * _relativeScale * heightMultiplier;
+					// TODO: change logic to be size independant
+
+					// transpose data into format expected by existing code: rotate matrix 90°
+					// '258' is correct in this line as it refers to the vt-terrain matrix which is 258x258
+					_heightData[xx, yy] = data[(xx + 1), 258 - (yy + 1) - 1] * heightMultiplier;
 				}
 			}
 
@@ -174,13 +203,15 @@ namespace Mapbox.Unity.MeshGeneration.Data
 			OnHeightDataChanged(this);
 		}
 
+
+
 		public float QueryHeightData(float x, float y)
 		{
 			if (_heightData != null)
 			{
 				var intX = (int)Mathf.Clamp(x * 256, 0, 255);
 				var intY = (int)Mathf.Clamp(y * 256, 0, 255);
-				return _heightData[intY * 256 + intX];
+				return _heightData[intX, intY];
 			}
 
 			return 0;

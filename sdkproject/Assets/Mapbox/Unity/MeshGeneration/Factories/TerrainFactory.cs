@@ -173,29 +173,18 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 		private void CreateTerrainHeight(UnityTile tile)
 		{
 			tile.HeightDataState = TilePropertyState.Loading;
-			var pngRasterTile = new RawPngRasterTile();
+			//var pngRasterTile = new RawPngRasterTile();
 
 			var terrainVt = new TerrainVectorTile();
 			terrainVt.Initialize(_fileSource, tile.CanonicalTileId, "terrain-vector-tiles", () =>
 			{
 				if (terrainVt.HasError)
 				{
-					Debug.Log(terrainVt.ExceptionsAsString);
-				}
-			});
-
-			tile.AddTile(pngRasterTile);
-			Progress++;
-
-			pngRasterTile.Initialize(_fileSource, tile.CanonicalTileId, _mapId, () =>
-			{
-				if (pngRasterTile.HasError)
-				{
 					tile.HeightDataState = TilePropertyState.Error;
 
 					// Handle missing elevation from server (404)!
 					// TODO: optimize this search!
-					if (pngRasterTile.ExceptionsAsString.Contains("404"))
+					if (terrainVt.ExceptionsAsString.Contains("404"))
 					{
 						ResetToFlatMesh(tile);
 					}
@@ -203,10 +192,34 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 					return;
 				}
 
-				tile.SetHeightData(pngRasterTile.Data, _heightModifier);
+				tile.SetHeightData(terrainVt.Data, _heightModifier);
 				GenerateTerrainMesh(tile);
 				Progress--;
 			});
+
+			tile.AddTile(terrainVt);
+			Progress++;
+
+			//pngRasterTile.Initialize(_fileSource, tile.CanonicalTileId, _mapId, () =>
+			//{
+			//	if (pngRasterTile.HasError)
+			//	{
+			//		tile.HeightDataState = TilePropertyState.Error;
+
+			//		// Handle missing elevation from server (404)!
+			//		// TODO: optimize this search!
+			//		if (pngRasterTile.ExceptionsAsString.Contains("404"))
+			//		{
+			//			ResetToFlatMesh(tile);
+			//		}
+			//		Progress--;
+			//		return;
+			//	}
+
+			//	tile.SetHeightData(pngRasterTile.Data, _heightModifier);
+			//	GenerateTerrainMesh(tile);
+			//	Progress--;
+			//});
 		}
 
 		/// <summary>
