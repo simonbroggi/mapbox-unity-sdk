@@ -4,12 +4,14 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Mapbox.Map {
+namespace Mapbox.Map
+{
 	using System.Collections.ObjectModel;
 	using Mapbox.Utils;
 	using Mapbox.VectorTile;
 	using Mapbox.VectorTile.ExtensionMethods;
 	using System;
+	using Mapbox.Threading;
 
 	/// <summary>
 	///    A decoded vector tile, as specified by the
@@ -39,18 +41,21 @@ namespace Mapbox.Map {
 	///	}));
 	/// </code>
 	/// </example>
-	public sealed class VectorTile : Tile, IDisposable {
+	public sealed class VectorTile : Tile, IDisposable
+	{
 		// FIXME: Namespace here is very confusing and conflicts (sematically)
 		// with his class. Something has to be renamed here.
-		private Mapbox.VectorTile.VectorTile data;
+		private Mapbox.VectorTile.VectorTile _data;
 
 		private bool isDisposed = false;
 
 		/// <summary> Gets the vector decoded using Mapbox.VectorTile library. </summary>
 		/// <value> The GeoJson data. </value>
-		public Mapbox.VectorTile.VectorTile Data {
-			get {
-				return this.data;
+		public Mapbox.VectorTile.VectorTile Data
+		{
+			get
+			{
+				return _data;
 			}
 		}
 
@@ -63,19 +68,24 @@ namespace Mapbox.Map {
 		//}
 
 
-		public void Dispose() {
+		public void Dispose()
+		{
 			Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
 		//TODO: change signature if 'VectorTile' class changes from 'sealed'
 		//protected override void Dispose(bool disposeManagedResources)
-		public void Dispose(bool disposeManagedResources) {
-			if (!isDisposed) {
-				if (disposeManagedResources) {
+		public void Dispose(bool disposeManagedResources)
+		{
+			if (!isDisposed)
+			{
+				if (disposeManagedResources)
+				{
 					//TODO implement IDisposable with Mapbox.VectorTile.VectorTile
-					if (null != data) {
-						data = null;
+					if (null != _data)
+					{
+						_data = null;
 					}
 				}
 			}
@@ -96,9 +106,11 @@ namespace Mapbox.Map {
 		/// Console.Write("GeoJson: " + json);
 		/// </code>
 		/// </example>
-		public string GeoJson {
-			get {
-				return this.data.ToGeoJson((ulong)Id.Z, (ulong)Id.X, (ulong)Id.Y, 0);
+		public string GeoJson
+		{
+			get
+			{
+				return _data.ToGeoJson((ulong)Id.Z, (ulong)Id.X, (ulong)Id.Y, 0);
 			}
 		}
 
@@ -118,8 +130,9 @@ namespace Mapbox.Map {
 		/// }
 		/// </code>
 		/// </example>
-		public ReadOnlyCollection<string> LayerNames() {
-			return this.data.LayerNames();
+		public ReadOnlyCollection<string> LayerNames()
+		{
+			return _data.LayerNames();
 		}
 
 		// FIXME: Why don't these work?
@@ -139,24 +152,94 @@ namespace Mapbox.Map {
 		/// }
 		/// </code>
 		/// </example>
-		public VectorTileLayer GetLayer(string layerName) {
-			return this.data.GetLayer(layerName);
+		public VectorTileLayer GetLayer(string layerName)
+		{
+			return _data.GetLayer(layerName);
 		}
 
 
-		internal override TileResource MakeTileResource(string mapId) {
+		internal override TileResource MakeTileResource(string mapId)
+		{
 			return TileResource.MakeVector(Id, mapId);
 		}
 
 
-		internal override bool ParseTileData(byte[] data) {
-			try {
-				var decompressed = Compression.Decompress(data);
-				this.data = new Mapbox.VectorTile.VectorTile(decompressed);
+		internal override bool ParseTileData(byte[] data)
+		{
+			try
+			{
+
+
+				//// ----->> START USING BACKGROUNDWORKER ------------->>
+
+				bool done = false;
+				Exception parsingException = null;
+				Worker worker = new Worker();
+				worker.ProcessWorkLoad(() =>
+				{
+					try
+					{
+						var decompressed = Compression.Decompress(data);
+						_data = new Mapbox.VectorTile.VectorTile(decompressed);
+
+						foreach (var lyrName in _data.LayerNames())
+						{
+							VectorTileLayer vtLayer = _data.GetLayer(lyrName);
+							for (int idx = 0; idx < vtLayer.FeatureCount(); idx++)
+							{
+								VectorTileFeature vtFeat = vtLayer.GetFeature(idx, 0);
+								//this calculates and caches the geometry
+								vtFeat.Geometry<float>(0);
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						parsingException = ex;
+					}
+					finally
+					{
+						worker.Dispose();
+						worker = null;
+						done = true;
+					}
+				});
+
+				while (!done) { }
+				if (null != parsingException)
+				{
+					AddException(parsingException);
+					return false;
+				}
+
+				//// <<-------------- END USING BACKGROUNDWORKER
+
+
+
+				//// ----->> START OLD IMPLEMENTATION ------------->>
+
+				//var decompressed = Compression.Decompress(data);
+				//_data = new Mapbox.VectorTile.VectorTile(decompressed);
+
+				//foreach (var lyrName in _data.LayerNames())
+				//{
+				//	VectorTileLayer vtLayer = _data.GetLayer(lyrName);
+				//	for (int idx = 0; idx < vtLayer.FeatureCount(); idx++)
+				//	{
+				//		VectorTileFeature vtFeat = vtLayer.GetFeature(idx, 0);
+				//		//this calculates and caches the geometry
+				//		vtFeat.Geometry<float>(0);
+				//	}
+				//}
+
+				//// <<-------------- END OLD IMPLEMENATION
+
+
 
 				return true;
 			}
-			catch (Exception ex) {
+			catch (Exception ex)
+			{
 				AddException(ex);
 				return false;
 			}
