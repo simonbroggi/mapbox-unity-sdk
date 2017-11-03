@@ -15,4 +15,6 @@ MonoBehaviour:
   _flatTops: 1
   _forceHeight: 0
   _height: 0
+  _heightPropertyName: pkm2
+  _scaleCoefficient: 0.5
   _createSideWalls: 1

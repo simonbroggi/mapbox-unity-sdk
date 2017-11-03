@@ -19,5 +19,5 @@ MonoBehaviour:
     UserName: 
   _mapId: mapbox://styles/mapbox/dark-v9
   _useCompression: 0
-  _useMipMap: 0
+  _useMipMap: 1
   _useRetina: 1

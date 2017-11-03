@@ -13,6 +13,11 @@
 			_marker.Show(_feature);
 		}
 
+		private void OnMouseOver()
+		{
+			_marker.Show(_feature);
+		}
+
 		internal void Initialize(FeatureUiMarker marker, VectorEntity ve)
 		{
 			_marker = marker;

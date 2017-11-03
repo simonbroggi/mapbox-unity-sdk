@@ -34,6 +34,12 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		private float _scale = 1;
 
 		[SerializeField]
+		private string _heightPropertyName;
+
+		[SerializeField]
+		private float _scaleCoefficient;
+
+		[SerializeField]
 		[Tooltip("Create side walls from calculated height down to terrain level. Suggested for buildings, not suggested for roads.")]
 		private bool _createSideWalls = true;
 
@@ -60,6 +66,13 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
             float hf = _height * _scale;
             if (!_forceHeight)
             {
+				if (feature.Properties.ContainsKey(_heightPropertyName))
+				{
+					if (float.TryParse(feature.Properties[_heightPropertyName].ToString(), out hf))
+					{
+						hf *= _scale * _scaleCoefficient;
+					}
+				}
                 if (feature.Properties.ContainsKey("height"))
                 {
                     if (float.TryParse(feature.Properties["height"].ToString(), out hf))
