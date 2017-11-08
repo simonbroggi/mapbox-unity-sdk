@@ -8,8 +8,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a4644f4fa4408d144a9c7927401f3807, type: 3}
-  m_Name: ParkLayerModifier
+  m_Script: {fileID: 11500000, guid: 48797cd179dab4ada972032f960c4b7e, type: 3}
+  m_Name: DatasetMaterialModifier
   m_EditorClassIdentifier: 
   Active: 1
-  _layerId: 10
+  _materialTemplate: {fileID: 2100000, guid: d235aa3a694c2417f889c020cd988432, type: 2}
+  _propertyName: pkm2
+  max: 80000

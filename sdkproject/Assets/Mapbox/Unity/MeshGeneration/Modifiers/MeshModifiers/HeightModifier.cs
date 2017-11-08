@@ -37,6 +37,9 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		private string _heightPropertyName;
 
 		[SerializeField]
+		private int maxHeight;
+
+		[SerializeField]
 		private float _scaleCoefficient;
 
 		[SerializeField]
@@ -71,6 +74,9 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 					if (float.TryParse(feature.Properties[_heightPropertyName].ToString(), out hf))
 					{
 						hf *= _scale * _scaleCoefficient;
+
+						if (hf > maxHeight)
+							hf = maxHeight;
 					}
 				}
                 if (feature.Properties.ContainsKey("height"))
