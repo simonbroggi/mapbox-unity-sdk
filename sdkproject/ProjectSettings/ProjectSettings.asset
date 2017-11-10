@@ -668,13 +668,13 @@ PlayerSettings:
     Game_Performance: 0
     Hub: 0
     Purchasing: 0
-    UNet: 0
+    UNet: 1
     Unity_Ads: 0
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 2
-  cloudProjectId: f183eef4-72bf-420c-80e0-aaadeab22f30
-  projectName: Mapbox Unity SDK
-  organizationId: mapbox-inc
+  cloudProjectId: d297578e-d600-4112-9123-62c2daf10725
+  projectName: MBX SDK
+  organizationId: unity_bzlevhwq2jeoxq
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0
