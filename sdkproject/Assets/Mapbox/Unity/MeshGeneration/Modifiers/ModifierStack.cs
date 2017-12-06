@@ -33,7 +33,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		[NonSerialized] private ObjectPool<List<VectorEntity>> _listPool;
 
 		[NonSerialized] private int _counter;
-
+		[NonSerialized] private int _secondCounter;
 		private void OnEnable()
 		{
 			_pool = new ObjectPool<VectorEntity>(() =>
@@ -94,7 +94,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		public override GameObject Execute(UnityTile tile, VectorFeatureUnity feature, MeshData meshData, GameObject parent = null, string type = "")
 		{
 			_counter = feature.Points.Count;
-			var c2 = 0;
+			_secondCounter = 0;
 
 			if (_moveFeaturePositionTo != PositionTargetType.TileCenter)
 			{
@@ -111,8 +111,8 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 										
 					for (int i = 0; i < _counter; i++)
 					{
-						c2 = feature.Points[i].Count;
-						for (int j = 0; j < c2; j++)
+						_secondCounter = feature.Points[i].Count;
+						for (int j = 0; j < _secondCounter; j++)
 						{
 							_tempPoint += feature.Points[i][j];
 							vertexIndex++;
@@ -123,8 +123,8 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 
 				for (int i = 0; i < _counter; i++)
 				{
-					c2 = feature.Points[i].Count;
-					for (int j = 0; j < c2; j++)
+					_secondCounter = feature.Points[i].Count;
+					for (int j = 0; j < _secondCounter; j++)
 					{
 						feature.Points[i][j] = new Vector3(feature.Points[i][j].x - _tempPoint.x, 0, feature.Points[i][j].z - _tempPoint.z);
 					}
@@ -142,8 +142,16 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				}
 			}
 
-
 			_tempVectorEntity = _pool.GetObject();
+
+			// It is possible that we changed scenes in the middle of map generation.
+			// This object can be null as a result of Unity cleaning up game objects in the scene.
+			// Let's bail if we don't have our object.
+			if (_tempVectorEntity.GameObject == null)
+			{
+				return null;
+			}
+
 			_tempVectorEntity.GameObject.SetActive(true);
 			_tempVectorEntity.Mesh.Clear();
 			_tempVectorEntity.Feature = feature;
@@ -152,6 +160,9 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			_tempVectorEntity.Mesh.subMeshCount = meshData.Triangles.Count;
 			_tempVectorEntity.Mesh.SetVertices(meshData.Vertices);
 			_tempVectorEntity.Mesh.SetNormals(meshData.Normals);
+			if(meshData.Tangents.Count > 0)
+				_tempVectorEntity.Mesh.SetTangents(meshData.Tangents);
+
 
 			_counter = meshData.Triangles.Count;
 			for (int i = 0; i < _counter; i++)

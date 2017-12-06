@@ -35,15 +35,6 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		private bool _separateSubmesh = false;
 
 		[SerializeField]
-		private string _heightPropertyName;
-
-		[SerializeField]
-		private int maxHeight;
-
-		[SerializeField]
-		private float _scaleCoefficient;
-
-		[SerializeField]
 		[Tooltip("Create side walls from calculated height down to terrain level. Suggested for buildings, not suggested for roads.")]
 		private bool _createSideWalls = true;
 
@@ -70,36 +61,21 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			float hf = _height * _scale;
 			if (!_forceHeight)
 			{
-				if (feature.Properties.ContainsKey(_heightPropertyName))
-				{
-					if (float.TryParse(feature.Properties[_heightPropertyName].ToString(), out hf))
-					{
-						if (hf <= 3)
-							return;
-						hf *= _scale * _scaleCoefficient;
-
-						if (hf > maxHeight)
-							hf = maxHeight;
-					}
-				}
 				if (feature.Properties.ContainsKey("height"))
 				{
-					if (float.TryParse(feature.Properties["height"].ToString(), out hf))
+					hf = Convert.ToSingle(feature.Properties["height"]);
+					hf *= _scale;
+					if (feature.Properties.ContainsKey("min_height"))
 					{
-						hf *= _scale;
-						if (feature.Properties.ContainsKey("min_height"))
-						{
-							minHeight = float.Parse(feature.Properties["min_height"].ToString()) * _scale;
-							hf -= minHeight;
-						}
+						minHeight = Convert.ToSingle(feature.Properties["min_height"]) * _scale;
+						hf -= minHeight;
 					}
-				}
-				if (feature.Properties.ContainsKey("ele"))
+				} 
+				else if (feature.Properties.ContainsKey("ele"))
 				{
-					if (float.TryParse(feature.Properties["ele"].ToString(), out hf))
-					{
-						hf *= _scale;
-					}
+					//"ele" is used in contour layer for elevation
+					hf = Convert.ToSingle(feature.Properties["ele"]);
+					hf *= _scale;
 				}
 			}
 
