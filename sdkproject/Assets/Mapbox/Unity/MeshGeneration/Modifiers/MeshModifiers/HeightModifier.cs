@@ -41,7 +41,14 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		public override ModifierType Type { get { return ModifierType.Preprocess; } }
 
 		private int _counter;
-
+		[SerializeField]
+ 		private string _heightPropertyName;
+ 
+ 		[SerializeField]
+ 		private int maxHeight;
+ 
+ 		[SerializeField]
+ 		private float _scaleCoefficient;
 
 		public override void Run(VectorFeatureUnity feature, MeshData md, float scale)
 		{
@@ -61,7 +68,19 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			float hf = _height * _scale;
 			if (!_forceHeight)
 			{
-				if (feature.Properties.ContainsKey("height"))
+				if (feature.Properties.ContainsKey(_heightPropertyName))
+				{
+					if (float.TryParse(feature.Properties[_heightPropertyName].ToString(), out hf))
+						{
+							if (hf <= 3)
+								return;
+								hf *= _scale * _scaleCoefficient;
+
+							if (hf > maxHeight)
+								hf = maxHeight;
+						}
+				}
+				else if (feature.Properties.ContainsKey("height"))
 				{
 					hf = Convert.ToSingle(feature.Properties["height"]);
 					hf *= _scale;
