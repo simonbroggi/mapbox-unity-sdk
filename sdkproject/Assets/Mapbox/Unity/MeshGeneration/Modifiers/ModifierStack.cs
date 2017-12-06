@@ -41,6 +41,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				var go = new GameObject();
 				var mf = go.AddComponent<MeshFilter>();
 				var mr = go.AddComponent<MeshRenderer>();
+				mr.enabled = false;
 				_tempVectorEntity = new VectorEntity()
 				{
 					GameObject = go,

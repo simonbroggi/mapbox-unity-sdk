@@ -131,7 +131,20 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 				if (!filterOut)
 				{
 					if (tile.VectorDataState != Enums.TilePropertyState.Cancelled)
+					{
+						if (feature == null)
+						{
+							Debug.Log(feature);
+							Debug.LogError(feature.GetType());
+						}
+						if (tile == null || tile.gameObject == null)
+						{
+							Debug.LogError(tile);
+							Debug.LogError("null".Equals(tile));
+							Debug.LogError(tile.GetType());
+						}
 						Build(feature, tile, tile.gameObject);
+					}
 				}
 
 				_entityInCurrentCoroutine++;

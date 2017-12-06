@@ -66,7 +66,15 @@ namespace Mapbox.Examples
 				x = Input.GetAxis("Horizontal");
 				z = Input.GetAxis("Vertical");
 				y = -Input.GetAxis("Mouse ScrollWheel") * _zoomSpeed;
-				transform.localPosition += transform.forward * y + (_originalRotation * new Vector3(x * _panSpeed, 0, z * _panSpeed));
+				var newPos = transform.localPosition + transform.forward * y + (_originalRotation * new Vector3(x * _panSpeed, 0, z * _panSpeed));
+				if (newPos.y > 350)
+				{
+					transform.localPosition = new Vector3(transform.localPosition.x, 350, transform.localPosition.z);
+				}
+				else
+				{
+					transform.localPosition = newPos;
+				}
 			}
 		}
 	}

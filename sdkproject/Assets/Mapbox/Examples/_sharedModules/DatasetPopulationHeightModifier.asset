@@ -17,5 +17,5 @@ MonoBehaviour:
   _height: 0
   _heightPropertyName: pkm2
   maxHeight: 200
-  _scaleCoefficient: 0.1
+  _scaleCoefficient: 0.03
   _createSideWalls: 1

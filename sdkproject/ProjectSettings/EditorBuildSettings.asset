@@ -8,3 +8,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Mapbox/Examples/VectorDataVisualization/VectorDataVisualization.unity
     guid: 4bd1db8744b1c41109974ee1698bbba4
+  - enabled: 1
+    path: Assets/Mapbox/Examples/MeshGenerationOnTerrain/MeshGenerationOnTerrain.unity
+    guid: c6e5371f61cf449d6a257725bc99a541

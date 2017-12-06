@@ -9,9 +9,11 @@
 	public class MergedModifierStackEditor : UnityEditor.Editor
 	{
 		private MonoScript script;
+		private SerializedProperty _heightProp;
 		private void OnEnable()
 		{
 			script = MonoScript.FromScriptableObject((MergedModifierStack)target);
+			_heightProp = serializedObject.FindProperty("heightPropertyName");
 		}
 
 		public override void OnInspectorGUI()
@@ -95,7 +97,7 @@
 				ScriptableCreatorWindow.Open(typeof(GameObjectModifier), facs2);
 			}
 			EditorGUILayout.EndHorizontal();
-
+		
 			serializedObject.ApplyModifiedProperties();
 		}
 	}
