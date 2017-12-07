@@ -13,7 +13,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Active: 1
   _classificationKey: 
-  _key: 
+  _key: outgeojson
   Filters: []
   _defaultStack: {fileID: 11400000, guid: 51d2635a9c7774e44ad1835b323cac97, type: 2}
   Stacks: []
+  _enableCoroutines: 0
+  _entityPerCoroutine: 20
