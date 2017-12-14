@@ -9,11 +9,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ef7239c46ddb6ab469994291c9603c01, type: 3}
-  m_Name: ExplorerDefaultBuilding
+  m_Name: ExplorerGreenBuilding
   m_EditorClassIdentifier: 
   MeshModifiers:
   - {fileID: 11400000, guid: 42df5b13ebbfe2a4aa3f0ec75a7a5852, type: 2}
   - {fileID: 11400000, guid: 23fec0796c24f584ca6c13522eb63102, type: 2}
   - {fileID: 11400000, guid: 59ecaf946bee51a41af2b279888f15bc, type: 2}
   GoModifiers:
-  - {fileID: 11400000, guid: 520575288513b4fbcb41debbea4c44fc, type: 2}
+  - {fileID: 11400000, guid: 792b35f7537194681b551ea9c2272bc2, type: 2}

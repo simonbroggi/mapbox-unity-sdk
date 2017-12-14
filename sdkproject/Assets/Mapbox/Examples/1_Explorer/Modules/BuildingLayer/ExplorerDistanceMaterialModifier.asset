@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b0876bbb11d04bada92fe712bb7e4ed, type: 3}
+  m_Name: ExplorerDistanceMaterialModifier
+  m_EditorClassIdentifier: 
+  Active: 1
+  _projectMapImagery: 0
+  _materials:
+  - Materials:
+    - {fileID: 2100000, guid: 508236771313ff54788fa797ece5c0e8, type: 2}
+  - Materials:
+    - {fileID: 2100000, guid: 508236771313ff54788fa797ece5c0e8, type: 2}
+  m_method: 2
+  m_latLonInput: 
+  m_vector3Input: {x: 0, y: 0, z: 0}
+  m_gradient:
+    serializedVersion: 2
+    key0: {r: 1, g: 0, b: 0, a: 1}
+    key1: {r: 0, g: 1, b: 0.2965517, a: 1}
+    key2: {r: 0.07586192, g: 0, b: 1, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 32960
+    ctime2: 65535
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 3
+    m_NumAlphaKeys: 2
+  m_minDistance: 300
+  m_maxDistance: 1000
+  _projectMapImagery: 0
+  _materials:
+  - Materials: []
+  - Materials: []
