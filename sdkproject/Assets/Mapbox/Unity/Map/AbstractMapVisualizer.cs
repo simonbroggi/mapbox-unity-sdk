@@ -149,7 +149,7 @@ namespace Mapbox.Unity.Map
 				_counter = Factories.Count;
 				for (int i = 0; i < _counter; i++)
 				{
-					if (Factories[i] != null)
+					if (Factories[i] != null && Factories[i].Active)
 					{
 						allFinished &= Factories[i].State == ModuleState.Finished;
 					}
@@ -190,7 +190,10 @@ namespace Mapbox.Unity.Map
 
 			foreach (var factory in Factories)
 			{
-				factory.Register(unityTile);
+				if (factory.Active)
+				{
+					factory.Register(unityTile);
+				}
 			}
 
 			ActiveTiles.Add(tileId, unityTile);

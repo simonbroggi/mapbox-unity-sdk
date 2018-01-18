@@ -10,7 +10,7 @@ namespace Mapbox.Editor
 	public class VectorTileFactoryEditor : UnityEditor.Editor
 	{
 		private string _defaultMapId = "mapbox.mapbox-streets-v7";
-		public SerializedProperty mapId_Prop;
+		public SerializedProperty mapId_Prop, _activeProp;
 		private VectorTileFactory _factory;
 		private MonoScript script;
 
@@ -18,6 +18,7 @@ namespace Mapbox.Editor
 		{
 			script = MonoScript.FromScriptableObject((VectorTileFactory)target);
 			mapId_Prop = serializedObject.FindProperty("_mapId");
+			_activeProp = serializedObject.FindProperty("Active");
 			_factory = target as VectorTileFactory;
 		}
 
@@ -27,6 +28,8 @@ namespace Mapbox.Editor
 			GUI.enabled = false;
 			script = EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false) as MonoScript;
 			GUI.enabled = true;
+			EditorGUILayout.PropertyField(_activeProp);
+			EditorGUILayout.Space();
 
 			EditorGUILayout.BeginHorizontal();
 			EditorGUILayout.PropertyField(mapId_Prop, new GUIContent("Map Id"));

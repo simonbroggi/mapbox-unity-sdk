@@ -15,7 +15,7 @@
 		private SerializedProperty _classKeyProp;
 		private SerializedProperty _keyProp;
 		private SerializedProperty _useCoroutines;
-		private SerializedProperty _entityPerCoroutine;
+		private SerializedProperty _entityPerCoroutine, _activeProp;
 
 
 		private void OnEnable()
@@ -24,6 +24,7 @@
 			_layerVis = target as VectorLayerVisualizer;
 			_classKeyProp = serializedObject.FindProperty("_classificationKey");
 			_keyProp = serializedObject.FindProperty("_key");
+			_activeProp = serializedObject.FindProperty("Active");
 			_useCoroutines = serializedObject.FindProperty("_enableCoroutines");
 			_entityPerCoroutine = serializedObject.FindProperty("_entityPerCoroutine");
 		}
@@ -34,6 +35,8 @@
 			GUI.enabled = false;
 			script = EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false) as MonoScript;
 			GUI.enabled = true;
+			EditorGUILayout.PropertyField(_activeProp);
+			EditorGUILayout.Space();
 
 			EditorGUILayout.PropertyField(_classKeyProp);
 			EditorGUILayout.PropertyField(_keyProp);

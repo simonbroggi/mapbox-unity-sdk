@@ -31,6 +31,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 	/// </summary>
 	public abstract class AbstractTileFactory : ScriptableObject
 	{
+		public bool Active = true;
 		protected IFileSource _fileSource;
 
 		public ModuleState State { get; private set; }

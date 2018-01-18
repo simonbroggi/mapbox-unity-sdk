@@ -14,6 +14,7 @@ namespace Mapbox.Editor
 			useMipMap_Prop,
 		useCompression_Prop,
 			useRetina_Prop,
+			_activeProp,
 			mapId_Prop;
 		private MonoScript script;
 
@@ -42,6 +43,7 @@ namespace Mapbox.Editor
 			useMipMap_Prop = serializedObject.FindProperty("_useMipMap");
 			useCompression_Prop = serializedObject.FindProperty("_useCompression");
 			useRetina_Prop = serializedObject.FindProperty("_useRetina");
+			_activeProp = serializedObject.FindProperty("Active");
 			script = MonoScript.FromScriptableObject((MapImageFactory)target);
 			for (int i = 0; i < _basicMapIds.Length; i++)
 			{
@@ -60,6 +62,7 @@ namespace Mapbox.Editor
 			GUI.enabled = false;
 			script = EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false) as MonoScript;
 			GUI.enabled = true;
+			EditorGUILayout.PropertyField(_activeProp);
 			EditorGUILayout.Space();
 			EditorGUILayout.Space();
 			EditorGUILayout.PropertyField(mapIdType_Prop, new GUIContent("Map Type"));
