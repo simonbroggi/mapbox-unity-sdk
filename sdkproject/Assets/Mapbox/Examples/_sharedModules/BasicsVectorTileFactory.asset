@@ -13,4 +13,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _mapId: lr1k.b7wzke2r
   Visualizers:
+  - {fileID: 11400000, guid: 1d2c597868e13c84b9c6c8e013ef80e5, type: 2}
   - {fileID: 11400000, guid: 49b5b5cab8982084a986f2d148acff42, type: 2}

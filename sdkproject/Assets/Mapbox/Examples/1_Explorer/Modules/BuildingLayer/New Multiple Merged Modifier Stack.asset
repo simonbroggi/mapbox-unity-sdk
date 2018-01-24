@@ -8,14 +8,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ef7239c46ddb6ab469994291c9603c01, type: 3}
-  m_Name: ExplorerDefaultBuilding
+  m_Script: {fileID: 11500000, guid: 902810d868d4a2241b30941029e17f11, type: 3}
+  m_Name: New Multiple Merged Modifier Stack
   m_EditorClassIdentifier: 
   MeshModifiers:
+  - {fileID: 11400000, guid: c1c619f43a2cb5b4a8cbc80e9e814804, type: 2}
   - {fileID: 11400000, guid: 42df5b13ebbfe2a4aa3f0ec75a7a5852, type: 2}
   - {fileID: 11400000, guid: 23fec0796c24f584ca6c13522eb63102, type: 2}
   - {fileID: 11400000, guid: 59ecaf946bee51a41af2b279888f15bc, type: 2}
-  - {fileID: 11400000, guid: 3fdb791f64419604e8493e2100eed557, type: 2}
   GoModifiers:
   - {fileID: 11400000, guid: 4ffac34077d07704593381f2fec545e5, type: 2}
-  - {fileID: 11400000, guid: 203d61015a4124744bf28f4502b286fc, type: 2}
+  _cacheVertexCount: 42526
