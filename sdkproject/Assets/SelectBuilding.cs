@@ -1,4 +1,5 @@
 ﻿using KDTree;
+using Mapbox.Unity.Map;
 using Mapbox.Unity.MeshGeneration.Data;
 using Mapbox.Unity.MeshGeneration.Modifiers;
 using System.Collections;
@@ -8,6 +9,7 @@ using UnityEngine;
 public class SelectBuilding : MonoBehaviour
 {
 	public MeshDataCollectionBase Collection;
+	public AbstractMap Map;
 	private NearestNeighbour<VectorFeatureUnity> pIter;
 	Ray ray;
 	RaycastHit info;
@@ -33,7 +35,8 @@ public class SelectBuilding : MonoBehaviour
 			
 			if (Physics.Raycast(ray, out info))
 			{
-				pIter = Collection.Entities.NearestNeighbors(new double[] { info.point.x, info.point.z }, MaxCount, Range);
+				var relativePoint = Map.Root.InverseTransformPoint(info.point);
+				pIter = Collection.Entities.NearestNeighbors(new double[] { relativePoint.x, relativePoint.z }, MaxCount, Range);
 				while (pIter.MoveNext())
 				{
 					var feature = pIter._Current;
@@ -61,7 +64,7 @@ public class SelectBuilding : MonoBehaviour
 						mesh.SetUVs(i, meshData.UV[i]);
 					}
 					mf.mesh = mesh;
-					go.transform.position = Collection.Positions[feature];
+					go.transform.localPosition = Collection.Positions[feature];
 					break;
 				}
 			}

@@ -27,10 +27,10 @@ public class MeshDataCollectionBase : ScriptableObject
 			pos += item;
 		}
 		pos /= md.Vertices.Count;
-		pos += tile.transform.position;
+		pos += tile.transform.localPosition;
 		Entities.AddPoint(new double[] { pos.x, pos.z }, feature);
 		Data.Add(feature, md);
-		Positions.Add(feature, tile.transform.position);
+		Positions.Add(feature, tile.transform.localPosition);
 		Count = Entities.Size;
 	}
 }
