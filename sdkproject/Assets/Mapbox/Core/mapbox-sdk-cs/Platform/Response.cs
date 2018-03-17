@@ -27,6 +27,10 @@ namespace Mapbox.Platform
 	using UnityEngine.Networking;
 	using Mapbox.Unity.Utilities;
 #endif
+#if NET_4_6
+	using System.Net.Http;
+	using System.Threading.Tasks;
+#endif
 
 	/// <summary> A response from a <see cref="IFileSource" /> request. </summary>
 	public class Response
@@ -333,6 +337,27 @@ namespace Mapbox.Platform
 		}
 #endif
 
+#if NET_4_6
+
+		public static async Task<Response> FromHttpResponseMessage(HttpResponseMessage resp)
+		{
+			Response response = new Response();
+
+			byte[] responseBytes = await resp.Content.ReadAsByteArrayAsync();
+
+			response.StatusCode = (int)resp.StatusCode;
+			if (!resp.IsSuccessStatusCode)
+			{
+			}
+			else
+			{
+				response.Data = responseBytes;
+			}
+
+			return response;
+		}
+
+#endif
 
 
 	}

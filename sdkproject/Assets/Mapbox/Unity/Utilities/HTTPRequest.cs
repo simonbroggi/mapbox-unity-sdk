@@ -91,7 +91,11 @@ namespace Mapbox.Unity.Utilities
 #pragma warning restore 0618
 #endif
 
+#if NET_4_6
+			Response response = MapboxHttpClient.Instance.Get(_request.url).Result;
+#else
 			var response = Response.FromWebResponse(this, _request, null);
+#endif
 
 			_callback(response);
 			_request.Dispose();
