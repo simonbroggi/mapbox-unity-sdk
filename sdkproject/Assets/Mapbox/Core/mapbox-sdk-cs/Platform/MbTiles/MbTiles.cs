@@ -109,7 +109,7 @@ lastmodified INTEGER,
 		}
 
 
-#region idisposable
+		#region idisposable
 
 
 		~MbTilesDb()
@@ -141,7 +141,7 @@ lastmodified INTEGER,
 		}
 
 
-#endregion
+		#endregion
 
 
 		private void openOrCreateDb(string dbName)
@@ -316,12 +316,14 @@ lastmodified INTEGER,
 		/// </summary>
 		public void Delete()
 		{
-			//already disposed
-			if (null == _sqlite) { return; }
+			if (null != _sqlite)
+			{
+				_sqlite.Close();
+				_sqlite.Dispose();
+				_sqlite = null;
+			}
 
-			_sqlite.Close();
-			_sqlite.Dispose();
-			_sqlite = null;
+			if (!File.Exists(_dbPath)) { return; }
 
 			UnityEngine.Debug.LogFormat("deleting {0}", _dbPath);
 
@@ -330,15 +332,19 @@ lastmodified INTEGER,
 			{
 				try
 				{
-					File.Delete(_dbPath);
+					// File.Delete doesn't seem to work with long paths workaround
+					// HACK: just replace the special characters with empty string
+					// TODO: find a way to properly delete a file with longer than
+					//       MAX_PATH file name
+					File.Delete(_dbPath.Replace(@"\\?\", ""));
 					return;
 				}
 				catch
 				{
-#if !WINDOWS_UWP
-					System.Threading.Thread.Sleep(100);
-#else
+#if WINDOWS_UWP || NET_4_6
 					System.Threading.Tasks.Task.Delay(100).Wait();
+#else
+					System.Threading.Thread.Sleep(100);
 #endif
 				}
 			}
