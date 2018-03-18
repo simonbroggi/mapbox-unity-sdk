@@ -74,7 +74,7 @@ namespace Mapbox.Unity.Telemetry
 			byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
 			var headers = new Dictionary<string, string>();
 			headers.Add("Content-Type", "application/json");
-			headers.Add("user-agent", GetUserAgent());
+			headers.Add("user-agent", UserAgent.GetUserAgentEditor());
 
 			var www = new WWW(url, bodyRaw, headers);
 			yield return www;
@@ -91,23 +91,7 @@ namespace Mapbox.Unity.Telemetry
 			}
 		}
 
-		static string GetUserAgent()
-		{
-			var userAgent = string.Format(
-				"{0}/{1}/{2} MapboxEventsUnityEditor/{3}",
-				PlayerSettings.applicationIdentifier,
-				PlayerSettings.bundleVersion,
-#if UNITY_IOS
-				PlayerSettings.iOS.buildNumber,
-#elif UNITY_ANDROID
-				PlayerSettings.Android.bundleVersionCode,
-#else
-				 "0",
-#endif
-				 Constants.SDK_VERSION
-			);
-			return userAgent;
-		}
+
 
 		public void SetLocationCollectionState(bool enable)
 		{

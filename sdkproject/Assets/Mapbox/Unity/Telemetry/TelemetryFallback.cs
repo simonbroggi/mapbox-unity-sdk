@@ -70,23 +70,12 @@ namespace Mapbox.Unity.Telemetry
 			byte[] bodyRaw = Encoding.UTF8.GetBytes(bodyJsonString);
 			var headers = new Dictionary<string, string>();
 			headers.Add("Content-Type", "application/json");
-			headers.Add("user-agent", GetUserAgent());
+			headers.Add("user-agent", UserAgent.GetUserAgent());
 
 			var www = new WWW(url, bodyRaw, headers);
 			yield return www;
 		}
 
-		static string GetUserAgent()
-		{
-			var userAgent = string.Format("{0}/{1}/{2} MapboxEventsUnity{3}/{4}",
-										  Application.identifier,
-										  Application.version,
-										  "0",
-										  Application.platform,
-										  Constants.SDK_VERSION
-										 );
-			return userAgent;
-		}
 
 		public void SetLocationCollectionState(bool enable)
 		{
