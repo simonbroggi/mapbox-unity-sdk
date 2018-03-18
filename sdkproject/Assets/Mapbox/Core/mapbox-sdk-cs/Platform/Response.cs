@@ -342,6 +342,7 @@ namespace Mapbox.Platform
 		public static async Task<Response> FromHttpResponseMessage(HttpResponseMessage resp)
 		{
 			Response response = new Response();
+			response.Headers = new Dictionary<string, string>();
 
 			byte[] responseBytes = await resp.Content.ReadAsByteArrayAsync();
 

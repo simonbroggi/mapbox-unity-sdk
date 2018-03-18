@@ -20,6 +20,9 @@ namespace Mapbox.Platform
 
 		private MapboxHttpClient()
 		{
+			ServicePointManager.Expect100Continue = true;
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+			ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
 			//ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3;
 			//var cookies = new CookieContainer();
 
@@ -73,7 +76,11 @@ namespace Mapbox.Platform
 			}
 			catch (Exception ex)
 			{
+#if UNITY_2017_1_OR_NEWER
+				UnityEngine.Debug.LogError(ex);
+#else
 				Console.WriteLine(ex);
+#endif
 			}
 
 			return response;
