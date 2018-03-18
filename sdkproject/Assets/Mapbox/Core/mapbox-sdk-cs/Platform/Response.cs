@@ -339,20 +339,34 @@ namespace Mapbox.Platform
 
 #if NET_4_6
 
-		public static async Task<Response> FromHttpResponseMessage(HttpResponseMessage resp)
+		public static async Task<Response> FromHttpResponseMessage(HttpResponseMessage httpResponseMsg)
 		{
 			Response response = new Response();
-			response.Headers = new Dictionary<string, string>();
 
-			byte[] responseBytes = await resp.Content.ReadAsByteArrayAsync();
-
-			response.StatusCode = (int)resp.StatusCode;
-			if (!resp.IsSuccessStatusCode)
+			if (null == httpResponseMsg)
 			{
+				response.AddException(new Exception("No response"));
+				return response;
 			}
-			else
+
+			try
 			{
-				response.Data = responseBytes;
+				response.Headers = httpResponseMsg.Headers.ToDictionary(k => k.Key, v => string.Join(";", v.Value));
+
+				byte[] responseBytes = await httpResponseMsg.Content.ReadAsByteArrayAsync();
+
+				response.StatusCode = (int)httpResponseMsg.StatusCode;
+				if (!httpResponseMsg.IsSuccessStatusCode)
+				{
+				}
+				else
+				{
+					response.Data = responseBytes;
+				}
+			}
+			catch (Exception ex)
+			{
+				response.AddException(ex);
 			}
 
 			return response;

@@ -69,7 +69,7 @@ namespace Mapbox.Unity.Utilities
 				Runnable.EnableRunnableInEditor();
 			}
 #endif
-			Runnable.Run(DoRequest(url));
+			Runnable.Run(DoRequest(url, timeout));
 		}
 
 		public void Cancel()
@@ -80,20 +80,20 @@ namespace Mapbox.Unity.Utilities
 			}
 		}
 
-		private IEnumerator DoRequest(string url)
+		private IEnumerator DoRequest(string url, int timeout)
 		{
 #if NET_4_6
 			// TODO: remove this workaround once everything has moved to Net4.6
 			// MbxHttpClient.Get.Result doesn't work as it causes a race condition with the GUI thread
 			Response response = null;
-			Task httpTask = Task.Run(async () => { response = await MapboxHttpClient.Instance.Get(url); });
+			Task httpTask = Task.Run(async () => { response = await MapboxHttpClient.Instance.Get(url, timeout); });
+			yield return null;
 			httpTask.Wait();
 
 			//Task<Response> httpTask = Task.Run(async () => { return await MapboxHttpClient.Instance.Get(_request.url); } );
 			//Task uiTask = httpTask.ContinueWith((resp) => { response = resp.Result; }, TaskScheduler.FromCurrentSynchronizationContext());
 			//httpTask.Wait();
 
-			yield return null;
 #else
 #if UNITY_EDITOR
 			// otherwise requests don't work in Edit mode, eg geocoding
