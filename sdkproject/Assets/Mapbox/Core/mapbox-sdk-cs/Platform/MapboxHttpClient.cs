@@ -1,4 +1,4 @@
-#if NET_4_6
+#if NET_STANDARD_2_0
 namespace Mapbox.Platform
 {
 	using Mapbox.Unity.Utilities;

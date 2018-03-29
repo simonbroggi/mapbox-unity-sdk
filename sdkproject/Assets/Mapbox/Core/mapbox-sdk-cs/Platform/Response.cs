@@ -27,7 +27,7 @@ namespace Mapbox.Platform
 	using UnityEngine.Networking;
 	using Mapbox.Unity.Utilities;
 #endif
-#if NET_4_6
+#if NET_STANDARD_2_0
 	using System.Net.Http;
 	using System.Threading.Tasks;
 #endif
@@ -337,7 +337,7 @@ namespace Mapbox.Platform
 		}
 #endif
 
-#if NET_4_6
+#if NET_STANDARD_2_0
 
 		public static async Task<Response> FromHttpResponseMessage(HttpResponseMessage httpResponseMsg)
 		{
