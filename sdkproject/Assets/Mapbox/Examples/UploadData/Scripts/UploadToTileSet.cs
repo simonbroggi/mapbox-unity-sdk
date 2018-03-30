@@ -1,13 +1,10 @@
 ﻿namespace Mapbox.Examples
 {
 	using System.Collections;
-	using System.Collections.Generic;
 	using Mapbox.Unity.Map;
 	using Mapbox.Utils;
 	using UnityEngine;
 	using UnityEngine.Networking;
-	using System;
-	using SimpleJSON;
 
 	public class UploadToTileSet : MonoBehaviour
 	{
@@ -28,11 +25,6 @@
 		[SerializeField]
 		private GameObject _marker;
 		private string myAccessToken;
-
-		private bool addedFeature = false;
-		private bool datasetUpdated = false;
-		float _elapsedTime;
-		float _updateInterval = 10;
 
 		// Use this for initialization
 		void Start()

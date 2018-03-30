@@ -14,17 +14,13 @@
 
 		void OnMouseUp()
 		{
-			Debug.Log("Drag ended! " + _feature.Feature.Properties["id"].ToString());
 			_uploadManager.UpdateFeature(gameObject.transform.position, _feature.Feature.Properties["id"].ToString());
 		}
 
 		void OnMouseDown()
 		{
-			Debug.Log("here");
 			screenPoint = Camera.main.WorldToScreenPoint(gameObject.transform.position);
-
 			offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z));
-
 		}
 
 		void OnMouseDrag()
