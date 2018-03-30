@@ -22,8 +22,6 @@
 		private string myTilesetId;
 		[SerializeField]
 		private string myLayerName;
-		[SerializeField]
-		private GameObject _marker;
 		private string myAccessToken;
 
 		// Use this for initialization
