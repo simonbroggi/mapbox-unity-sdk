@@ -37,32 +37,39 @@
 		// Use this for initialization
 		void Start()
 		{
+			//Get access token. 
 			myAccessToken = Unity.MapboxAccess.Instance.Configuration.AccessToken;
 		}
 
-		// Update is called once per frame
-		void LateUpdate()
+		/// <summary>
+		/// Updates the feature.
+		/// </summary>
+		/// <param name="position">Position.</param>
+		/// <param name="featureId">Feature identifier.</param>
+		public void UpdateFeature(Vector3 position, string featureId)
 		{
-			if (Input.GetMouseButtonUp(0))
-			{
-				var mousePosScreen = Input.mousePosition;
-				//assign distance of camera to ground plane to z, otherwise ScreenToWorldPoint() will always return the position of the camera
-				//http://answers.unity3d.com/answers/599100/view.html
-				mousePosScreen.z = _referenceCamera.transform.localPosition.y;
-				var pos = _referenceCamera.ScreenToWorldPoint(mousePosScreen);
-
-				var latlongDelta = _mapManager.WorldToGeoPosition(pos);
-				//Debug.Log("Latitude: " + latlongDelta.x + " Longitude: " + latlongDelta.y);
-				var marker = Instantiate(_marker);
-				marker.transform.position = pos;
-				marker.transform.SetParent(_mapManager.Root);
-				var newGuid = Guid.NewGuid();
-				StartCoroutine(PostNewDatasetFeature(newGuid.ToString(), "Point-" + newGuid.ToString(), latlongDelta));
-			}
+			// Convert the world position of the feature (treasure chest) into latitude longitude. 
+			var latlong = _mapManager.WorldToGeoPosition(position);
+			// Trigger upload of the feature with updated position. 
+			StartCoroutine(UpdateFeatureInDataset(featureId.ToString(), "Point-" + featureId.ToString(), latlong));
 		}
-
-		IEnumerator PostNewDatasetFeature(string myFeatureId, string featureName, Vector2d latlongDelta)
+		/// <summary>
+		/// Sends the web request to update the feature in the dataset using the Mapbox Uploads API.
+		/// </summary>
+		/// <returns>The new dataset feature.</returns>
+		/// <param name="myFeatureId">feature identifier.</param>
+		/// <param name="featureName">Feature name.</param>
+		/// <param name="latlong">Position in latitude longitude.</param>
+		IEnumerator UpdateFeatureInDataset(string myFeatureId, string featureName, Vector2d latlong)
 		{
+			// Check to make sure latitude longitude are in the correct range. 
+			var xDelta = latlong.x;
+			var yDelta = latlong.y;
+
+			xDelta = xDelta > 0 ? Mathd.Min(xDelta, Mapbox.Utils.Constants.LatitudeMax) : Mathd.Max(xDelta, -Mapbox.Utils.Constants.LatitudeMax);
+			yDelta = yDelta > 0 ? Mathd.Min(yDelta, Mapbox.Utils.Constants.LongitudeMax) : Mathd.Max(yDelta, -Mapbox.Utils.Constants.LongitudeMax);
+
+			// Form the URL string. 
 			string postURL = string.Format(
 				"https://api.mapbox.com/datasets/v1/{0}/{1}/features/{2}?access_token={3}"
 				, myId
@@ -71,19 +78,23 @@
 				, myAccessToken
 			);
 
-			//Debug.Log(postURL);
-			string typeProperty = string.Format("{{\"type\":\"Point\",\"coordinates\":[{0},{1}]}}", latlongDelta.y, latlongDelta.x);
+			//Construct the geoJSON for the feature. Use a JSON library to do this. 
+			// Using strings works for our simple case. 
+			string typeProperty = string.Format("{{\"type\":\"Point\",\"coordinates\":[{0},{1}]}}", yDelta, xDelta);
 			string geometryProperty = string.Format("\"geometry\":");
-			string nameProperty = string.Format("{{\"name\":\"{0}\"}}", featureName);
-			string combined = string.Format("{0},{1}{2}", nameProperty, geometryProperty, typeProperty);
+			string nameProperty = string.Format("\"name\":\"{0}\"", featureName);
+			string idProperty = string.Format("\"id\":\"{0}\"", myFeatureId);
+			string nameIdCombined = string.Format("{{{0},{1}}}", nameProperty, idProperty);
+			string combined = string.Format("{0},{1}{2}", nameIdCombined, geometryProperty, typeProperty);
 
-			string geoJSONstring2 = string.Format(
+			string geoJSON = string.Format(
 				"{{\"type\":\"Feature\",\"properties\":{0}}}"
 				, combined);
 
-			//Debug.Log(geoJSONstring2);
-			UnityWebRequest www = UnityWebRequest.Put(postURL, geoJSONstring2);
+			UnityWebRequest www = UnityWebRequest.Put(postURL, geoJSON);
 			www.SetRequestHeader("Content-Type", "application/json");
+
+			// Send web request to update feature in the dataset. 
 			yield return www.SendWebRequest();
 
 			if (www.isNetworkError || www.isHttpError)
@@ -92,58 +103,17 @@
 			}
 			else
 			{
-				Debug.Log("www = " + www.downloadHandler.text);
+				//Debug.Log("www = " + www.downloadHandler.text);
 
 				// If we receive a successful upload response, we should be good to send a tileset update request. 
 				StartCoroutine(ApplyDatasetToTileset());
 			}
 		}
 
-		//IEnumerator CheckIfDataSetIsReady(bool start = false)
-		//{
-		//	string postURL = string.Format("https://api.mapbox.com/datasets/v1/{0}/{1}/?access_token={2}"
-		//									, myId
-		//									, myDatasetId
-		//									, myAccessToken
-		//									);
-		//	//Debug.Log("Check Update : " + postURL);
-		//	UnityWebRequest www = UnityWebRequest.Get(postURL);
-		//	www.SetRequestHeader("content-type", "application/json");
-
-		//	yield return www.SendWebRequest();
-
-		//	if (www.isNetworkError || www.isHttpError)
-		//	{
-		//		Debug.Log("CheckIfDataSetIsReady www error: " + www.error);
-		//	}
-		//	else
-		//	{
-		//		Debug.Log("CheckIfDataSetIsReady www = " + www.downloadHandler.text);
-		//		var datasetObj = SimpleJSON.JSON.Parse(www.downloadHandler.text);
-		//		currentFeatureCount = datasetObj["features"].AsInt;
-		//		Debug.Log("Start : " + start);
-		//		if (start)
-		//		{
-		//			previousFeatureCount = currentFeatureCount;
-		//		}
-		//		else
-		//		{
-		//			Debug.Log("Current -> " + currentFeatureCount + " Previous -> " + previousFeatureCount);
-		//			if (currentFeatureCount > previousFeatureCount)
-		//			{
-		//				Debug.Log("Updated..");
-		//				datasetObj = true;
-		//				addedFeature = false;
-		//				previousFeatureCount = currentFeatureCount;
-		//				StartCoroutine(ApplyDatasetToTileset());
-		//			}
-		//		}
-
-		//		Debug.Log("Features = " + currentFeatureCount);
-		//	}
-		//}
-
-
+		/// <summary>
+		/// Applies the dataset to tileset.
+		/// </summary>
+		/// <returns>The dataset to tileset.</returns>
 		IEnumerator ApplyDatasetToTileset()
 		{
 			string postURL = string.Format(
@@ -152,7 +122,6 @@
 				, myAccessToken
 			);
 
-			//Debug.Log(postURL);
 			string datasetTilesetInfo = string.Format(
 				@"{{""tileset"":""{1}"",""url"":""mapbox://datasets/{0}/{2}"",""name"":""{3}""}}"
 				, myId
@@ -160,7 +129,7 @@
 				, myDatasetId
 				, myLayerName
 			);
-			//Debug.Log(datasetTilesetInfo);
+
 			byte[] bytes = System.Text.Encoding.UTF8.GetBytes(datasetTilesetInfo);
 			// initialize as PUT
 			UnityWebRequest www = UnityWebRequest.Put(postURL, bytes);

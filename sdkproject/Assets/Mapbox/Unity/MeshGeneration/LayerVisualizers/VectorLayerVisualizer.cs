@@ -46,6 +46,7 @@
 			else
 			{
 				_defaultStack = ScriptableObject.CreateInstance<ModifierStack>();
+				((ModifierStack)_defaultStack).moveFeaturePositionTo = _layerProperties.moveFeaturePositionTo;
 			}
 
 			_defaultStack.MeshModifiers = new List<MeshModifier>();
@@ -230,8 +231,9 @@
 					if (combiner.Try(feature))
 					{
 						if (tile != null && tile.gameObject != null && tile.VectorDataState != Enums.TilePropertyState.Cancelled)
+						{
 							Build(feature, tile, tile.gameObject);
-
+						}
 						_entityInCurrentCoroutine++;
 					}
 				}
