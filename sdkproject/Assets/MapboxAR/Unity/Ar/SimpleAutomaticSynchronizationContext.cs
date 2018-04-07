@@ -5,7 +5,6 @@
 	using Mapbox.Unity.Location;
 	using System;
 
-
 	public class SimpleAutomaticSynchronizationContext : ISynchronizationContext
 	{
 		float _rotation;
