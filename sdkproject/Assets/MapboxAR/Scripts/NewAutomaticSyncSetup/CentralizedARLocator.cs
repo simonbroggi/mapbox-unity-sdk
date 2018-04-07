@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MapMatching : MonoBehaviour {
+public class CentralizedARLocator : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {

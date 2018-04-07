@@ -19,6 +19,7 @@
 
 		IEnumerator _saveARnodes;
 
+
 		//Average best here... The median scale of accuracy..
 		//Only add the best points if a point drops below mediuan remove it from the list..
 		void Start()
@@ -31,14 +32,12 @@
 
 		void Update()
 		{
-
 		}
 
 		IEnumerator saveArNodes()
 		{
 			while (true)
 			{
-				yield return WaitForSeconds(60);
 			}
 		}
 	}
