@@ -6,23 +6,41 @@
 	using Mapbox.Map;
 	using Mapbox.Utils;
 	using Mapbox.Unity.Location;
-
+	using System;
+	using Mapbox.Unity.Map;
 
 	///<summary>
 	///  Generates GPSNodes for ARLocationManager.
 	/// </summary>
-	public class GpsNodeSync : MonoBehaviour, INodeSync
+	public class GpsNodeSync : NodeSyncBase
 	{
 		[SerializeField]
-		bool _filterNodes, _replaceLatestNodeIfHigherAccuracy;
+		AbstractMap _map;
 
-		//If true show range..
+		[SerializeField]
+		bool _filterNodes;
 
-		List<Node> _listOfCachedNodes;
+		[Tooltip("Applies only if FilterNode is true")]
+
+		[SerializeField]
+		int _desiredAccuracy = 5;
+
+		[SerializeField]
+		float _minMagnitude;
+
+		List<Node> _listOfNodes;
 
 		void Start()
 		{
-			LocationProviderFactory.Instance.DefaultLocationProvider.OnLocationUpdated += SaveNodes;
+			Action<Location> SaveFirstNode = null;
+			SaveFirstNode = (Location location) =>
+			{
+				SaveNodes(location);
+				LocationProviderFactory.Instance.DefaultLocationProvider.OnLocationUpdated -= SaveFirstNode;
+				LocationProviderFactory.Instance.DeviceLocationProvider.OnLocationUpdated += FilterNodes;
+			};
+			LocationProviderFactory.Instance.DefaultLocationProvider.OnLocationUpdated += SaveFirstNode;
+			_listOfNodes = new List<Node>();
 		}
 
 		//TODO : So basically the GPS can be 15 off and then 4 off.. And it might send the location 
@@ -33,29 +51,46 @@
 		// Start Placing AR nodes again...... Also if AR tracking goes really low then replace placement with the latest GPS node again... When tracking state jumps up...
 		//All of this should happen in the CentralizedARLocator.
 
-		private void SaveNodes(Location location)
+		private void FilterNodes(Location location)
 		{
+			Debug.Log("GPS nodes runs");
 			if (_filterNodes)
 			{
-				//Check Node accuracy;
-			}
+				// Check Node accuracy & distance.
+				var latestNode = _map.GeoToWorldPosition(location.LatitudeLongitude);
+				var previousNode = _map.GeoToWorldPosition(_listOfNodes[_listOfNodes.Count - 1].LatLon);
+				var forMagnitude = latestNode - previousNode;
 
+				if (location.Accuracy <= _desiredAccuracy && _minMagnitude >= forMagnitude.magnitude)
+				{
+					// Save nodes.. that are more accurate than 
+					SaveNodes(location);
+				}
+			}
+			else
+			{
+				//Saves every node.
+				SaveNodes(location);
+			}
+		}
+
+		private void SaveNodes(Location location)
+		{
 			var latestNode = new Node();
 			latestNode.LatLon = location.LatitudeLongitude;
 			latestNode.Accuracy = location.Accuracy;
-			_listOfCachedNodes.Add(latestNode);
+			_listOfNodes.Add(latestNode);
 		}
 
-		public Node[] ReturnNodes()
+		public override Node ReturnLatestNode()
 		{
-			return _listOfCachedNodes.ToArray();
+			return _listOfNodes[_listOfNodes.Count]; ;
 		}
 
-		private void FilterNodes()
+		public override Node[] ReturnNodes()
 		{
-
+			return _listOfNodes.ToArray();
 		}
-
 	}
 
 	public struct Node
@@ -68,14 +103,6 @@
 		/// Accuracy of the Node. ARNodes accuracy is determined by the latest and most accurate GPS point.
 		/// </summary>
 		public float Accuracy;
-	}
-
-	public interface INodeSync
-	{
-		/// <summary>
-		/// Returns an array of nodes.
-		/// </summary>
-		Node[] ReturnNodes();
 	}
 
 }
