@@ -134,22 +134,6 @@ namespace Mapbox.Unity.Map
 		/// Adds a vector source and visualizers to define the rendering behaviour of vector data layers.
 		/// </summary>
 		[SerializeField]
-		LocationPrefabsLayer _locationPrefabs = new LocationPrefabsLayer();
-		[NodeEditorElement("Layers")]
-		public LocationPrefabsLayer LocationPrefabs
-		{
-			get
-			{
-				return _locationPrefabs;
-			}
-		}
-
-		/// <summary>
-		/// The vector data.
-		/// Options to control the vector data component of the map.
-		/// Adds a vector source and visualizers to define the rendering behaviour of vector data layers.
-		/// </summary>
-		[SerializeField]
 		VectorLayer _vectorData = new VectorLayer();
 		[NodeEditorElement("Layers")]
 		public VectorLayer VectorData
@@ -157,6 +141,15 @@ namespace Mapbox.Unity.Map
 			get
 			{
 				return _vectorData;
+			}
+		}
+
+		[NodeEditorElement("Layers")]
+		public LocationPrefabsLayer LocationPrefabs
+		{
+			get
+			{
+				return _vectorData.locationPrefabsLayer;
 			}
 		}
 

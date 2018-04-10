@@ -1,6 +1,7 @@
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 using Mapbox.Unity.Map;
+using System;
 
 public class LocationPrefabsLayerProperties : LayerProperties
 {
@@ -13,4 +14,7 @@ public class LocationPrefabsLayerProperties : LayerProperties
 		isActive = true
 	};
 	public GameObject prefab;
+	public List<PrefabItem> locationPrefabList = new List<PrefabItem>();
+
+
 }

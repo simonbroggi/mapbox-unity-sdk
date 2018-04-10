@@ -8,15 +8,20 @@ namespace Mapbox.Unity.Map
 
 	public class LocationPrefabsLayer : IVectorDataLayer
 	{
+		public LocationPrefabsLayer (VectorLayer layer)
+		{
+			_vectorLayer = layer;
+		}
+
 		[SerializeField]
-		LocationPrefabsLayerProperties _layerProperty = new LocationPrefabsLayerProperties();
+		LocationPrefabsLayerProperties _prefabsLayerProperty = new LocationPrefabsLayerProperties();
 
 		[NodeEditorElement(" Location Prefabs Layer ")]
 		public LocationPrefabsLayerProperties LayerProperty
 		{
 			get
 			{
-				return _layerProperty;
+				return _prefabsLayerProperty;
 			}
 		}
 		public MapLayerType LayerType
@@ -31,7 +36,7 @@ namespace Mapbox.Unity.Map
 		{
 			get
 			{
-				return true;
+				return _prefabsLayerProperty.locationPrefabList.Count > 0;
 			}
 		}
 
@@ -39,72 +44,57 @@ namespace Mapbox.Unity.Map
 		{
 			get
 			{
-				return _layerProperty.GetConcatenatedMapId();
+				return MapboxDefaultVector.GetParameters(VectorSourceType.MapboxStreets).Id;
 			}
 		}
-
-		/*
-		public void SetLayerSource(VectorSourceType vectorSource)
-		{
-			if (vectorSource != VectorSourceType.Custom && vectorSource != VectorSourceType.None)
-			{
-				_layerProperty.sourceType = vectorSource;
-				_layerProperty.sourceOptions.layerSource = MapboxDefaultVector.GetParameters(vectorSource);
-			}
-			else
-			{
-				Debug.LogWarning("Invalid style - trying to set " + vectorSource.ToString() + " as default style!");
-			}
-		}
-		*/
 
 		//method used to set a common layer source for all the visualizers
 		public void SetLayerSource(string vectorSource)
 		{
 			if (!string.IsNullOrEmpty(vectorSource))
 			{
-				_layerProperty.SetSameSourceForAllVisualizers(vectorSource);
+				_prefabsLayerProperty.sourceOptions.Id = vectorSource;
 			}
 			else
 			{
-				_layerProperty.isActive = false;
+				_prefabsLayerProperty.locationPrefabList.Clear();
 				Debug.LogWarning("Empty source - turning off vector data. ");
 			}
 		}
 
 
-		public void AddVectorLayer(VectorSubLayerProperties subLayerProperties)
+		public void AddPrefabItem(PrefabItem item)
 		{
-			if (_layerProperty.vectorSubLayers == null)
+			if (_prefabsLayerProperty.locationPrefabList == null)
 			{
-				_layerProperty.vectorSubLayers = new List<VectorSubLayerProperties>();
+				_prefabsLayerProperty.locationPrefabList = new List<PrefabItem>();
 			}
-			_layerProperty.vectorSubLayers.Add(subLayerProperties);
+			_prefabsLayerProperty.locationPrefabList.Add(item);
 		}
 
-		public void RemoveVectorLayer(int index)
+		public void RemovePrefabItem(int index)
 		{
-			if (_layerProperty.vectorSubLayers != null)
+			if (_prefabsLayerProperty.locationPrefabList != null)
 			{
-				_layerProperty.vectorSubLayers.RemoveAt(index);
+				_prefabsLayerProperty.locationPrefabList.RemoveAt(index);
 			}
 		}
 
 		public void Initialize(LayerProperties properties)
 		{
-			_layerProperty = (VectorLayerProperties)properties;
+			_prefabsLayerProperty = (LocationPrefabsLayerProperties)properties;
 			Initialize();
 		}
 
 		public void Initialize()
 		{
-			_vectorTileFactory = ScriptableObject.CreateInstance<VectorTileFactory>();
-			_vectorTileFactory.SetOptions(_layerProperty);
+			//TODO Implement the addition of prefab modifier using a setOptions method on that modifier
+			//_vectorTileFactory.SetOptions(_prefabsLayerProperty);
 		}
 
 		public void Remove()
 		{
-			_layerProperty.isActive = false;
+			_prefabsLayerProperty.locationPrefabList.Clear();
 		}
 
 		public void Update(LayerProperties properties)
@@ -112,13 +102,13 @@ namespace Mapbox.Unity.Map
 			Initialize(properties);
 		}
 
-		public VectorTileFactory Factory
+		public VectorLayer vectorLayer
 		{
 			get
 			{
-				return _vectorTileFactory;
+				return _vectorLayer;
 			}
 		}
-		private VectorTileFactory _vectorTileFactory;
+		private VectorLayer _vectorLayer;
 	}
 }

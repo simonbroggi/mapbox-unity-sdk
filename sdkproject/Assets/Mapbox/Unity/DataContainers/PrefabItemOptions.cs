@@ -1,7 +1,12 @@
-using UnityEngine;
-using System.Collections;
-
-public class PrefabItem : MonoBehaviour
+namespace Mapbox.Unity.Map
 {
+	using UnityEngine;
+	using System.Collections;
+	using System;
 
+	[Serializable]
+	public class PrefabItem
+	{
+
+	}
 }
