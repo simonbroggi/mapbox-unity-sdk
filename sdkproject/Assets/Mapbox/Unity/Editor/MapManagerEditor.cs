@@ -53,11 +53,28 @@
 				EditorPrefs.SetBool("MapManagerEditor_showTerrain", value);
 			}
 		}
+
+		/// <summary>
+		/// Gets or sets a value to show or hide Location Prefabs section <see cref="T:Mapbox.Editor.MapManagerEditor"/>.
+		/// </summary>
+		/// <value><c>true</c> if show vector; otherwise, <c>false</c>.</value>
+		bool ShowLocationPrefabs
+		{
+			get
+			{
+				return EditorPrefs.GetBool("MapManagerEditor_showLocationPrefabs");
+			}
+			set
+			{
+				EditorPrefs.SetBool("MapManagerEditor_showLocationPrefabs", value);
+			}
+		}
+
 		/// <summary>
 		/// Gets or sets a value to show or hide Vector section <see cref="T:Mapbox.Editor.MapManagerEditor"/>.
 		/// </summary>
 		/// <value><c>true</c> if show vector; otherwise, <c>false</c>.</value>
-		bool ShowVector
+		bool ShowMapFeatures
 		{
 			get
 			{
@@ -155,11 +172,18 @@
 			{
 				ShowSection(serializedObject.FindProperty("_terrain"), "_layerProperty");
 			}
+			ShowSepartor();
+
+			ShowLocationPrefabs = EditorGUILayout.Foldout(ShowLocationPrefabs, "PREFABS AT LOCATION");
+			if (ShowLocationPrefabs)
+			{
+				ShowSection(serializedObject.FindProperty("_locationPrefabs"), "_layerProperty");
+			}
 
 			ShowSepartor();
 
-			ShowVector = EditorGUILayout.Foldout(ShowVector, "VECTOR");
-			if (ShowVector)
+			ShowMapFeatures = EditorGUILayout.Foldout(ShowMapFeatures, "MAP FEATURES");
+			if (ShowMapFeatures)
 			{
 				ShowSection(serializedObject.FindProperty("_vectorData"), "_layerProperty");
 			}

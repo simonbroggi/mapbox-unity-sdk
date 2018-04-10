@@ -15,8 +15,6 @@
 	public class VectorLayerPropertiesDrawer : PropertyDrawer
 	{
 		static float _lineHeight = EditorGUIUtility.singleLineHeight;
-		GUIContent[] _sourceTypeContent;
-		bool _isGUIContentSet = false;
 
 		bool ShowPosition
 		{
@@ -54,12 +52,6 @@
 			}
 		}
 
-		private GUIContent _mapIdGui = new GUIContent
-		{
-			text = "Map Id",
-			tooltip = "Map Id corresponding to the tileset."
-		};
-
 		VectorSubLayerTreeView layerTreeView = new VectorSubLayerTreeView(new TreeViewState());
 		IList<int> selectedLayers = new List<int>();
 
@@ -68,72 +60,10 @@
 			EditorGUI.BeginProperty(position, label, property);
 			position.height = _lineHeight;
 
-			var sourceTypeProperty = property.FindPropertyRelative("sourceType");
-			var sourceTypeValue = (VectorSourceType)sourceTypeProperty.enumValueIndex;
-
-			var displayNames = sourceTypeProperty.enumDisplayNames;
-			int count = sourceTypeProperty.enumDisplayNames.Length;
-			if (!_isGUIContentSet)
+			//TODO: replace the condition below to have an option to choose no vector layer--------------------------------------------------
+			if (true)//(sourceTypeValue != VectorSourceType.None) 
 			{
-				_sourceTypeContent = new GUIContent[count];
-				for (int extIdx = 0; extIdx < count; extIdx++)
-				{
-					_sourceTypeContent[extIdx] = new GUIContent
-					{
-						text = displayNames[extIdx],
-						tooltip = ((VectorSourceType)extIdx).Description(),
-					};
-				}
-				_isGUIContentSet = true;
-			}
-			var typePosition = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), new GUIContent { text = "Data Source", tooltip = "Source tileset for Vector Data" });
-
-			sourceTypeProperty.enumValueIndex = EditorGUI.Popup(typePosition, sourceTypeProperty.enumValueIndex, _sourceTypeContent);
-			sourceTypeValue = (VectorSourceType)sourceTypeProperty.enumValueIndex;
-
-			position.y += _lineHeight;
-			var sourceOptionsProperty = property.FindPropertyRelative("sourceOptions");
-			var layerSourceProperty = sourceOptionsProperty.FindPropertyRelative("layerSource");
-			var layerSourceId = layerSourceProperty.FindPropertyRelative("Id");
-			var isActiveProperty = sourceOptionsProperty.FindPropertyRelative("isActive");
-			switch (sourceTypeValue)
-			{
-				case VectorSourceType.MapboxStreets:
-				case VectorSourceType.MapboxStreetsWithBuildingIds:
-					var sourcePropertyValue = MapboxDefaultVector.GetParameters(sourceTypeValue);
-					layerSourceId.stringValue = sourcePropertyValue.Id;
-					GUI.enabled = false;
-					EditorGUILayout.PropertyField(sourceOptionsProperty, _mapIdGui);
-					GUI.enabled = true;
-					isActiveProperty.boolValue = true;
-					break;
-				case VectorSourceType.Custom:
-					layerSourceId.stringValue = string.Empty;
-					EditorGUILayout.PropertyField(sourceOptionsProperty, _mapIdGui);
-					isActiveProperty.boolValue = true;
-					break;
-				case VectorSourceType.None:
-					isActiveProperty.boolValue = false;
-					break;
-				default:
-					isActiveProperty.boolValue = false;
-					break;
-			}
-			if (sourceTypeValue != VectorSourceType.None)
-			{
-				position.y += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("sourceOptions"));
-
-				var isStyleOptimized = property.FindPropertyRelative("useOptimizedStyle");
-				EditorGUILayout.PropertyField(isStyleOptimized);
-				position.y += _lineHeight;
-
-				if (isStyleOptimized.boolValue)
-				{
-					EditorGUILayout.PropertyField(property.FindPropertyRelative("optimizedStyle"), new GUIContent("Style Options"));
-				}
-				position.y += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("optimizedStyle"));
-				EditorGUILayout.PropertyField(property.FindPropertyRelative("performanceOptions"), new GUIContent("Perfomance Options"));
-				position.y += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("performanceOptions"));
+				//position.y += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("sourceOptions"));
 
 				EditorGUILayout.LabelField(new GUIContent { text = "Vector Layer Visualizers", tooltip = "Visualizers for vector features contained in a layer. " });
 
@@ -218,7 +148,23 @@
 					var layerProperty = subLayerArray.GetArrayElementAtIndex(SelectionIndex);
 
 					layerProperty.isExpanded = true;
-					DrawLayerVisualizerProperties(sourceTypeValue,layerProperty);
+					//Common properties for all visualizers
+					var isStyleOptimized = property.FindPropertyRelative("useOptimizedStyle");
+					EditorGUILayout.PropertyField(isStyleOptimized);
+					position.y += _lineHeight;
+
+					if (isStyleOptimized.boolValue)
+					{
+						EditorGUILayout.PropertyField(property.FindPropertyRelative("optimizedStyle"), new GUIContent("Style Options"));
+					}
+					position.y += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("optimizedStyle"));
+					EditorGUILayout.PropertyField(property.FindPropertyRelative("performanceOptions"), new GUIContent("Perfomance Options"));
+					position.y += EditorGUI.GetPropertyHeight(property.FindPropertyRelative("performanceOptions"));
+					position.y += _lineHeight;
+					GUILayout.Space(EditorGUIUtility.singleLineHeight);
+
+					//visualizers
+					DrawLayerVisualizerProperties(layerProperty);
 				}
 				else
 				{
@@ -228,7 +174,7 @@
 			EditorGUI.EndProperty();
 		}
 
-		void DrawLayerVisualizerProperties(VectorSourceType sourceType, SerializedProperty layerProperty)
+		void DrawLayerVisualizerProperties(SerializedProperty layerProperty)
 		{
 			EditorGUI.indentLevel++;
 			GUILayout.Label("Vector Layer Visualizer Properties");
@@ -236,7 +182,7 @@
 
 			var subLayerCoreOptions = layerProperty.FindPropertyRelative("coreOptions");
 			VectorPrimitiveType primitiveTypeProp = (VectorPrimitiveType)subLayerCoreOptions.FindPropertyRelative("geometryType").enumValueIndex;
-
+			VectorSourceType sourceType = (VectorSourceType)subLayerCoreOptions.FindPropertyRelative("sourceType").enumValueIndex;
 			EditorGUILayout.PropertyField(subLayerCoreOptions);
 
 			if (primitiveTypeProp != VectorPrimitiveType.Point && primitiveTypeProp != VectorPrimitiveType.Custom)
@@ -252,7 +198,7 @@
 			EditorGUI.indentLevel++;
 			if (ShowOthers)
 			{
-				if (primitiveTypeProp == VectorPrimitiveType.Polygon && sourceType != VectorSourceType.MapboxStreets)
+				if (primitiveTypeProp == VectorPrimitiveType.Polygon && sourceType!= VectorSourceType.MapboxStreets)
 				{
 					EditorGUI.indentLevel--;
 					layerProperty.FindPropertyRelative("honorBuildingIdSetting").boolValue = true;

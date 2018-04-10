@@ -29,6 +29,21 @@
 			get { return _layerProperties.coreOptions.layerName; }
 			set { _layerProperties.coreOptions.layerName = value; }
 		}
+
+		private string _mapId;
+		public override string MapId
+		{
+			get
+			{
+				return _mapId;
+			}
+
+			set
+			{
+				_mapId = value;
+			}
+		}
+
 		public void SetProperties(VectorSubLayerProperties properties, LayerPerformanceOptions performanceOptions)
 		{
 			List<MeshModifier> defaultMeshModifierStack = new List<MeshModifier>();

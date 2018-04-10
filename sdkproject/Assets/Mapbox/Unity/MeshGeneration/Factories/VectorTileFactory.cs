@@ -35,16 +35,16 @@
 		private Dictionary<UnityTile, VectorTile> _cachedData = new Dictionary<UnityTile, VectorTile>();
 
 		VectorLayerProperties _properties;
-		public string MapId
+		public string AggregateMapId
 		{
 			get
 			{
-				return _properties.sourceOptions.Id;
+				return _properties.GetConcatenatedMapId();
 			}
 
 			set
 			{
-				_properties.sourceOptions.Id = value;
+				_properties.SetSameSourceForAllVisualizers(value);
 			}
 		}
 
@@ -88,7 +88,7 @@
 			var vectorTile = (_properties.useOptimizedStyle) ? new VectorTile(_properties.optimizedStyle.Id, _properties.optimizedStyle.Modified) : new VectorTile();
 			tile.AddTile(vectorTile);
 
-			if (string.IsNullOrEmpty(MapId) || _properties.sourceOptions.isActive == false || _properties.vectorSubLayers.Count == 0)
+			if (string.IsNullOrEmpty(AggregateMapId) || _properties.isActive == false || _properties.vectorSubLayers.Count == 0)
 			{
 				// Do nothing; 
 				Progress++;
@@ -96,7 +96,7 @@
 			}
 			else
 			{
-				vectorTile.Initialize(_fileSource, tile.CanonicalTileId, MapId, () =>
+				vectorTile.Initialize(_fileSource, tile.CanonicalTileId, AggregateMapId, () =>
 				{
 					if (tile == null)
 					{

@@ -32,7 +32,7 @@
 		{
 			get
 			{
-				return (_layerProperty.sourceType != VectorSourceType.None);
+				return (_layerProperty.vectorSubLayers.Count > 0);
 			}
 		}
 
@@ -40,10 +40,11 @@
 		{
 			get
 			{
-				return _layerProperty.sourceOptions.Id;
+				return _layerProperty.GetConcatenatedMapId();
 			}
 		}
 
+		/*
 		public void SetLayerSource(VectorSourceType vectorSource)
 		{
 			if (vectorSource != VectorSourceType.Custom && vectorSource != VectorSourceType.None)
@@ -56,20 +57,22 @@
 				Debug.LogWarning("Invalid style - trying to set " + vectorSource.ToString() + " as default style!");
 			}
 		}
+		*/
 
+		//method used to set a common layer source for all the visualizers
 		public void SetLayerSource(string vectorSource)
 		{
 			if (!string.IsNullOrEmpty(vectorSource))
 			{
-				_layerProperty.sourceType = VectorSourceType.Custom;
-				_layerProperty.sourceOptions.Id = vectorSource;
+				_layerProperty.SetSameSourceForAllVisualizers(vectorSource);
 			}
 			else
 			{
-				_layerProperty.sourceType = VectorSourceType.None;
+				_layerProperty.isActive = false;
 				Debug.LogWarning("Empty source - turning off vector data. ");
 			}
 		}
+
 
 		public void AddVectorLayer(VectorSubLayerProperties subLayerProperties)
 		{
@@ -102,10 +105,7 @@
 
 		public void Remove()
 		{
-			_layerProperty = new VectorLayerProperties
-			{
-				sourceType = VectorSourceType.None
-			};
+			_layerProperty.isActive = false;
 		}
 
 		public void Update(LayerProperties properties)

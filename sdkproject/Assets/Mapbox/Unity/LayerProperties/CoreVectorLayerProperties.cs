@@ -10,6 +10,12 @@
 	{
 		[Tooltip("Is visualizer active.")]
 		public bool isActive = true;
+		public VectorSourceType sourceType = VectorSourceType.MapboxStreets;
+		public LayerSourceOptions sourceOptions = new LayerSourceOptions()
+		{
+			isActive = true,
+			layerSource = MapboxDefaultVector.GetParameters(VectorSourceType.MapboxStreets)
+		};
 		[Tooltip("Name of the visualizer. ")]
 		public string sublayerName = "untitled";
 		[Tooltip("Primitive geometry type of the visualizer, allowed primitives - point, line, polygon")]

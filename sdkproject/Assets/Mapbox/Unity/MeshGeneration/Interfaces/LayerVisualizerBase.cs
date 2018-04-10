@@ -11,6 +11,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 	public abstract class LayerVisualizerBase : ScriptableObject
     {
         public bool Active = true;
+		public abstract string MapId { get; set; }
         public abstract string Key { get; set; }
         public abstract void Create(VectorTileLayer layer, UnityTile tile, Action callback = null);
 
