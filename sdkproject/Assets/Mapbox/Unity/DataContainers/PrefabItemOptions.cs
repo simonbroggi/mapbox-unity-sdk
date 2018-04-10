@@ -5,7 +5,7 @@ namespace Mapbox.Unity.Map
 	using System;
 
 	[Serializable]
-	public class PrefabItemOptions
+	public class PrefabItem
 	{
 
 	}
