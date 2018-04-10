@@ -6,5 +6,5 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Mapbox/Unity/Tests/InitTestScene636578453762395651.unity
-    guid: 1503d167f9309a140bbe7f65d69d01c6
+    path: Assets/MapboxAR/Examples/Scenes/DropPinOnMapScene.unity
+    guid: 0a6fa68cbc9de45e4a269f5801a88793
