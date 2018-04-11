@@ -20,7 +20,14 @@
 		float _desiredStartingAccuracy = 5f;
 
 		[SerializeField]
+		int _desiredAccuracy;
+
+		[SerializeField]
 		NodeSyncBase[] _nodeSyncs;
+
+		[SerializeField]
+		Transform _player;
+
 		Node[] _nodes;
 		Location _highestLocation;
 
@@ -48,20 +55,33 @@
 			}
 		}
 
-		void CalculateARPosition()
+		void FindBestNodes()
 		{
 			foreach (var nodeSync in _nodeSyncs)
 			{
-				_nodes = nodeSync.ReturnNodes();
-
-				foreach (var node in _nodes)
+				var mean = CheckMeanAccuracy(nodeSync, 5);
+				if (mean <= _desiredAccuracy)
 				{
-
+					// TODO: Do map matching based on Nodes.
 				}
 			}
 		}
 
-		void SnapPlayerToTheMostAccurateNode()
+		int CheckMeanAccuracy(NodeSyncBase syncBase, int howManyNodes)
+		{
+			var nodes = syncBase.ReturnNodes();
+			int accuracy = 0;
+
+			for (int i = 1; i < howManyNodes; i++)
+			{
+				accuracy += nodes[nodes.Length - i].Accuracy;
+			}
+
+			var mean = accuracy / howManyNodes;
+			return mean;
+		}
+
+		void SnapMapToNode(Node node)
 		{
 
 		}

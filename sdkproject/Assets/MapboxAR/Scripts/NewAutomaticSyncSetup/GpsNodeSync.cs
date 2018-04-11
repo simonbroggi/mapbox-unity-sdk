@@ -102,7 +102,7 @@
 		/// <summary>
 		/// Accuracy of the Node. ARNodes accuracy is determined by the latest and most accurate GPS point.
 		/// </summary>
-		public float Accuracy;
+		public int Accuracy;
 	}
 
 }
