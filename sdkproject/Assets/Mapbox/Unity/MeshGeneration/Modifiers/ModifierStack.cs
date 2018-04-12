@@ -101,6 +101,11 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		{
 			base.Initialize();
 
+			if(FeatureCollection != null)
+			{
+				FeatureCollection.Initialize();
+			}
+
 			_counter = MeshModifiers.Count;
 			for (int i = 0; i < _counter; i++)
 			{
@@ -219,6 +224,11 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				{
 					GoModifiers[i].Run(_tempVectorEntity, tile);
 				}
+			}
+
+			if (FeatureCollection != null)
+			{
+				FeatureCollection.AddFeature(new double[] { _tempVectorEntity.Transform.position.x, _tempVectorEntity.Transform.position.z }, _tempVectorEntity);
 			}
 
 			return _tempVectorEntity.GameObject;

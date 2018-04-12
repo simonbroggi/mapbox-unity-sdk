@@ -178,6 +178,7 @@
 					var subLayerCoreOptions = subLayer.FindPropertyRelative("coreOptions");
 					subLayerCoreOptions.FindPropertyRelative("isActive").boolValue = true;
 					subLayerCoreOptions.FindPropertyRelative("layerName").stringValue = "building";
+					subLayerCoreOptions.FindPropertyRelative("featureCollection").objectReferenceValue = null;
 					subLayerCoreOptions.FindPropertyRelative("geometryType").enumValueIndex = (int)VectorPrimitiveType.Polygon;
 					subLayerCoreOptions.FindPropertyRelative("snapToTerrain").boolValue = true;
 					subLayerCoreOptions.FindPropertyRelative("groupFeatures").boolValue = false;

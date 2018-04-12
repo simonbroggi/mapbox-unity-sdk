@@ -105,6 +105,10 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			_buildingCount.Clear();
 			_pool.Clear();
 
+			if (FeatureCollection != null)
+			{
+				FeatureCollection.Initialize();
+			}
 			_counter = MeshModifiers.Count;
 			for (int i = 0; i < _counter; i++)
 			{
@@ -137,6 +141,12 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				{
 					MeshModifiers[i].Run(feature, meshData, tile);
 				}
+			}
+
+			if (FeatureCollection != null)
+			{
+				var ve = new VectorEntity() { Feature = feature };
+				FeatureCollection.AddFeature(new double[] { meshData.Vertices[0].x, meshData.Vertices[0].z }, ve);
 			}
 
 			GameObject go = null;

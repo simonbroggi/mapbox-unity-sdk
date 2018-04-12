@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using Mapbox.Unity.MeshGeneration.Filters;
 	using UnityEngine;
+	using Mapbox.Unity.MeshGeneration;
 
 	[Serializable]
 	public class CoreVectorLayerProperties
@@ -16,6 +17,7 @@
 		public VectorPrimitiveType geometryType = VectorPrimitiveType.Polygon;
 		[Tooltip("Name of the layer in the source tileset. This property is case sensitive.")]
 		public string layerName = "layerName";
+		public FeatureCollectionBase featureCollection;
 		[Tooltip("Snap features to the terrain elevation, use this option to draw features above terrain. ")]
 		public bool snapToTerrain = true;
 		[Tooltip("Groups features into one Unity GameObject.")]

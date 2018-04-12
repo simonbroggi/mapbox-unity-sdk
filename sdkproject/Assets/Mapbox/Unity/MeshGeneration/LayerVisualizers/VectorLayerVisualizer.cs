@@ -51,6 +51,7 @@
 
 			_defaultStack.MeshModifiers = new List<MeshModifier>();
 			_defaultStack.GoModifiers = new List<GameObjectModifier>();
+			_defaultStack.FeatureCollection = properties.coreOptions.featureCollection;
 
 			switch (properties.coreOptions.geometryType)
 			{

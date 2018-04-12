@@ -10,6 +10,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 {
 	public class ModifierStackBase : ScriptableObject
 	{
+		[SerializeField] public FeatureCollectionBase FeatureCollection;
 		[NodeEditorElement("Mesh Modifiers")] public List<MeshModifier> MeshModifiers;
 		[NodeEditorElement("Game Object Modifiers")] public List<GameObjectModifier> GoModifiers;
 

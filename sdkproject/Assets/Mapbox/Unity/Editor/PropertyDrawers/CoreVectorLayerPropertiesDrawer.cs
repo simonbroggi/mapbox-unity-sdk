@@ -25,8 +25,11 @@
 			EditorGUI.indentLevel++;
 
 			position.y += lineHeight;
-			EditorGUI.PropertyField(new Rect(position.x, position.y, position.width, lineHeight), property.FindPropertyRelative("layerName"));
+			EditorGUI.PropertyField(new Rect(position.x, position.y, position.width, lineHeight), property.FindPropertyRelative("featureCollection"));
 
+			position.y += lineHeight;
+			EditorGUI.PropertyField(new Rect(position.x, position.y, position.width, lineHeight), property.FindPropertyRelative("layerName"));
+						
 			position.y += lineHeight;
 			EditorGUI.PropertyField(position, property.FindPropertyRelative("snapToTerrain"));
 
@@ -38,7 +41,6 @@
 				position.y += lineHeight;
 				EditorGUI.PropertyField(position, property.FindPropertyRelative("lineWidth"));
 			}
-
 			EditorGUI.EndProperty();
 		}
 
@@ -47,7 +49,7 @@
 			var sourceTypeProperty = property.FindPropertyRelative("geometryType");
 
 			float height = 0.0f;
-			height += (((((VectorPrimitiveType)sourceTypeProperty.enumValueIndex == VectorPrimitiveType.Line)) ? 6.0f : 5.0f) * EditorGUIUtility.singleLineHeight);
+			height += (((((VectorPrimitiveType)sourceTypeProperty.enumValueIndex == VectorPrimitiveType.Line)) ? 7.0f : 6.0f) * EditorGUIUtility.singleLineHeight);
 
 			return height;
 		}
