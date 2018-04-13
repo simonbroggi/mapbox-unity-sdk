@@ -6,6 +6,7 @@
 	using UnityEngine;
 	using Mapbox.Unity.Location;
 	using System;
+	using Mapbox.MapMatching;
 
 	public class CentralizedARLocator : MonoBehaviour
 	{
@@ -14,10 +15,16 @@
 		// Lol. Snap Snap Snap... after yeach new better GPS val...
 
 		[SerializeField]
+		ARMapMatching _mapMathching;
+
+		[SerializeField]
 		bool _useSnapping;
 
 		[SerializeField]
 		float _desiredStartingAccuracy = 5f;
+
+		[SerializeField]
+		int _amountOfNodesToCheck;
 
 		[SerializeField]
 		int _desiredAccuracy;
@@ -59,7 +66,7 @@
 		{
 			foreach (var nodeSync in _nodeSyncs)
 			{
-				var mean = CheckMeanAccuracy(nodeSync, 5);
+				var mean = CheckMeanAccuracy(nodeSync, _amountOfNodesToCheck);
 				if (mean <= _desiredAccuracy)
 				{
 					// TODO: Do map matching based on Nodes.

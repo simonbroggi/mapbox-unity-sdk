@@ -28,10 +28,14 @@
 		[SerializeField]
 		float _minMagnitude;
 
-		List<Node> _listOfNodes;
+		List<Node> _savedNodes;
 
 		void Start()
 		{
+
+			// this start method as well could be eliminated all together....
+			// And added to the run method.. Although... yeah nevermind...
+
 			Action<Location> SaveFirstNode = null;
 			SaveFirstNode = (Location location) =>
 			{
@@ -40,7 +44,7 @@
 				LocationProviderFactory.Instance.DeviceLocationProvider.OnLocationUpdated += FilterNodes;
 			};
 			LocationProviderFactory.Instance.DefaultLocationProvider.OnLocationUpdated += SaveFirstNode;
-			_listOfNodes = new List<Node>();
+			_savedNodes = new List<Node>();
 		}
 
 		//TODO : So basically the GPS can be 15 off and then 4 off.. And it might send the location 
@@ -58,7 +62,7 @@
 			{
 				// Check Node accuracy & distance.
 				var latestNode = _map.GeoToWorldPosition(location.LatitudeLongitude);
-				var previousNode = _map.GeoToWorldPosition(_listOfNodes[_listOfNodes.Count - 1].LatLon);
+				var previousNode = _map.GeoToWorldPosition(_savedNodes[_savedNodes.Count - 1].LatLon);
 				var forMagnitude = latestNode - previousNode;
 
 				if (location.Accuracy <= _desiredAccuracy && _minMagnitude >= forMagnitude.magnitude)
@@ -79,31 +83,23 @@
 			var latestNode = new Node();
 			latestNode.LatLon = location.LatitudeLongitude;
 			latestNode.Accuracy = location.Accuracy;
-			_listOfNodes.Add(latestNode);
+			_savedNodes.Add(latestNode);
+
+			if (NodeAdded != null)
+			{
+				NodeAdded();
+			}
 		}
 
 		public override Node ReturnLatestNode()
 		{
-			return _listOfNodes[_listOfNodes.Count]; ;
+			return _savedNodes[_savedNodes.Count - 1]; ;
 		}
 
 		public override Node[] ReturnNodes()
 		{
-			return _listOfNodes.ToArray();
+			return _savedNodes.ToArray();
 		}
 	}
-
-	public struct Node
-	{
-		/// <summary>
-		/// Represents the saved Latitude Longitude value of the Node.
-		/// </summary>
-		public Vector2d LatLon;
-		/// <summary>
-		/// Accuracy of the Node. ARNodes accuracy is determined by the latest and most accurate GPS point.
-		/// </summary>
-		public int Accuracy;
-	}
-
 }
 

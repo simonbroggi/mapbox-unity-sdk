@@ -41,7 +41,6 @@ namespace Mapbox.MapboxSdkCs.UnitTest
 
 
 
-
 		[UnityTest]
 		public IEnumerator AsSimpleAsPossible()
 		{

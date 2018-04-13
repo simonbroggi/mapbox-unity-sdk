@@ -1,11 +1,11 @@
 ﻿namespace Mapbox.Unity.Ar
 {
+	using System;
 	using System.Collections;
 	using System.Collections.Generic;
 	using UnityEngine;
 	using Mapbox.Unity.Map;
 	using Mapbox.Unity.Location;
-	using System;
 
 	/// <summary>
 	///  Generates and filters ArNodes for ARLocationManager.
@@ -30,24 +30,19 @@
 		WaitForSeconds _waitFor;
 		int _latestBestGPSAccuracy;
 
-		// TODO: 
-		// Average best here... The median scale of accuracy.. 
-		//For map matching... to determine which points to send...
-		// The median should have a callback point like "give me the latest 5 nodes.."
-		// And that should return the median of the accuracy..
-		//
-		//Only add the best points if a point drops below median exclude it from the list..
-
 		void Start()
 		{
 			//TODO : This needs to have InitializdedARMode notifier.
 			//That is notified on ARPlanePlacement....
 			//_map.Initialize();
+			//OOOOR actually this should start running from CentralizedArLocator...
+			// NodeSyncBase call that calls for Run!
 
 			_waitFor = new WaitForSeconds(_timeBetweenNodeDrop);
 			_savedNodes = new List<Node>();
 			CentralizedARLocator.OnNewHighestAccuracyGPS += SavedGPSAccuracy;
 
+			//Then you wont need this fucking crazy shenanigans...
 			Action handler = null;
 			handler = () =>
 			{
@@ -55,7 +50,6 @@
 				_map.OnInitialized -= handler;
 			};
 			_map.OnInitialized += handler;
-
 		}
 
 		void SavedGPSAccuracy(Location location)
@@ -67,7 +61,6 @@
 		{
 			while (true)
 			{
-				Debug.Log("this runs");
 				ConvertToNodes(dropTransform);
 				yield return _waitFor;
 			}
@@ -75,15 +68,11 @@
 
 		void ConvertToNodes(Transform nodeDrop)
 		{
-			//TODO; check magnitude
-			//Check here the magnetude of the node for AR.
+			// Despise if else jungles...
 			if (_savedNodes.Count >= 1)
 			{
 				var previousNodePos = _map.GeoToWorldPosition(_savedNodes[_savedNodes.Count - 1].LatLon, false);
-				Debug.Log(_savedNodes[_savedNodes.Count - 1].LatLon);
-				Debug.Log(previousNodePos);
 				var currentMagnitude = nodeDrop.position - previousNodePos;
-				Debug.Log("Current Magnitude: " + currentMagnitude.magnitude);
 
 				if (currentMagnitude.magnitude >= _minMagnitudeBetween)
 				{
@@ -91,17 +80,24 @@
 					node.LatLon = _map.WorldToGeoPosition(nodeDrop.position);
 					node.Accuracy = _latestBestGPSAccuracy;
 					_savedNodes.Add(node);
-					Instantiate(_debugNodes, nodeDrop.position, Quaternion.identity);
+
+					if (NodeAdded != null)
+					{
+						NodeAdded();
+					}
 				}
 			}
 			else
 			{
 				var node = new Node();
-				Debug.Log(_map.WorldToGeoPosition(nodeDrop.position));
 				node.LatLon = _map.WorldToGeoPosition(nodeDrop.position);
 				node.Accuracy = _latestBestGPSAccuracy;
 				_savedNodes.Add(node);
-				Instantiate(_debugNodes, nodeDrop.position, Quaternion.identity);
+
+				if (NodeAdded != null)
+				{
+					NodeAdded();
+				}
 			}
 
 		}
@@ -113,7 +109,7 @@
 
 		public override Node ReturnLatestNode()
 		{
-			return _savedNodes[_savedNodes.Count];
+			return _savedNodes[_savedNodes.Count - 1];
 		}
 	}
 }

@@ -27,7 +27,6 @@ namespace Mapbox.MapMatching
 		//	_requestExceptions = requestExceptions;
 		//}
 
-
 		[JsonProperty("code")]
 		public string Code;
 		[JsonProperty("message")]
