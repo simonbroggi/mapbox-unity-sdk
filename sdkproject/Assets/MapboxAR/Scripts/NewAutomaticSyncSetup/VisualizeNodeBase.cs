@@ -20,21 +20,18 @@
 		[SerializeField]
 		Material _nodeMat;
 
-		int _count;
-
 		private void Start()
 		{
 			_nodeBase.NodeAdded += PlotRoute;
 		}
 
-		void PlotRoute()
+		private void PlotRoute()
 		{
-			Debug.Log("called");
+			// TODO: pooling here for new Spheres... This won't work for MapMatching Nodes.
 
 			var nodePos = _map.GeoToWorldPosition(_nodeBase.ReturnLatestNode().LatLon);
 			Instantiate(GameObject.CreatePrimitive(PrimitiveType.Sphere), nodePos, Quaternion.identity, _map.gameObject.transform);
 
-			// All this trouble for a line rend. Lol.
 			var nodes = _nodeBase.ReturnNodes();
 			_lineRend.positionCount = nodes.Length;
 
@@ -46,7 +43,7 @@
 
 		private void OnDisable()
 		{
-			_nodeBase.NodeAdded += PlotRoute;
+			_nodeBase.NodeAdded -= PlotRoute;
 		}
 	}
 }

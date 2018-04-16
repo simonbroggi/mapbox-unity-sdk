@@ -19,7 +19,7 @@
 		/// <returns>The latest node.</returns>
 		public abstract Node ReturnLatestNode();
 		/// <summary>
-		/// An event that is called when a node is added. Mostly for Debugging.
+		/// An event that is called when a node is added.
 		/// </summary>
 		public Action NodeAdded;
 	}
@@ -34,6 +34,10 @@
 		/// Accuracy of the Node. ARNodes accuracy is determined by the latest and most accurate GPS point.
 		/// </summary>
 		public int Accuracy;
+		/// <summary>
+		/// Represents the Confidence of a Map Matching node. Not valid on ARNode or GPSNode.
+		/// </summary>
+		public float Confidence;
 	}
 
 

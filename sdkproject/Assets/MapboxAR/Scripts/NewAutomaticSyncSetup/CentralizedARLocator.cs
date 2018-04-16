@@ -7,6 +7,7 @@
 	using Mapbox.Unity.Location;
 	using System;
 	using Mapbox.MapMatching;
+	using Mapbox.Utils;
 
 	public class CentralizedARLocator : MonoBehaviour
 	{
@@ -66,15 +67,15 @@
 		{
 			foreach (var nodeSync in _nodeSyncs)
 			{
-				var mean = CheckMeanAccuracy(nodeSync, _amountOfNodesToCheck);
-				if (mean <= _desiredAccuracy)
+				var average = CheckAverageAccuracy(nodeSync, _amountOfNodesToCheck);
+				if (average <= _desiredAccuracy)
 				{
 					// TODO: Do map matching based on Nodes.
 				}
 			}
 		}
 
-		int CheckMeanAccuracy(NodeSyncBase syncBase, int howManyNodes)
+		int CheckAverageAccuracy(NodeSyncBase syncBase, int howManyNodes)
 		{
 			var nodes = syncBase.ReturnNodes();
 			int accuracy = 0;
@@ -84,8 +85,8 @@
 				accuracy += nodes[nodes.Length - i].Accuracy;
 			}
 
-			var mean = accuracy / howManyNodes;
-			return mean;
+			var average = accuracy / howManyNodes;
+			return average;
 		}
 
 		void SnapMapToNode(Node node)

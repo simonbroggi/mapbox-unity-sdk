@@ -31,7 +31,6 @@ namespace Mapbox.MapboxSdkCs.UnitTest
 		private FileSource _fs;
 		private int _timeout = 10;
 
-
 		[SetUp]
 		public void SetUp()
 		{
@@ -595,7 +594,6 @@ namespace Mapbox.MapboxSdkCs.UnitTest
 
 			Directions.Step step1 = matchingResponse.Matchings[0].Legs[0].Steps[1];
 			Assert.IsTrue(step1.Maneuver.Instruction.Contains("Sie haben Ihr Ziel erreicht"), "Step[1]:Instruction not as expected");
-
 		}
 
 
