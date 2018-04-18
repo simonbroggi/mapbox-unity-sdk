@@ -194,7 +194,7 @@ GameObject:
   m_Component:
   - component: {fileID: 63030424}
   - component: {fileID: 63030426}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: CentralizedARSyncPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -231,7 +231,7 @@ MonoBehaviour:
   _mapMathching: {fileID: 1226186904}
   _useSnapping: 0
   _desiredStartingAccuracy: 5
-  _amountOfNodesToCheck: 10
+  _amountOfNodesToCheck: 5
   _desiredAccuracy: 0
   _nodeSyncs:
   - {fileID: 826912542}
@@ -739,6 +739,10 @@ Prefab:
       propertyPath: _map
       value: 
       objectReference: {fileID: 1851171493}
+    - target: {fileID: 1946284039185172, guid: 21145be9b350b404ab052d0f6b3063d3, type: 2}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 21145be9b350b404ab052d0f6b3063d3, type: 2}
   m_IsPrefabParent: 0
@@ -1361,7 +1365,7 @@ Camera:
   m_Depth: 1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 28672
+    m_Bits: 16384
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -1455,6 +1459,10 @@ Prefab:
       propertyPath: _map
       value: 
       objectReference: {fileID: 1851171493}
+    - target: {fileID: 1946284039185172, guid: 21145be9b350b404ab052d0f6b3063d3, type: 2}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 21145be9b350b404ab052d0f6b3063d3, type: 2}
   m_IsPrefabParent: 0
@@ -2433,6 +2441,10 @@ Prefab:
       propertyPath: _map
       value: 
       objectReference: {fileID: 1851171493}
+    - target: {fileID: 1946284039185172, guid: 21145be9b350b404ab052d0f6b3063d3, type: 2}
+      propertyPath: m_Layer
+      value: 14
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 21145be9b350b404ab052d0f6b3063d3, type: 2}
   m_IsPrefabParent: 0
@@ -2863,7 +2875,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 28672
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
