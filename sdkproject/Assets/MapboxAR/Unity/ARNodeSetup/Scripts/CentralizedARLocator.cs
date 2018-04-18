@@ -39,12 +39,19 @@
 		Node[] _nodes;
 		Location _highestLocation;
 
+		IEnumerator _checkNodes;
+		WaitForSeconds _waitFor;
+
 		public static Action<Location> OnNewHighestAccuracyGPS;
 
 		void Start()
 		{
 			LocationProviderFactory.Instance.DefaultLocationProvider.OnLocationUpdated += SaveHighestAccuracy;
 			_mapMathching.ReturnMapMatchCoords += GetMapMatchingCoords;
+			_waitFor = new WaitForSeconds(10);
+			_checkNodes = FindBestNodes();
+			StartCoroutine(_checkNodes);
+
 		}
 
 		void SaveHighestAccuracy(Location location)
@@ -64,22 +71,36 @@
 			}
 		}
 
-		void FindBestNodes()
+		IEnumerator FindBestNodes()
 		{
-			foreach (var nodeSync in _nodeSyncs)
+
+			while (true)
 			{
-				var average = CheckAverageAccuracy(nodeSync, _amountOfNodesToCheck);
-				if (average <= _desiredAccuracy)
+				foreach (var nodeSync in _nodeSyncs)
 				{
-					// TODO: Do map matching based on Nodes.
+					var average = CheckAverageAccuracy(nodeSync, _amountOfNodesToCheck);
+					if (average <= _desiredAccuracy)
+					{
+						// TODO: Do map matching based on Nodes.
+						_mapMathching.MapMatchQuery(nodeSync.ReturnNodes());
+					}
 				}
+
+				yield return _waitFor;
 			}
+
 		}
 
 		int CheckAverageAccuracy(NodeSyncBase syncBase, int howManyNodes)
 		{
 			var nodes = syncBase.ReturnNodes();
 			int accuracy = 0;
+
+			if (howManyNodes > syncBase.ReturnNodes().Length)
+			{
+				Debug.Log("Not enough nodes!");
+				return 100;
+			}
 
 			for (int i = 1; i < howManyNodes; i++)
 			{
