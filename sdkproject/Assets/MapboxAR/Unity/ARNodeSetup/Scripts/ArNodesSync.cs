@@ -14,16 +14,13 @@
 	{
 
 		[SerializeField]
-		GameObject _debugNodes;
-
-		[SerializeField]
 		Transform _targetTransform;
 
 		[SerializeField]
 		AbstractMap _map;
 
 		[SerializeField]
-		float _timeBetweenNodeDrop, _minMagnitudeBetween;
+		float _secondsBetweenDropCheck, _minMagnitudeBetween;
 
 		IEnumerator _saveARnodes;
 		List<Node> _savedNodes;
@@ -38,7 +35,7 @@
 			//OOOOR actually this should start running from CentralizedArLocator...
 			// NodeSyncBase call that calls for Run!
 
-			_waitFor = new WaitForSeconds(_timeBetweenNodeDrop);
+			_waitFor = new WaitForSeconds(_secondsBetweenDropCheck);
 			_savedNodes = new List<Node>();
 			CentralizedARLocator.OnNewHighestAccuracyGPS += SavedGPSAccuracy;
 

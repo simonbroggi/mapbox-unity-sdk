@@ -44,6 +44,7 @@
 		void Start()
 		{
 			LocationProviderFactory.Instance.DefaultLocationProvider.OnLocationUpdated += SaveHighestAccuracy;
+			_mapMathching.ReturnMapMatchCoords += GetMapMatchingCoords;
 		}
 
 		void SaveHighestAccuracy(Location location)
@@ -87,6 +88,22 @@
 
 			var average = accuracy / howManyNodes;
 			return average;
+		}
+
+		void GetMapMatchingCoords(Node[] nodes)
+		{
+			foreach (var node in nodes)
+			{
+				Debug.Log("Check lat lon coords: " + node.LatLon);
+			}
+		}
+
+		private void Update()
+		{
+			if (Input.GetKeyDown(KeyCode.Space))
+			{
+				_mapMathching.MapMatchQuery(_nodeSyncs[0].ReturnNodes());
+			}
 		}
 
 		void SnapMapToNode(Node node)

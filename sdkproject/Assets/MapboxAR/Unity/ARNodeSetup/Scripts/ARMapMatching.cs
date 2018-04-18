@@ -21,51 +21,34 @@
 		Node[] _savedNodes;
 		IEnumerator _mapMatching, _waitForRequest;
 		WaitForSeconds _waitFor;
-		FileSource _fs;
-		private int _timeout = 10;
-
-		void Awake()
-		{
-			_fs = new FileSource(MapboxAccess.Instance.Configuration.AccessToken);
-			_timeout = MapboxAccess.Instance.Configuration.DefaultTimeout;
-		}
 
 		public void MapMatchQuery(Node[] nodes)
 		{
 
 			Vector2d[] coordinates = new Vector2d[nodes.Length];
+
 			for (int i = 0; i < nodes.Length; i++)
 			{
 				coordinates[i] = nodes[i].LatLon;
 			}
 
-			_mapMatching = SimpleQuery(coordinates);
-			StartCoroutine(_mapMatching);
+			SimpleQuery(coordinates);
 		}
 
-		IEnumerator SimpleQuery(Vector2d[] coords)
+		void SimpleQuery(Vector2d[] coords)
 		{
 			MapMatchingResource resource = new MapMatchingResource();
 			resource.Coordinates = coords;
 			resource.Profile = _profile;
-			MapMatcher matcher = new MapMatcher(_fs, _timeout);
-			MapMatchingResponse matchResponse = null;
+			MapMatcher matcher = MapboxAccess.Instance.MapMatcher;
+
 			matcher.Match(
 				resource,
 				(MapMatchingResponse responce) =>
 			 {
-				 matchResponse = responce;
+				 SendResponseCoords(responce);
 			 }
 			);
-
-			IEnumerator enumerator = _fs.WaitForAllRequests();
-
-			while (enumerator.MoveNext())
-			{
-				yield return null;
-			}
-
-			SendResponseCoords(matchResponse);
 		}
 
 		void SendResponseCoords(MapMatchingResponse response)
@@ -81,8 +64,14 @@
 					nodes[i].Confidence = quality;
 					nodes[i].LatLon = coordinates[i];
 				}
+
 				ReturnMapMatchCoords(nodes);
 				_savedNodes = nodes;
+
+				if (NodeAdded != null)
+				{
+					NodeAdded();
+				}
 			}
 
 			if (NodeAdded != null)
