@@ -17,8 +17,10 @@ public class PrefabPlacementAPITest : MonoBehaviour {
 		map.MapVisualizer.OnMapVisualizerStateChanged += HandleMapStateChange;
 
 		//add layers before initialize
-		map.SpawnPrefabAtGeoLocation(prefab, new Vector2d(37.784179, -122.401583), HandlePrefabsPlaced);
+		//map.SpawnPrefabAtGeoLocation(prefab, new Vector2d(37.784179, -122.401583), HandlePrefabsPlaced);
 		map.Initialize( new Vector2d(37.784179, -122.401583), 16);
+
+		//var test = map.VectorData.LocationPrefabsLayerProperties.locationPrefabList[0].buildingsWithUniqueIds;
 	}
 	
 	// Update is called once per frame

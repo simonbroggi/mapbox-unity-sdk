@@ -6,5 +6,7 @@ using System;
 [Serializable]
 public class LocationPrefabsLayerProperties : LayerProperties
 {
-	public List<PrefabItemOptions> locationPrefabList = new List<PrefabItemOptions>();
+	//we want the vector tile factory is iterating though this list as 
+	//ISubLayerProperties, not the concrete properties
+	public List<ISubLayerProperties> locationPrefabList = new List<ISubLayerProperties>();
 }

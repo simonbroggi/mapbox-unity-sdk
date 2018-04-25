@@ -13,13 +13,22 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 	public class LocationPrefabsLayerVisualizer : VectorLayerVisualizer
 	{
 		private int maxDensity = 30; //This value is same as the density's max range value in PrefabItemOptions
-
-		public void SetProperties(PrefabItemOptions item)
+	
+		public override void SetProperties(ISubLayerProperties properties, LayerPerformanceOptions performanceOptions)
 		{
-			SubLayerProperties = item;
+			PrefabItemOptions item = null;
+			//cast sublayer properties to prefabitemoptions
+			if (typeof(PrefabItemOptions).IsAssignableFrom(properties.GetType()))
+			{
+				item = properties as PrefabItemOptions;
+				SubLayerProperties = item;
+				PerformanceOptions = performanceOptions;
+			}
 
 			if (!item.isActive)
+			{
 				return;
+			}
 			
 			//Check to make sure that when Categories selection is none, the location prefab is disabled
 			if (item.findByType == LocationPrefabFindBy.MapboxCategory && item.categories == LocationPrefabCategories.None)

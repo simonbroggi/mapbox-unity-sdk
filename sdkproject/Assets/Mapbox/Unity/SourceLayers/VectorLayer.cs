@@ -12,7 +12,6 @@
 		[SerializeField]
 		LocationPrefabsLayerProperties _locationPrefabsLayerProperties = new LocationPrefabsLayerProperties();	
 
-
 		[SerializeField]
 		VectorLayerProperties _layerProperty = new VectorLayerProperties();
 
@@ -97,11 +96,11 @@
 			}
 		}
 
-		public void AddVectorLayer(VectorSubLayerProperties subLayerProperties)
+		public void AddVectorLayer(ISubLayerProperties subLayerProperties)
 		{
 			if (_layerProperty.vectorSubLayers == null)
 			{
-				_layerProperty.vectorSubLayers = new List<VectorSubLayerProperties>();
+				_layerProperty.vectorSubLayers = new List<ISubLayerProperties>();
 			}
 			_layerProperty.vectorSubLayers.Add(subLayerProperties);
 		}

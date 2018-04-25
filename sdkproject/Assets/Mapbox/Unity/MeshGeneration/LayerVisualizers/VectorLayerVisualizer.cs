@@ -13,59 +13,57 @@
 
 	public class VectorLayerVisualizer : LayerVisualizerBase
 	{
-		VectorSubLayerProperties _layerProperties;
+		private VectorSubLayerProperties _layerProperties;
 		public VectorSubLayerProperties SubLayerProperties
 		{
-			get
-			{
-				return _layerProperties;
-			}
-			set
-			{
-				_layerProperties = value;
-			}
+			get { return _layerProperties; }
+			set { _layerProperties = value; }
 		}
 
+		protected ModifierStackBase _defaultStack;
 		public ModifierStackBase DefaultModifierStack
 		{
-			get
-			{
-				return _defaultStack;
-			}
-			set
-			{
-				_defaultStack = value;
-			}
+			get { return _defaultStack; }
+			set { _defaultStack = value; }
 		}
 
-		LayerPerformanceOptions _performanceOptions;
+		private LayerPerformanceOptions _performanceOptions;
+		public LayerPerformanceOptions PerformanceOptions
+		{
+			get { return _performanceOptions; }
+			set { _performanceOptions = value; }
+		}
+
 		protected Dictionary<UnityTile, List<int>> _activeCoroutines;
 		int _entityInCurrentCoroutine = 0;
 
-		protected ModifierStackBase _defaultStack;
+
 		private HashSet<ulong> _activeIds;
 		private Dictionary<UnityTile, List<ulong>> _idPool; //necessary to keep _activeIds list up to date when unloading tiles
 
 		private string _key;
-
-
-
 		public override string Key
 		{
 			get { return _layerProperties.coreOptions.layerName; }
 			set { _layerProperties.coreOptions.layerName = value; }
 		}
 
-		public void SetProperties(VectorSubLayerProperties properties, LayerPerformanceOptions performanceOptions)
+		public override void SetProperties(ISubLayerProperties properties, LayerPerformanceOptions performanceOptions)
 		{
+
+			//cast sublayer properties to vectorsublayerproperties
+			if (typeof(VectorSubLayerProperties).IsAssignableFrom(properties.GetType()))
+			{
+				_layerProperties = properties as VectorSubLayerProperties;
+				_performanceOptions = performanceOptions;
+			}
+
 			List<MeshModifier> defaultMeshModifierStack = new List<MeshModifier>();
 		 	List<GameObjectModifier> defaultGOModifierStack = new List<GameObjectModifier>();
-			_layerProperties = properties;
-			_performanceOptions = performanceOptions;
 
 			Active = _layerProperties.coreOptions.isActive;
 
-			if (properties.coreOptions.groupFeatures)
+			if (_layerProperties.coreOptions.groupFeatures)
 			{
 				_defaultStack = ScriptableObject.CreateInstance<MergedModifierStack>();
 			}
@@ -78,7 +76,7 @@
 			_defaultStack.MeshModifiers = new List<MeshModifier>();
 			_defaultStack.GoModifiers = new List<GameObjectModifier>();
 
-			switch (properties.coreOptions.geometryType)
+			switch (_layerProperties.coreOptions.geometryType)
 			{
 				case VectorPrimitiveType.Point:
 					break;
@@ -86,51 +84,51 @@
 					// Let the user add anything that they want
 					if (_layerProperties.coreOptions.snapToTerrain == true)
 					{
-						defaultMeshModifierStack.Add(CreateInstance<SnapTerrainModifier>());
+						defaultMeshModifierStack.Add(ScriptableObject.CreateInstance<SnapTerrainModifier>());
 					}
 					break;
 				case VectorPrimitiveType.Line:
 
-					var lineMeshMod = CreateInstance<LineMeshModifier>();
+					var lineMeshMod = ScriptableObject.CreateInstance<LineMeshModifier>();
 					lineMeshMod.Width = _layerProperties.coreOptions.lineWidth;
 					defaultMeshModifierStack.Add(lineMeshMod);
 
-					//defaultMeshModifierStack.Add(CreateInstance<UvModifier>());
+					//defaultMeshModifierStack.Add(ScriptableObject.CreateInstance<UvModifier>());
 					if (_layerProperties.extrusionOptions.extrusionType != Map.ExtrusionType.None)
 					{
-						var heightMod = CreateInstance<HeightModifier>();
+						var heightMod = ScriptableObject.CreateInstance<HeightModifier>();
 						heightMod.SetProperties(_layerProperties.extrusionOptions);
 						defaultMeshModifierStack.Add(heightMod);
 					}
 					if (_layerProperties.coreOptions.snapToTerrain == true)
 					{
-						defaultMeshModifierStack.Add(CreateInstance<SnapTerrainModifier>());
+						defaultMeshModifierStack.Add(ScriptableObject.CreateInstance<SnapTerrainModifier>());
 					}
 
 					//collider modifier options
 					if (_layerProperties.colliderOptions.colliderType != ColliderType.None)
 					{
-						var lineColliderMod = CreateInstance<ColliderModifier>();
+						var lineColliderMod = ScriptableObject.CreateInstance<ColliderModifier>();
 						lineColliderMod.SetProperties(_layerProperties.colliderOptions);
 						defaultGOModifierStack.Add(lineColliderMod);
 					}
 
-					var lineMatMod = CreateInstance<MaterialModifier>();
+					var lineMatMod = ScriptableObject.CreateInstance<MaterialModifier>();
 					lineMatMod.SetProperties(_layerProperties.materialOptions);
 					defaultGOModifierStack.Add(lineMatMod);
 					break;
 				case VectorPrimitiveType.Polygon:
 					if (_layerProperties.coreOptions.snapToTerrain == true)
 					{
-						defaultMeshModifierStack.Add(CreateInstance<SnapTerrainModifier>());
+						defaultMeshModifierStack.Add(ScriptableObject.CreateInstance<SnapTerrainModifier>());
 					}
-					defaultMeshModifierStack.Add(CreateInstance<PolygonMeshModifier>());
+					defaultMeshModifierStack.Add(ScriptableObject.CreateInstance<PolygonMeshModifier>());
 					UVModifierOptions uvModOptions = new UVModifierOptions
 					{
 						texturingType = _layerProperties.materialOptions.texturingType,
 						atlasInfo = _layerProperties.materialOptions.atlasInfo
 					};
-					var uvMod = CreateInstance<UvModifier>();
+					var uvMod = ScriptableObject.CreateInstance<UvModifier>();
 					uvMod.SetProperties(uvModOptions);
 					defaultMeshModifierStack.Add(uvMod);
 
@@ -138,14 +136,14 @@
 					{
 						if (_layerProperties.materialOptions.texturingType == UvMapType.Atlas || _layerProperties.materialOptions.texturingType == UvMapType.AtlasWithColorPalette)
 						{
-							var atlasMod = CreateInstance<TextureSideWallModifier>();
+							var atlasMod = ScriptableObject.CreateInstance<TextureSideWallModifier>();
 							GeometryExtrusionWithAtlasOptions atlasOptions = new GeometryExtrusionWithAtlasOptions(_layerProperties.extrusionOptions, uvModOptions);
 							atlasMod.SetProperties(atlasOptions);
 							defaultMeshModifierStack.Add(atlasMod);
 						}
 						else
 						{
-							var heightMod = CreateInstance<HeightModifier>();
+							var heightMod = ScriptableObject.CreateInstance<HeightModifier>();
 							heightMod.SetProperties(_layerProperties.extrusionOptions);
 							defaultMeshModifierStack.Add(heightMod);
 						}
@@ -154,18 +152,18 @@
 					//collider modifier options
 					if (_layerProperties.colliderOptions.colliderType != ColliderType.None)
 					{
-						var polyColliderMod = CreateInstance<ColliderModifier>();
+						var polyColliderMod = ScriptableObject.CreateInstance<ColliderModifier>();
 						polyColliderMod.SetProperties(_layerProperties.colliderOptions);
 						defaultGOModifierStack.Add(polyColliderMod);
 					}
 
-					var matMod = CreateInstance<MaterialModifier>();
+					var matMod = ScriptableObject.CreateInstance<MaterialModifier>();
 					matMod.SetProperties(_layerProperties.materialOptions);
 					defaultGOModifierStack.Add(matMod);
 
 					if (_layerProperties.materialOptions.texturingType == UvMapType.AtlasWithColorPalette)
 					{
-						var colorPaletteMod = CreateInstance<MapboxStylesColorModifier>();
+						var colorPaletteMod = ScriptableObject.CreateInstance<MapboxStylesColorModifier>();
 						colorPaletteMod.m_scriptablePalette = _layerProperties.materialOptions.colorPalette;
 
 						defaultGOModifierStack.Add(colorPaletteMod);

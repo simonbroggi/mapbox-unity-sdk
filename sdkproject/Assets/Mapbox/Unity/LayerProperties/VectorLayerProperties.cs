@@ -47,6 +47,6 @@
 		public Style optimizedStyle;
 		public LayerPerformanceOptions performanceOptions;
 		[NodeEditorElementAttribute("Vector Sublayers")]
-		public List<VectorSubLayerProperties> vectorSubLayers = new List<VectorSubLayerProperties>();
+		public List<ISubLayerProperties> vectorSubLayers = new List<ISubLayerProperties>();
 	}
 }
