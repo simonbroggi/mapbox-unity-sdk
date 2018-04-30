@@ -8,10 +8,10 @@
 	using Mapbox.Unity.Location;
 	using System;
 	using Mapbox.Unity.Map;
-	//using System.Threading.Tasks;
+	using Mapbox.Utils;
 
 	///<summary>
-	///  Generates GPSNodes for ARLocationManager.
+	///  Generates GPSNodes for CentralizedARLocator.
 	/// </summary>
 	public class GpsNodeSync : NodeSyncBase
 	{
@@ -25,14 +25,14 @@
 		[SerializeField]
 		float _minMagnitude;
 
-		List<Node> _savedNodes;
 		AbstractMap _map;
+		CircularBuffer<Node> _nodeBuffer;
 
 		public override void InitializeNodeBase(AbstractMap map)
 		{
-			_savedNodes = new List<Node>();
 			_map = map;
 			IsNodeBaseInitialized = true;
+			_nodeBuffer = new CircularBuffer<Node>(10);
 			Debug.Log("Initialized GPS nodes");
 		}
 
@@ -40,7 +40,7 @@
 		{
 			// Check Node accuracy & distance.
 			var latestNode = _map.GeoToWorldPosition(location.LatitudeLongitude);
-			var previousNode = _map.GeoToWorldPosition(_savedNodes[_savedNodes.Count - 1].LatLon);
+			var previousNode = _map.GeoToWorldPosition(_nodeBuffer[0].LatLon);
 			var forMagnitude = latestNode - previousNode;
 
 			if (location.Accuracy <= _desiredAccuracy && _minMagnitude <= forMagnitude.magnitude)
@@ -58,7 +58,7 @@
 		public override void SaveNode()
 		{
 			var location = LocationProviderFactory.Instance.DefaultLocationProvider.CurrentLocation;
-			bool isFirstNode = (_savedNodes.Count == 0);
+			bool isFirstNode = (_nodeBuffer.Count == 0);
 			bool isGoodFilteredNode = false;
 			bool saveNode = true;
 			if (isFirstNode)
@@ -79,18 +79,24 @@
 					LatLon = location.LatitudeLongitude,
 					Accuracy = location.Accuracy
 				};
-				_savedNodes.Add(latestNode);
+
+				_nodeBuffer.Add(latestNode);
 			}
+		}
+
+		public override Node ReturnNodeAtIndex(int index)
+		{
+			return _nodeBuffer[index];
+		}
+
+		public override int ReturnNodeCount()
+		{
+			return _nodeBuffer.Count;
 		}
 
 		public override Node ReturnLatestNode()
 		{
-			return _savedNodes[_savedNodes.Count - 1]; ;
-		}
-
-		public override Node[] ReturnNodes()
-		{
-			return _savedNodes.ToArray();
+			return _nodeBuffer[0];
 		}
 	}
 }
