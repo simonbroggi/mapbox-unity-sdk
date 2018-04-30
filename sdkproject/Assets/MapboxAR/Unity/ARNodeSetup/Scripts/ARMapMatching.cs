@@ -1,16 +1,14 @@
 ﻿namespace Mapbox.Unity.Ar
 {
 	using System;
-	using System.Collections;
 	using System.Collections.Generic;
 	using UnityEngine;
 	using Mapbox.MapMatching;
 	using Mapbox.Utils;
-	using Mapbox.Platform;
 	using Mapbox.Unity.Map;
 	using System.Linq;
 
-	public class ARMapMatching : NodeSyncBase
+	public class ARMapMatching : MonoBehaviour
 	{
 		[SerializeField]
 		MapMatching.Profile _profile;
@@ -25,7 +23,6 @@
 
 		public Action<Node[]> ReturnMapMatchCoords;
 		private List<Node> _savedNodes;
-
 		private List<Node> _nodesForMapMatchingQuery = new List<Node>();
 
 		protected void Update()
@@ -88,26 +85,15 @@
 			}
 		}
 
-		public override Node[] ReturnNodes()
-		{
-			return _savedNodes.ToArray();
-		}
-
-		public override Node ReturnLatestNode()
-		{
-			return _savedNodes[_savedNodes.Count - 1];
-		}
-
-		public override void InitializeNodeBase(AbstractMap map)
+		public void InitializeNodeBase(AbstractMap map)
 		{
 			_savedNodes = new List<Node>();
 			_nodesForMapMatchingQuery = new List<Node>();
-			IsNodeBaseInitialized = true;
 		}
 
-		public override void SaveNode()
+		public void SaveNode()
 		{
-			_nodesForMapMatchingQuery = _inputNodes.ReturnNodes().ToList();
+			_nodesForMapMatchingQuery = _inputNodes.ReturnAllNodes().ToList();
 			if (_nodesForMapMatchingQuery.Count > 2 && _elapsedTime > _updateInterval)
 			{
 				_elapsedTime = 0;
