@@ -11,9 +11,9 @@
 	public abstract class NodeSyncBase : MonoBehaviour
 	{
 		/// <summary>
-		/// Returns the nodes that the sync base has collected.
+		/// Returns the nodes count the sync base has collected.
 		/// </summary>
-		/// <returns>The nodes.</returns>
+		/// <returns>The node count.</returns>
 		public abstract int ReturnNodeCount();
 		/// <summary>
 		/// Returns the latest node added to sync base.
@@ -26,6 +26,11 @@
 		/// <returns>The node at index.</returns>
 		/// <param name="index">Index.</param>
 		public abstract Node ReturnNodeAtIndex(int index);
+		/// <summary>
+		/// Returns an array of nodes the sync base has collected.
+		/// </summary>
+		/// <returns>The node array.</returns>
+		public abstract Node[] ReturnAllNodes();
 		/// <summary>
 		/// Initializes the node base.
 		/// </summary>

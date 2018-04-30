@@ -16,6 +16,7 @@
 
 		// TODO : Snap should happening here for things to happen...
 		// Lol. Snap Snap Snap... after yeach new better GPS val...
+
 		[SerializeField]
 		AbstractMap _map;
 
@@ -64,7 +65,6 @@
 			InitializeSyncNodes(_map);
 			_map.OnInitialized += Map_OnInitialized;
 			_arInterface = ARInterface.GetInterface();
-
 		}
 
 		void Map_OnInitialized()
@@ -109,25 +109,23 @@
 				// HACk to get data from GPS Nodes.
 				if (syncNode.GetType() == typeof(GpsNodeSync))
 				{
-					var gpsNodes = syncNode.ReturnNodes();
-					if (gpsNodes.Length < 2)
+					if (syncNode.ReturnNodeCount() < 2)
 					{
-						Debug.LogFormat("Not enough ({0})GPS node", gpsNodes.Length);
+						Debug.LogFormat("Not enough ({0})GPS node", syncNode.ReturnNodeCount());
 						return;
 					}
 					currentGpsNode = syncNode.ReturnLatestNode();
-					previousGpsNode = gpsNodes[gpsNodes.Length - 2];
+					previousGpsNode = syncNode.ReturnNodeAtIndex(1);
 				}
 				if (syncNode.GetType() == typeof(ArNodesSync))
 				{
-					var arNodes = syncNode.ReturnNodes();
-					if (arNodes.Length < 2)
+					if (syncNode.ReturnNodeCount() < 2)
 					{
-						Debug.LogFormat("Not enough ({0})AR node", arNodes.Length);
+						Debug.LogFormat("Not enough ({0})AR node", syncNode.ReturnNodeCount());
 						return;
 					}
 					currentARNode = syncNode.ReturnLatestNode();
-					previousARNode = arNodes[arNodes.Length - 2];
+					previousARNode = syncNode.ReturnNodeAtIndex(1);
 				}
 			}
 
@@ -290,19 +288,19 @@
 		//	}
 		//}
 
-		float CheckAverageAccuracy(NodeSyncBase syncBase, int howManyNodes)
-		{
-			var nodes = syncBase.ReturnNodes();
-			float accuracy = 0;
+		//float CheckAverageAccuracy(NodeSyncBase syncBase, int howManyNodes)
+		//{
+		//	var nodes = syncBase.ReturnNodeCount();
+		//	float accuracy = 0;
 
-			for (int i = 1; i < howManyNodes; i++)
-			{
-				accuracy += nodes[nodes.Length - i].Accuracy;
-			}
+		//	for (int i = 1; i < howManyNodes; i++)
+		//	{
+		//		accuracy += nodes[nodes.Length - i].Accuracy;
+		//	}
 
-			var average = accuracy / howManyNodes;
-			return average;
-		}
+		//	var average = accuracy / howManyNodes;
+		//	return average;
+		//}
 
 		void GetMapMatchingCoords(Node[] nodes)
 		{

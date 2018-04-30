@@ -122,7 +122,6 @@ GameObject:
   m_Component:
   - component: {fileID: 9398829}
   - component: {fileID: 9398828}
-  - component: {fileID: 9398830}
   m_Layer: 0
   m_Name: MapMatchingNode
   m_TagString: Untagged
@@ -141,7 +140,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 828d3e802ce824ef3aba9114467f5c92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsNodeBaseInitialized: 0
   _profile: 2
   _inputNodes: {fileID: 0}
   _updateInterval: 10
@@ -158,22 +156,6 @@ Transform:
   m_Father: {fileID: 897694401}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9398830
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 9398827}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c79a2223c85344e3199e38d5adf707e6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _nodeBase: {fileID: 9398828}
-  _color: {r: 1, g: 0.7844828, b: 0.08088237, a: 1}
-  _lineWidth: 1
-  _lineHeight: 0
-  _nodeMaterial: {fileID: 2100000, guid: 1955ddd6a93c0409ba17d3fbafd416b0, type: 2}
 --- !u!4 &377018416 stripped
 Transform:
   m_PrefabParentObject: {fileID: 4526069144002162, guid: 35e76f6e52f5c4252a0b703cc2019a37,

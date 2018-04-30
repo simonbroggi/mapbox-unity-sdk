@@ -84,6 +84,18 @@
 			}
 		}
 
+		public override Node[] ReturnAllNodes()
+		{
+			var nodeArray = new Node[_nodeBuffer.Count];
+
+			for (int i = 0; i < _nodeBuffer.Count; i++)
+			{
+				nodeArray[i] = _nodeBuffer[i];
+			}
+
+			return nodeArray;
+		}
+
 		public override Node ReturnNodeAtIndex(int index)
 		{
 			return _nodeBuffer[index];

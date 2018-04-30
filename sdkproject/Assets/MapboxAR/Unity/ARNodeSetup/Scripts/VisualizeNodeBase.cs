@@ -45,11 +45,11 @@
 		{
 			if (_nodeBase.IsNodeBaseInitialized)
 			{
-				var nodes = _nodeBase.ReturnNodes();
+				var nodes = _nodeBase.ReturnAllNodes();
 				var length = nodes.Length;
 				_lineRend.positionCount = length;
 
-				for (int i = 0; i < _nodeBase.ReturnNodes().Length; i++)
+				for (int i = 0; i < nodes.Length; i++)
 				{
 					var position = _map.GeoToWorldPosition(nodes[i].LatLon, false);
 					if (_lineHeight > 0)
