@@ -14,12 +14,18 @@
 		/// Returns the nodes that the sync base has collected.
 		/// </summary>
 		/// <returns>The nodes.</returns>
-		public abstract Node[] ReturnNodes();
+		public abstract int ReturnNodeCount();
 		/// <summary>
 		/// Returns the latest node added to sync base.
 		/// </summary>
 		/// <returns>The latest node.</returns>
 		public abstract Node ReturnLatestNode();
+		/// <summary>
+		/// Returns node at the index. Position is reversed. 0 returns Latest node.
+		/// </summary>
+		/// <returns>The node at index.</returns>
+		/// <param name="index">Index.</param>
+		public abstract Node ReturnNodeAtIndex(int index);
 		/// <summary>
 		/// Initializes the node base.
 		/// </summary>
