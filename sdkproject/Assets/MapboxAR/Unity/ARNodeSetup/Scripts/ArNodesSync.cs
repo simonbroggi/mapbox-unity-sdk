@@ -6,6 +6,8 @@
 	using UnityEngine;
 	using Mapbox.Unity.Map;
 	using Mapbox.Unity.Location;
+	using Mapbox.Utils;
+
 	//using System.Threading.Tasks;
 
 	/// <summary>
@@ -20,11 +22,16 @@
 		[SerializeField]
 		float _minMagnitudeBetween;
 
+		[SerializeField]
+		int _capacityForNodes;
+
 		float _latestBestGPSAccuracy;
 		List<Node> _savedNodes;
 		WaitForSeconds _waitFor;
 
 		AbstractMap _map;
+
+		CircularBuffer<Node> _nodeBuffer;
 
 		public override void InitializeNodeBase(AbstractMap map)
 		{
@@ -33,6 +40,8 @@
 			_map = map;
 			IsNodeBaseInitialized = true;
 			Debug.Log("Initialized ARNodes");
+			_nodeBuffer = new CircularBuffer<Node>(10);
+			var node = _nodeBuffer[0];
 		}
 
 		void SavedGPSAccuracy(Location location)
@@ -66,18 +75,23 @@
 					LatLon = _map.WorldToGeoPosition(_targetTransform.position),
 					Accuracy = _latestBestGPSAccuracy
 				};
-				_savedNodes.Add(node);
+				_nodeBuffer.Add(node);
 			}
 		}
 
-		public override Node[] ReturnNodes()
+		public override Node ReturnNodeAtIndex(int index)
 		{
-			return _savedNodes.ToArray();
+			return _nodeBuffer[index];
+		}
+
+		public override int ReturnNodeCount()
+		{
+			return _nodeBuffer.Count;
 		}
 
 		public override Node ReturnLatestNode()
 		{
-			return _savedNodes[_savedNodes.Count - 1];
+			return _nodeBuffer[0];
 		}
 	}
 }
