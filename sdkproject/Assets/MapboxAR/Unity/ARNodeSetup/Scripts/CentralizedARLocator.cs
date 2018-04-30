@@ -57,14 +57,14 @@
 		void Awake()
 		{
 			_alignmentStrategy.Register(this);
-			_map = LocationProviderFactory.Instance.mapManager;
 
 			// Initialize all sync-nodes.Make them ready to recieve node data.
 			// Map needs to be generated before init. Otherwise bunch of errors.
 
-			InitializeSyncNodes();
-
+			InitializeSyncNodes(_map);
 			_map.OnInitialized += Map_OnInitialized;
+			_arInterface = ARInterface.GetInterface();
+
 		}
 
 		void Map_OnInitialized()
@@ -222,25 +222,34 @@
 			ComputeAlignment();
 		}
 
-		void InitializeSyncNodes()
+		void InitializeSyncNodes(AbstractMap map)
 		{
 			for (int i = 0; i < _syncNodes.Length; i++)
 			{
-				_syncNodes[i].InitializeNodeBase();
+				_syncNodes[i].InitializeNodeBase(map);
 			}
 		}
 
-		//void CheckTracking()
-		//{
-		//	var tracking = new ARInterface.CustomTrackingState();
-		//	if (_arInterface.GetTrackingState(ref tracking))
-		//	{
-		//		if (tracking == ARInterface.CustomTrackingState.Good)
-		//		{
-		//			// Blah blah..
-		//		}
-		//	}
-		//}
+		private void Update()
+		{
+			CheckTracking();
+		}
+
+		void CheckTracking()
+		{
+			var tracking = new ARInterface.CustomTrackingState();
+
+			if (_arInterface.GetTrackingState(ref tracking))
+			{
+				Unity.Utilities.Console.Instance.Log(
+				string.Format(
+					"Tracking Quality: {0}"
+						, tracking
+				)
+				, "blue"
+			);
+			}
+		}
 
 		void SaveHighestAccuracy(Location location)
 		{

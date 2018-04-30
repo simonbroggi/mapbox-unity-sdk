@@ -23,15 +23,14 @@
 		float _latestBestGPSAccuracy;
 		List<Node> _savedNodes;
 		WaitForSeconds _waitFor;
-		float _latestBestGPSAccuracy;
 
 		AbstractMap _map;
 
-		public override void InitializeNodeBase()
+		public override void InitializeNodeBase(AbstractMap map)
 		{
 			_savedNodes = new List<Node>();
 			CentralizedARLocator.OnNewHighestAccuracyGPS += SavedGPSAccuracy;
-			_map = LocationProviderFactory.Instance.mapManager;
+			_map = map;
 			IsNodeBaseInitialized = true;
 			Debug.Log("Initialized ARNodes");
 		}
@@ -62,12 +61,13 @@
 			if (saveNode == true)
 			{
 				Debug.Log("Saving AR Node");
-				var node = new Node();
-				node.LatLon = _map.WorldToGeoPosition(_targetTransform.position);
-				node.Accuracy = _latestBestGPSAccuracy;
+				var node = new Node
+				{
+					LatLon = _map.WorldToGeoPosition(_targetTransform.position),
+					Accuracy = _latestBestGPSAccuracy
+				};
 				_savedNodes.Add(node);
 			}
-
 		}
 
 		public override Node[] ReturnNodes()

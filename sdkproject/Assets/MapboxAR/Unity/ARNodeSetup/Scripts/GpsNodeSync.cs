@@ -28,13 +28,12 @@
 		List<Node> _savedNodes;
 		AbstractMap _map;
 
-		public override void InitializeNodeBase()
+		public override void InitializeNodeBase(AbstractMap map)
 		{
 			_savedNodes = new List<Node>();
-			_map = LocationProviderFactory.Instance.mapManager;
+			_map = map;
 			IsNodeBaseInitialized = true;
 			Debug.Log("Initialized GPS nodes");
-
 		}
 
 		private bool IsNodeGoodToUse(Location location)
@@ -75,9 +74,11 @@
 			if (saveNode)
 			{
 				Debug.Log("Saving GPS Node");
-				var latestNode = new Node();
-				latestNode.LatLon = location.LatitudeLongitude;
-				latestNode.Accuracy = location.Accuracy;
+				var latestNode = new Node
+				{
+					LatLon = location.LatitudeLongitude,
+					Accuracy = location.Accuracy
+				};
 				_savedNodes.Add(latestNode);
 			}
 		}
