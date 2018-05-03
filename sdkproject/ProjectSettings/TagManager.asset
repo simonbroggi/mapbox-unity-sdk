@@ -21,8 +21,8 @@ TagManager:
   - Both
   - Path
   - ARGameObject
-  - 
-  - 
+  - DebugLayer
+  - ARLayer
   - 
   - 
   - 

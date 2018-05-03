@@ -22,10 +22,11 @@
 		Vector3 _delta;
 		float _oldTouchDistance;
 
-		bool _wasTouching;
+		bool _editing;
 
 		void Update()
 		{
+
 
 			if (Input.touchCount == 0)
 			{
@@ -45,12 +46,12 @@
 				{
 					var touchDelta = Input.GetTouch(0).deltaPosition;
 					var offset = new Vector3(touchDelta.x, 0f, touchDelta.y);
-					offset = _camera.transform.rotation * offset;
+					offset = _camera.transform.rotation * (offset/10f);
 					var newPos = new Vector3(offset.x, 0, offset.y);
 					_mapRoot.position = newPos + _mapRoot.position;
 				}
 			}
-			else
+			else if (Input.touchCount == 2)
 			{
 				if (_oldTouchPositions[1] == null)
 				{
@@ -70,6 +71,41 @@
 					_oldTouchPositions[1] = newTouchPositions[1];
 					_oldTouchVector = newTouchVector;
 					_oldTouchDistance = newTouchDistance;
+				}
+			}
+			else if(Input.touchCount == 3)
+			{
+				if (_oldTouchPositions[0] == null || _oldTouchPositions[1] != null)
+				{
+					_oldTouchPositions[0] = Input.GetTouch(0).position;
+					_oldTouchPositions[1] = null;
+				}
+
+				if (Input.GetTouch(0).phase == TouchPhase.Moved)
+				{
+					var touchDelta = Input.GetTouch(0).deltaPosition;
+					var offset = new Vector3(touchDelta.x, 0f, touchDelta.y);
+					offset = _camera.transform.rotation * (offset / 100f);
+					var newPos = new Vector3(offset.x, 0, offset.y);
+					_mapRoot.position = newPos + _mapRoot.position;
+				}
+
+			}
+			else 
+			{
+				if (_oldTouchPositions[0] == null || _oldTouchPositions[1] != null)
+				{
+					_oldTouchPositions[0] = Input.GetTouch(0).position;
+					_oldTouchPositions[1] = null;
+				}
+
+				if (Input.GetTouch(0).phase == TouchPhase.Moved)
+				{
+					var touchDelta = Input.GetTouch(0).deltaPosition;
+					var offset = new Vector3(touchDelta.x, 0f, touchDelta.y);
+					offset = _camera.transform.rotation * (offset / 100f);
+					var newPos = new Vector3( 0, offset.y, 0);
+					_mapRoot.position = newPos + _mapRoot.position;
 				}
 			}
 		}
