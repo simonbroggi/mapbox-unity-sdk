@@ -245,7 +245,7 @@ Light:
   serializedVersion: 8
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 1
+  m_Intensity: 0.8
   m_Range: 10
   m_SpotAngle: 30
   m_CookieSize: 10
@@ -439,7 +439,7 @@ Camera:
     height: 1
   near clip plane: 10
   far clip plane: 2000
-  field of view: 10
+  field of view: 5
   orthographic: 0
   orthographic size: 143.6
   m_Depth: 1
@@ -450,9 +450,9 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 0
+  m_HDR: 1
   m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
+  m_AllowDynamicResolution: 1
   m_ForceIntoRT: 1
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
@@ -675,7 +675,7 @@ Prefab:
     - target: {fileID: 224907993215804030, guid: 98be219873e6d4dffb5949746f515a33,
         type: 2}
       propertyPath: m_AnchorMin.y
-      value: 0.14468281
+      value: 0.1636113
       objectReference: {fileID: 0}
     - target: {fileID: 224907993215804030, guid: 98be219873e6d4dffb5949746f515a33,
         type: 2}
@@ -795,7 +795,7 @@ Prefab:
     - target: {fileID: 224835413515161394, guid: 98be219873e6d4dffb5949746f515a33,
         type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -116.91571
+      value: -119.56163
       objectReference: {fileID: 0}
     - target: {fileID: 224835413515161394, guid: 98be219873e6d4dffb5949746f515a33,
         type: 2}
@@ -805,12 +805,12 @@ Prefab:
     - target: {fileID: 224835413515161394, guid: 98be219873e6d4dffb5949746f515a33,
         type: 2}
       propertyPath: m_SizeDelta.y
-      value: 213.83142
+      value: 219.12326
       objectReference: {fileID: 0}
     - target: {fileID: 224857786874416376, guid: 98be219873e6d4dffb5949746f515a33,
         type: 2}
       propertyPath: m_SizeDelta.y
-      value: 233.83142
+      value: 239.12326
       objectReference: {fileID: 0}
     - target: {fileID: 224907856650798614, guid: 98be219873e6d4dffb5949746f515a33,
         type: 2}
@@ -908,18 +908,18 @@ MonoBehaviour:
     loadingTexture: {fileID: 2800000, guid: e2896a92727704803a9c422b043eae89, type: 3}
   _imagery:
     _layerProperty:
-      sourceType: 1
+      sourceType: 6
       sourceOptions:
         isActive: 1
         layerSource:
           Name: Streets
-          Id: mapbox://styles/mapbox/outdoors-v10
+          Id: mapbox://styles/morgane-santos/cjgpnax6j002i2slqxmwu99sv
           Modified: 
           UserName: 
       rasterOptions:
-        useRetina: 0
+        useRetina: 1
         useCompression: 0
-        useMipMap: 0
+        useMipMap: 1
   _terrain:
     _layerProperty:
       sourceType: 0
@@ -950,7 +950,7 @@ MonoBehaviour:
     _locationPrefabsLayerProperties:
       locationPrefabList:
       - coreOptions:
-          isActive: 1
+          isActive: 0
           sublayerName: Arts and Enterinment
           geometryType: 0
           layerName: 
@@ -989,7 +989,7 @@ MonoBehaviour:
         coordinates: []
         density: 10
       - coreOptions:
-          isActive: 1
+          isActive: 0
           sublayerName: Food
           geometryType: 0
           layerName: 
@@ -1026,9 +1026,9 @@ MonoBehaviour:
         categories: 2
         nameString: POI Name
         coordinates: []
-        density: 15
+        density: 10
       - coreOptions:
-          isActive: 1
+          isActive: 0
           sublayerName: Nightlife
           geometryType: 0
           layerName: 
@@ -1067,7 +1067,7 @@ MonoBehaviour:
         coordinates: []
         density: 10
       - coreOptions:
-          isActive: 1
+          isActive: 0
           sublayerName: Outdoors and Recreation
           geometryType: 0
           layerName: 
@@ -1104,9 +1104,9 @@ MonoBehaviour:
         categories: 8
         nameString: POI Name
         coordinates: []
-        density: 20
+        density: 5
       - coreOptions:
-          isActive: 1
+          isActive: 0
           sublayerName: Services
           geometryType: 0
           layerName: 
@@ -1145,7 +1145,7 @@ MonoBehaviour:
         coordinates: []
         density: 5
       - coreOptions:
-          isActive: 1
+          isActive: 0
           sublayerName: Shops
           geometryType: 0
           layerName: 
@@ -1184,7 +1184,7 @@ MonoBehaviour:
         coordinates: []
         density: 10
       - coreOptions:
-          isActive: 1
+          isActive: 0
           sublayerName: Transportation
           geometryType: 0
           layerName: 
@@ -1260,7 +1260,86 @@ MonoBehaviour:
         categories: -1
         nameString: POI Name
         coordinates: []
-        density: 15
+        density: 3
+      - coreOptions:
+          isActive: 1
+          sublayerName: Starbucks
+          geometryType: 0
+          layerName: 
+          snapToTerrain: 1
+          groupFeatures: 0
+          lineWidth: 0
+        filterOptions:
+          filters: []
+          combinerType: 0
+        extrusionOptions:
+          extrusionType: 0
+          extrusionGeometryType: 0
+          propertyName: 
+          minimumHeight: 0
+          maximumHeight: 0
+          extrusionScaleFactor: 0
+        colliderOptions:
+          colliderType: 0
+        materialOptions:
+          texturingType: 0
+          materials: []
+          atlasInfo: {fileID: 0}
+          colorPalette: {fileID: 0}
+        honorBuildingIdSetting: 0
+        buildingsWithUniqueIds: 0
+        moveFeaturePositionTo: 0
+        MeshModifiers: []
+        GoModifiers: []
+        spawnPrefabOptions:
+          prefab: {fileID: 1707885508695930, guid: d748e6a0b26334f4d933c1438339484d,
+            type: 2}
+          scaleDownWithWorld: 1
+        findByType: 2
+        categories: -1
+        nameString: Starbucks
+        coordinates:
+        - 37.788457, -122.39988
+        density: 30
+      - coreOptions:
+          isActive: 0
+          sublayerName: Astronaut
+          geometryType: 0
+          layerName: 
+          snapToTerrain: 1
+          groupFeatures: 0
+          lineWidth: 0
+        filterOptions:
+          filters: []
+          combinerType: 0
+        extrusionOptions:
+          extrusionType: 0
+          extrusionGeometryType: 0
+          propertyName: 
+          minimumHeight: 0
+          maximumHeight: 0
+          extrusionScaleFactor: 0
+        colliderOptions:
+          colliderType: 0
+        materialOptions:
+          texturingType: 0
+          materials: []
+          atlasInfo: {fileID: 0}
+          colorPalette: {fileID: 0}
+        honorBuildingIdSetting: 0
+        buildingsWithUniqueIds: 0
+        moveFeaturePositionTo: 0
+        MeshModifiers: []
+        GoModifiers: []
+        spawnPrefabOptions:
+          prefab: {fileID: 1378465762430876, guid: 7854e8c0d48424d29bc598ff7f82924b,
+            type: 2}
+          scaleDownWithWorld: 0
+        findByType: 1
+        categories: -1
+        nameString: Starbucks
+        coordinates: []
+        density: 30
     _layerProperty:
       _sourceType: 0
       sourceOptions:
@@ -1301,14 +1380,14 @@ MonoBehaviour:
         colliderOptions:
           colliderType: 0
         materialOptions:
-          texturingType: 3
+          texturingType: 2
           materials:
           - Materials:
-            - {fileID: 2100000, guid: d4d7464e3429a44e090f55a4ac17f110, type: 2}
+            - {fileID: 2100000, guid: 5cc6a7dc3df7cc84693bdde07669ab5b, type: 2}
           - Materials:
             - {fileID: 2100000, guid: 55cc6edead802446b9106b2998406844, type: 2}
           atlasInfo: {fileID: 11400000, guid: 414754d7155df47beb52ca117a774f21, type: 2}
-          colorPalette: {fileID: 11400000, guid: b01b6d453d33e40119c0f9472d50c45f,
+          colorPalette: {fileID: 11400000, guid: e1b79d6caac0144adada0c548ef06705,
             type: 2}
         honorBuildingIdSetting: 1
         buildingsWithUniqueIds: 1
@@ -1956,8 +2035,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9527fd56bc6a0c549a1e550219f9b16e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _panSpeed: 10
-  _zoomSpeed: 50
+  _panSpeed: 0.1
+  _zoomSpeed: 0
   _referenceCamera: {fileID: 0}
 --- !u!81 &1681481102
 AudioListener:
@@ -1998,7 +2077,7 @@ Camera:
     height: 1
   near clip plane: 10
   far clip plane: 3000
-  field of view: 10
+  field of view: 5
   orthographic: 0
   orthographic size: 143.6
   m_Depth: -1
@@ -2009,9 +2088,9 @@ Camera:
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
-  m_HDR: 0
+  m_HDR: 1
   m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
+  m_AllowDynamicResolution: 1
   m_ForceIntoRT: 1
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
@@ -2023,7 +2102,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1681481099}
   m_LocalRotation: {x: 0.2588191, y: 0, z: 0, w: 0.9659258}
-  m_LocalPosition: {x: 0, y: 225, z: -400}
+  m_LocalPosition: {x: 0, y: 225, z: -266}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 621795785}
