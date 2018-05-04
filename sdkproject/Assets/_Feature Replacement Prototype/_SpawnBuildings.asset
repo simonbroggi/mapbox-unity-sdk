@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 420705c61d1b6435c8aa7b1cbd0ce80a, type: 3}
+  m_Name: _SpawnBuildings
+  m_EditorClassIdentifier: 
+  Active: 1
+  _spawnRateInSquareMeters: 1
+  _maxSpawn: 1
+  _prefabs:
+  - {fileID: 1000014201024826, guid: 186f25b0163c80f42b4a86c690793452, type: 2}
+  - {fileID: 1000011086151546, guid: f268d41a635271b499c19e7154a03321, type: 2}
+  - {fileID: 1000011868398520, guid: fb28c56cbe98b9944b86dc4658a34987, type: 2}
+  _layerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _scaleDownWithWorld: 1
+  _randomizeScale: 1
+  _randomizeRotation: 1
