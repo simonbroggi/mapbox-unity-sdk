@@ -15,11 +15,11 @@
 		{
 			get
 			{
-				return EditorPrefs.GetInt(objectId + "GeometryOptions_propertySelectionIndex");
+				return EditorPrefs.GetInt(objectId + "GeometryExtrusionOptions_index");
 			}
 			set
 			{
-				EditorPrefs.SetInt(objectId + "GeometryOptions_propertySelectionIndex", value);
+				EditorPrefs.SetInt(objectId + "GeometryExtrusionOptions_index", value);
 			}
 		}
 
@@ -137,7 +137,7 @@
 				{
 					if (!Enumerable.SequenceEqual(propertyNamesList, propertyDisplayNames))
 					{
-						index = 0;
+						property.FindPropertyRelative("propertyNameIndex").intValue = 0;
 					}
 				}
 				else
@@ -157,7 +157,8 @@
 				}
 
 				var propertyNameLabel = new GUIContent { text = "Property Name", tooltip = "The name of the property in the selected Mapbox layer that will be used for extrusion" };
-				index = EditorGUILayout.Popup(propertyNameLabel, index, _propertyNameContent);
+				property.FindPropertyRelative("propertyNameIndex").intValue = EditorGUILayout.Popup(propertyNameLabel, property.FindPropertyRelative("propertyNameIndex").intValue, _propertyNameContent);
+				index = property.FindPropertyRelative("propertyNameIndex").intValue;
 				var parsedString = propertyNamesList[index].Split(new string[] { tileJsonData.optionalPropertiesString }, System.StringSplitOptions.None)[0].Trim();
 				descriptionString = tileJsonData.LayerPropertyDescriptionDictionary[selectedLayerName][parsedString];
 				property.FindPropertyRelative("propertyName").stringValue = parsedString;

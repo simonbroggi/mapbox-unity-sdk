@@ -10,15 +10,15 @@
 	[CustomPropertyDrawer(typeof(VectorFilterOptions))]
 	public class VectorFilterOptionsDrawer : PropertyDrawer
 	{
-		int propertyIndex
+		int index
 		{
 			get
 			{
-				return EditorPrefs.GetInt(objectId + "FilterOptions_propertySelectionIndex");
+				return EditorPrefs.GetInt(objectId + "VectorFilterOptions_index");
 			}
 			set
 			{
-				EditorPrefs.SetInt(objectId + "FilterOptions_propertySelectionIndex", value);
+				EditorPrefs.SetInt(objectId + "VectorFilterOptions_index", value);
 			}
 		}
 
@@ -112,7 +112,7 @@
 			{
 				if (cachedLayerName != selectedLayerName)
 				{
-					propertyIndex = 0;
+					originalProperty.FindPropertyRelative("propertyNameIndex").intValue = 0;
 				}
 
 				cachedLayerName = selectedLayerName;
@@ -175,8 +175,9 @@
 				properties[i] = new GUIContent(propertyDisplayNames[i], descriptionArray[i]);
 			}
 
-			propertyIndex = EditorGUILayout.Popup(propertyIndex, properties, GUILayout.MaxWidth(150));
-			var parsedString = propertyDisplayNames[propertyIndex].Split(new string[] { tileJsonData.optionalPropertiesString }, System.StringSplitOptions.None)[0].Trim();
+			originalProperty.FindPropertyRelative("propertyNameIndex").intValue = EditorGUILayout.Popup(originalProperty.FindPropertyRelative("propertyNameIndex").intValue, properties, GUILayout.MaxWidth(150));
+			index = originalProperty.FindPropertyRelative("propertyNameIndex").intValue;
+			var parsedString = propertyDisplayNames[index].Split(new string[] { tileJsonData.optionalPropertiesString }, System.StringSplitOptions.None)[0].Trim();
 			filterProperty.FindPropertyRelative("Key").stringValue = parsedString;
 		}
 

@@ -15,11 +15,11 @@
 		{
 			get
 			{
-				return EditorPrefs.GetInt(objectId + "CoreOptions_propertySelectionIndex");
+				return EditorPrefs.GetInt(objectId + "CoreVectorLayerProperties_index");
 			}
 			set
 			{
-				EditorPrefs.SetInt(objectId + "CoreOptions_propertySelectionIndex", value);
+				EditorPrefs.SetInt(objectId + "CoreVectorLayerProperties_index", value);
 			}
 		}
 
@@ -79,7 +79,7 @@
 			{
 				if (currentSource != newSource)
 				{
-					index = 0;
+					property.FindPropertyRelative("layerNameIndex").intValue = 0;
 				}
 				currentSource = newSource;
 			}
@@ -128,7 +128,8 @@
 				};
 			}
 
-			index = EditorGUILayout.Popup(layerNameLabel, index, _layerTypeContent);
+			property.FindPropertyRelative("layerNameIndex").intValue  = EditorGUILayout.Popup(layerNameLabel, property.FindPropertyRelative("layerNameIndex").intValue, _layerTypeContent);
+			index = property.FindPropertyRelative("layerNameIndex").intValue;
 			var parsedString = layerDisplayNames.ToArray()[index].Split(new string[] { tileJsonData.commonLayersKey }, System.StringSplitOptions.None)[0].Trim();
 			property.FindPropertyRelative("layerName").stringValue = parsedString;
 		}

@@ -24,6 +24,8 @@
 		public bool groupFeatures = false;
 		[Tooltip("Width of the line feature.")]
 		public float lineWidth = 1.0f;
+		[SerializeField]
+		private int layerNameIndex = 0;
 	}
 
 	[Serializable]
@@ -34,5 +36,7 @@
 		public List<LayerFilter> filters = new List<LayerFilter>();
 		[Tooltip("Operator to combine filters. ")]
 		public LayerFilterCombinerOperationType combinerType = LayerFilterCombinerOperationType.All;
+		[SerializeField]
+		private int propertyNameIndex = 0;
 	}
 }

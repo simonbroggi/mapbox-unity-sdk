@@ -26,6 +26,8 @@
 		public float maximumHeight = 0f;
 		[Tooltip("Scale factor to multiply the extrusion value of the feature.")]
 		public float extrusionScaleFactor = 1f;
+		[SerializeField]
+		private int propertyNameIndex = 0;
 	}
 
 	[Serializable]
