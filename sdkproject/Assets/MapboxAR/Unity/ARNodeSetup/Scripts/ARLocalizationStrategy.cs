@@ -25,6 +25,7 @@
 		private Vector3 _mapMatchNode;
 		private float _timeToUpdateHeading;
 		CircularBuffer<float> _headingValues;
+		private float _cacheHeading;
 
 		private void Start()
 		{
@@ -40,6 +41,7 @@
 		{
 			var currentLocation = LocationProviderFactory.Instance.DefaultLocationProvider.CurrentLocation;
 			var aligment = new Alignment();
+			var map = centralizedARLocator.CurrentMap;
 
 			if (_setUserHeading)
 			{
@@ -49,27 +51,22 @@
 			if (!_setUserHeading)
 			{
 				_headingValues.Add(currentLocation.DeviceOrientation);
+				_cacheHeading = currentLocation.DeviceOrientation;
 				_setUserHeading = true;
 				Debug.Log("testing");
 			}
 
-			//TODO : Collect headings.
-
-			// Only store the heading values is the phone is more on or less on the angle of horizontal... 
-			// Get the angle of the from the  
 
 			if (CheckTracking())
 			{
+				// If tracking is good. Keep map at same pos.. Need to find a way to get a better location...
+				// Assumes initial location is solid.
 
-				Unity.Utilities.Console.Instance.Log(string.Format("YPlaneCoords: {0}", _planePosOnY)
-					, "red"
-				);
-
-				var map = centralizedARLocator.CurrentMap;
 				var mapPos = map.GeoToWorldPosition(map.CenterLatitudeLongitude, false);
 				var newPos = new Vector3(mapPos.x, _planePosOnY, mapPos.z);
 
 				aligment.Position = newPos;
+				aligment.Rotation = _cacheHeading;
 
 				if (_timeToUpdateHeading <= 0)
 				{
@@ -78,34 +75,56 @@
 					// TODO; Get average heading...
 					Debug.Log("average heading: " + GetAverageHeading(_headingValues));
 					aligment.Rotation = GetAverageHeading(_headingValues);
-					OnLocalizationComplete(aligment);
+					_cacheHeading = aligment.Rotation;
+
+					Unity.Utilities.Console.Instance.Log(string.Format
+														 ("New average heading: {0}", aligment.Rotation)
+														 , "red");
+
 					_timeToUpdateHeading = _updateHeadingInterval;
-					return;
 				}
+
+				Unity.Utilities.Console.Instance.Log(string.Format("Keeping at Location")
+														 , "green");
+				OnLocalizationComplete(aligment);
 
 				return;
 			}
 
+			// FOR MapMatching Node..
 			if (CanSnatchMapMatchingNode(centralizedARLocator, ref _mapMatchNode))
 			{
 				Unity.Utilities.Console.Instance.Log(string.Format("Snatched MapMatchNode: {0}", _mapMatchNode)
-					, "green"
+					, "yellow"
 				);
 
 				aligment.Position = _mapMatchNode;
 				aligment.Rotation = currentLocation.DeviceOrientation;
+
+				Unity.Utilities.Console.Instance.Log(string.Format("Aligning map by MapMatchingNode")
+					, "yellow"
+				);
+
 				OnLocalizationComplete(aligment);
 				return;
 			}
 
-			Unity.Utilities.Console.Instance.Log(string.Format("Aligning map by GPS")
-					, "yellow"
-				);
+			// FOR GPS...
+			foreach (var nodeBase in centralizedARLocator.SyncNodes)
+			{
+				if (nodeBase.GetType() == typeof(GpsNodeSync))
+				{
+					var node = nodeBase.ReturnLatestNode();
+					var newGeoPos = map.GeoToWorldPosition(node.LatLon, false);
+					newGeoPos.y = _player.position.y - 1f;
+					aligment.Position = newGeoPos;
+					aligment.Rotation = GetAverageHeading(_headingValues);
+				}
+			}
 
-			var geoPos = centralizedARLocator.CurrentMap.GeoToWorldPosition(currentLocation.LatitudeLongitude);
-			var geoAndPlanePos = new Vector3(geoPos.x, _planePosOnY, geoPos.z);
-			aligment.Position = geoAndPlanePos;
-			aligment.Rotation = currentLocation.DeviceOrientation;
+			Unity.Utilities.Console.Instance.Log(string.Format("Aligning map by GPSNode")
+					, "blue"
+				);
 
 			OnLocalizationComplete(aligment);
 		}
@@ -186,7 +205,7 @@
 					"ARTracking State: {0}"
 						, _trackingState
 				)
-				, "blue"
+				, "white"
 			);
 
 				Debug.Log((_trackingState));
