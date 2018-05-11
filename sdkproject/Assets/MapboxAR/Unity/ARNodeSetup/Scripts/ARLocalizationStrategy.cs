@@ -1,27 +1,30 @@
 ﻿namespace Mapbox.Unity.Ar
 {
-	using System.Collections;
-	using System.Collections.Generic;
 	using UnityEngine;
 	using System;
 	using UnityARInterface;
 	using Mapbox.Unity.Location;
-	using Mapbox.Unity.Map;
+	using System.Linq;
+	using Mapbox.Utils;
 
 	public class ARLocalizationStrategy : ComputeARLocalizationStrategy
 	{
+		public override event Action<Alignment> OnLocalizationComplete;
 
 		[SerializeField]
-		ARMapMatching _mapMatching;
+		Transform _player;
 
 		ARInterface.CustomTrackingState _trackingState;
 		ARInterface _arInterface;
 		bool _isTrackingGood, _setUserHeading;
 		float _planePosOnY = -.5f;
-		Node _mapMatchNode;
 
+		[SerializeField]
+		float _updateHeadingInterval = 30;
 
-		public override event Action<Alignment> OnLocalizationComplete;
+		private Vector3 _mapMatchNode;
+		private float _timeToUpdateHeading;
+		CircularBuffer<float> _headingValues;
 
 		private void Start()
 		{
@@ -29,7 +32,8 @@
 			_trackingState = new ARInterface.CustomTrackingState();
 			ARInterface.planeAdded += GetPlaneCoords;
 			ARInterface.planeRemoved += GetPlaneCoords;
-			_mapMatching.ReturnMapMatchCoords += MapMatchGetCoords;
+			_headingValues = new CircularBuffer<float>(20);
+			_timeToUpdateHeading = _updateHeadingInterval;
 		}
 
 		public override void ComputeLocalization(CentralizedARLocator centralizedARLocator)
@@ -37,12 +41,22 @@
 			var currentLocation = LocationProviderFactory.Instance.DefaultLocationProvider.CurrentLocation;
 			var aligment = new Alignment();
 
-			// TODO: Get the mapmatching coords and then check the latest node to replace the user, if GPS or so is bad...
-			/// IN the meantime flow with the offset of things.
-			/// 
-			/// 
-			// Checking if tracking is good, do nothing on location. Other than check if the newly calculated heading is better.
-			Debug.Log("Tracking state: " + CheckTracking());
+			if (_setUserHeading)
+			{
+				SaveHeading(currentLocation.DeviceOrientation, 70f);
+			}
+
+			if (!_setUserHeading)
+			{
+				_headingValues.Add(currentLocation.DeviceOrientation);
+				_setUserHeading = true;
+				Debug.Log("testing");
+			}
+
+			//TODO : Collect headings.
+
+			// Only store the heading values is the phone is more on or less on the angle of horizontal... 
+			// Get the angle of the from the  
 
 			if (CheckTracking())
 			{
@@ -51,51 +65,115 @@
 					, "red"
 				);
 
-				var mapPos = centralizedARLocator.CurrentMap.transform.position;
+				var map = centralizedARLocator.CurrentMap;
+				var mapPos = map.GeoToWorldPosition(map.CenterLatitudeLongitude, false);
 				var newPos = new Vector3(mapPos.x, _planePosOnY, mapPos.z);
+
 				aligment.Position = newPos;
 
-				if (currentLocation.IsUserHeadingUpdated && !_setUserHeading)
+				if (_timeToUpdateHeading <= 0)
 				{
-					aligment.Rotation = currentLocation.UserHeading;
-					_setUserHeading = true;
-				}
-				else
-				{
-					aligment.Rotation = centralizedARLocator.CurrentMap.transform.eulerAngles.y;
+					Debug.Log("times up");
 
+					// TODO; Get average heading...
+					Debug.Log("average heading: " + GetAverageHeading(_headingValues));
+					aligment.Rotation = GetAverageHeading(_headingValues);
+					OnLocalizationComplete(aligment);
+					_timeToUpdateHeading = _updateHeadingInterval;
+					return;
 				}
-
-				OnLocalizationComplete(aligment);
 
 				return;
 			}
 
-			// If tracking is bad then use GPS to align map. If tracking was previously bad... 
-			// Check map matching quality. And maybe use that to snap to the user.
+			if (CanSnatchMapMatchingNode(centralizedARLocator, ref _mapMatchNode))
+			{
+				Unity.Utilities.Console.Instance.Log(string.Format("Snatched MapMatchNode: {0}", _mapMatchNode)
+					, "green"
+				);
 
-			// TODO : Add mapmatching to the equation.
+				aligment.Position = _mapMatchNode;
+				aligment.Rotation = currentLocation.DeviceOrientation;
+				OnLocalizationComplete(aligment);
+				return;
+			}
 
+			Unity.Utilities.Console.Instance.Log(string.Format("Aligning map by GPS")
+					, "yellow"
+				);
 
 			var geoPos = centralizedARLocator.CurrentMap.GeoToWorldPosition(currentLocation.LatitudeLongitude);
 			var geoAndPlanePos = new Vector3(geoPos.x, _planePosOnY, geoPos.z);
 			aligment.Position = geoAndPlanePos;
-			//aligment.Rotation = currentLocation.IsUserHeadingUpdated ? currentLocation.UserHeading : currentLocation.DeviceOrientation;
 			aligment.Rotation = currentLocation.DeviceOrientation;
 
-			//OnLocalizationComplete(aligment);
+			OnLocalizationComplete(aligment);
 		}
 
-		void MapMatchGetCoords(Node[] nodes)
+		void SaveHeading(float heading, float bufferDifference)
 		{
-			_mapMatchNode = nodes[nodes.Length - 1];
-			// ARMapMatching is not like the other node bases. Order is reversed.
-			// Do smth with the coords.
+			// TODO: Remember to save first heading before checking average.
+			float average = GetAverageHeading(_headingValues);
+
+			if (heading >= (average + bufferDifference) || heading <= (average - bufferDifference))
+			{
+				Debug.Log("setting new headings");
+				_timeToUpdateHeading = _updateHeadingInterval;
+				_headingValues = new CircularBuffer<float>(20);
+				_headingValues.Add(heading);
+				return;
+			}
+
+			Debug.Log("Saving heading");
+			_headingValues.Add(heading);
+		}
+
+		float GetAverageHeading(CircularBuffer<float> headingValues)
+		{
+			float accuracy = 0;
+			int valuesCount = headingValues.Count;
+
+			foreach (var headingVal in headingValues)
+			{
+				accuracy += headingVal;
+			}
+
+			var average = accuracy / valuesCount;
+			return average;
+		}
+
+		float GetPlayerAngle()
+		{
+			Vector3 targetPos = new Vector3(_player.position.x, _player.position.y - 1f, _player.position.z);
+			Vector3 targetDir = targetPos - _player.position;
+			return Vector3.Angle(targetDir, _player.forward);
+		}
+
+		private void Update()
+		{
+			_timeToUpdateHeading -= Time.deltaTime;
 		}
 
 		void GetPlaneCoords(BoundedPlane plane)
 		{
 			_planePosOnY = plane.center.y;
+		}
+
+		bool CanSnatchMapMatchingNode(CentralizedARLocator arLocator, ref Vector3 vector3)
+		{
+			foreach (var nodebase in arLocator.SyncNodes)
+			{
+				if (nodebase.GetType() == typeof(ARMapMatching))
+				{
+					if (nodebase.ReturnNodes().Count() != 0)
+					{
+						var nodes = nodebase.ReturnNodes();
+						vector3 = arLocator.CurrentMap.GeoToWorldPosition(nodes[0].LatLon, false);
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		bool CheckTracking()
