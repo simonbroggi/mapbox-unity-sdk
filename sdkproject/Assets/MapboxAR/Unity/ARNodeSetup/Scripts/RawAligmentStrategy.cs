@@ -21,10 +21,10 @@
 			{
 				var latlon = _map.WorldToGeoPosition(alignment.Position);
 				_map.UpdateMap(latlon, _map.Zoom);
-				_map.transform.position = new Vector3(_map.transform.position.x, alignment.Position.y, _map.transform.position.z);
+				var pos = new Vector3(_map.transform.position.x, alignment.Position.y, _map.transform.position.z);
 				var rotation = Quaternion.Euler(0, alignment.Rotation, 0);
 				var inverse = Quaternion.Inverse(rotation);
-				_map.transform.SetPositionAndRotation(_transform.position, inverse);
+				_map.transform.SetPositionAndRotation(pos, inverse);
 			}
 		}
 	}
