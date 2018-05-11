@@ -24,21 +24,6 @@
 		}
 
 		[SerializeField]
-		ARMapMatching _mapMathching;
-
-		[SerializeField]
-		bool _useSnapping;
-
-		[SerializeField]
-		float _desiredStartingAccuracy = 5f;
-
-		[SerializeField]
-		int _amountOfNodesToCheck;
-
-		[SerializeField]
-		int _desiredAccuracy;
-
-		[SerializeField]
 		NodeSyncBase[] _syncNodes;
 		public NodeSyncBase[] SyncNodes
 		{
@@ -62,14 +47,12 @@
 
 		Location _highestLocation;
 
-		public static Action<Location> OnNewHighestAccuracyGPS;
 		public event Action<Alignment> OnAlignmentAvailable;
 		public event Action OnAlignmentComplete;
 
 		void Start()
 		{
 			_alignmentStrategy.Register(this);
-
 
 			// Initialize all sync-nodes.Make them ready to recieve node data.
 			// Map needs to be generated before init. Otherwise bunch of errors.
@@ -84,6 +67,7 @@
 			_map.OnInitialized -= Map_OnInitialized;
 			// We don't want location updates until we have a map, otherwise our conversion will fail.
 			ComputeFirstLocalization();
+			Debug.Log("First map position: " + _map.CenterLatitudeLongitude);
 		}
 
 		/// <summary>
@@ -183,81 +167,43 @@
 			}
 		}
 
-		void SaveHighestAccuracy(Location location)
-		{
-			if (location.Accuracy <= _desiredStartingAccuracy)
-			{
-				_highestLocation = location;
-				_desiredStartingAccuracy = location.Accuracy;
+		// FIXME: these should be on a localisation strategy class?
 
-				if (OnNewHighestAccuracyGPS != null)
-				{
-					OnNewHighestAccuracyGPS(location);
-				}
-
-				// TODO:
-				// And snap player to there...
-			}
-		}
-
-		//async void FindBestNodes()
+		//void SaveHighestAccuracy(Location location)
 		//{
-
-		//	while (true)
+		//	if (location.Accuracy <= _desiredStartingAccuracy)
 		//	{
-		//		foreach (var nodeSync in _nodeSyncs)
-		//		{
-		//			if (nodeSync.ReturnNodes().Length >= _amountOfNodesToCheck)
-		//			{
-		//				var average = CheckAverageAccuracy(nodeSync, _amountOfNodesToCheck);
+		//		_highestLocation = location;
+		//		_desiredStartingAccuracy = location.Accuracy;
 
-		//				if (average <= _desiredAccuracy)
-		//				{
-		//					_mapMathching.MapMatchQuery(nodeSync.ReturnNodes());
-		//				}
-		//			}
+		//		if (OnNewHighestAccuracyGPS != null)
+		//		{
+		//			OnNewHighestAccuracyGPS(location);
 		//		}
 
-		//		await Task.Delay(TimeSpan.FromSeconds(10));
+		//		// TODO:
+		//		// And snap player to there...
 		//	}
 		//}
 
-		float CheckAverageAccuracy(NodeSyncBase syncBase, int howManyNodes)
-		{
-			var nodes = syncBase.ReturnNodes();
-			float accuracy = 0;
-
-			for (int i = 1; i < howManyNodes; i++)
-			{
-				accuracy += nodes[nodes.Length - i].Accuracy;
-			}
-
-			var average = accuracy / howManyNodes;
-			return average;
-		}
-
-		void GetMapMatchingCoords(Node[] nodes)
-		{
-			foreach (var node in nodes)
-			{
-				Debug.Log("Check lat lon coords: " + node.LatLon);
-			}
-		}
-
-		//private void Update()
+		//float CheckAverageAccuracy(NodeSyncBase syncBase, int howManyNodes)
 		//{
-		//	if (Input.GetKeyDown(KeyCode.Space))
+		//	var nodes = syncBase.ReturnNodes();
+		//	float accuracy = 0;
+
+		//	for (int i = 1; i < howManyNodes; i++)
 		//	{
-		//		_mapMathching.MapMatchQuery(_syncNodes[0].ReturnNodes());
+		//		accuracy += nodes[nodes.Length - i].Accuracy;
 		//	}
+
+		//	var average = accuracy / howManyNodes;
+		//	return average;
 		//}
 
-		void SnapMapToNode(Node node)
-		{
+		//void SnapMapToNode(Node node)
+		//{
 
-		}
+		//}
 
-		// TODO: Check trackingQuality in AR
-		// and snap to GPS nodes if tracking goes bad..
 	}
 }
