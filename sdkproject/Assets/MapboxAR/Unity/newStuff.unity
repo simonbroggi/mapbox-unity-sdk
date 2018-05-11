@@ -187,6 +187,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05567cf12384a4fa88ebcb2e7f1ac3dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _player: {fileID: 1536869830}
+  _updateHeadingInterval: 10
 --- !u!114 &10376835
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -380,7 +382,8 @@ MonoBehaviour:
   IsNodeBaseInitialized: 0
   _filterNodes: 1
   _desiredAccuracy: 100
-  _minMagnitude: 3
+  _minMagnitude: 1
+  _maxMagnitude: 0.1
 --- !u!114 &113196486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -396,7 +399,7 @@ MonoBehaviour:
   _nodeBase: {fileID: 113196485}
   _color: {r: 0.13235295, g: 0.53326577, b: 1, a: 1}
   _lineWidth: 3
-  _lineHeight: 2
+  _lineHeight: 5
   _nodeMaterial: {fileID: 2100000, guid: 1955ddd6a93c0409ba17d3fbafd416b0, type: 2}
   _map: {fileID: 325026587}
 --- !u!4 &113196487
@@ -1312,7 +1315,6 @@ GameObject:
   - component: {fileID: 536186039}
   - component: {fileID: 536186038}
   - component: {fileID: 536186037}
-  - component: {fileID: 536186041}
   m_Layer: 0
   m_Name: AR Root
   m_TagString: Untagged
@@ -1398,25 +1400,6 @@ MonoBehaviour:
     type: 2}
   m_MaxPointsToShow: 100
   m_ParticleSize: 0.04
---- !u!114 &536186041
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 536186035}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a6c9235e73bea042bda6b2c0539ad63, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ARCamera: {fileID: 1536869833}
-  m_PlaneDetection: 0
-  m_LightEstimation: 0
-  m_PointCloud: 0
-  m_BackgroundRendering: 1
-  m_Scale: 1
-  pointOfInterest: {x: 0, y: 0, z: 0}
-  m_SendVideo: 0
 --- !u!1 &542245222
 GameObject:
   m_ObjectHideFlags: 0
@@ -3401,7 +3384,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0, y: 182.2}
+  m_AnchoredPosition: {x: 0, y: 182.2002}
   m_SizeDelta: {x: 0, y: -288.1}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1625015190

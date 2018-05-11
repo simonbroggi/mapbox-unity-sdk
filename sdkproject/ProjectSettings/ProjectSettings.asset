@@ -158,7 +158,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.mapbox.unitysdk
+    Android: com.mapbox.sdk
     Standalone: unity.Mapbox.MBX SDK
     Tizen: com.mapbox.MBX-SDK
     iOS: com.mapbox.MBX-SDK
@@ -724,7 +724,7 @@ PlayerSettings:
     UNet: 0
     Unity_Ads: 0
   facebookSdkVersion: 7.9.4
-  apiCompatibilityLevel: 2
+  apiCompatibilityLevel: 3
   cloudProjectId: f183eef4-72bf-420c-80e0-aaadeab22f30
   projectName: Mapbox Unity SDK
   organizationId: mapbox-inc

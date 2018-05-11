@@ -19,22 +19,15 @@
 		[SerializeField]
 		float _minMagnitudeBetween;
 
-		float _latestBestGPSAccuracy;
 		AbstractMap _map;
 		CircularBuffer<Node> _nodeBuffer;
 
 		public override void InitializeNodeBase(AbstractMap map)
 		{
 			_nodeBuffer = new CircularBuffer<Node>(20);
-			CentralizedARLocator.OnNewHighestAccuracyGPS += SavedGPSAccuracy;
 			_map = map;
 			IsNodeBaseInitialized = true;
 			Debug.Log("Initialized ARNodes");
-		}
-
-		void SavedGPSAccuracy(Location location)
-		{
-			_latestBestGPSAccuracy = location.Accuracy;
 		}
 
 		public override void SaveNode()
@@ -60,12 +53,12 @@
 				var node = new Node
 				{
 					LatLon = _map.WorldToGeoPosition(_targetTransform.position),
-					Accuracy = _latestBestGPSAccuracy
+					// HACK: Save the map snapped location accuracy to here.
+					Accuracy = 6
 				};
 
 				_nodeBuffer.Add(node);
 			}
-
 		}
 
 		public override Node[] ReturnNodes()
@@ -79,3 +72,5 @@
 		}
 	}
 }
+
+
