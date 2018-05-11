@@ -24,7 +24,7 @@
 
 		public override void InitializeNodeBase(AbstractMap map)
 		{
-			_nodeBuffer = new CircularBuffer<Node>(20);
+			_nodeBuffer = new CircularBuffer<Node>(60);
 			_map = map;
 			IsNodeBaseInitialized = true;
 			Debug.Log("Initialized ARNodes");
