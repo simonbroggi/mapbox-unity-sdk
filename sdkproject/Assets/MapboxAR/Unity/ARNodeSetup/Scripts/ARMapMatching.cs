@@ -33,7 +33,7 @@
 			_elapsedTime += Time.deltaTime;
 		}
 
-		void SimpleQuery(Vector2d[] coords)
+		public void SimpleQuery(Vector2d[] coords)
 		{
 			MapMatchingResource resource = new MapMatchingResource();
 			resource.Coordinates = coords;
