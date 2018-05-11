@@ -22,6 +22,9 @@
 		[SerializeField]
 		float _minMagnitude;
 
+		[SerializeField]
+		float _maxMagnitude;
+
 		AbstractMap _map;
 		CircularBuffer<Node> _nodeBuffer;
 
@@ -40,7 +43,8 @@
 			var previousNode = _map.GeoToWorldPosition(_nodeBuffer[0].LatLon);
 			var forMagnitude = latestNode - previousNode;
 
-			if (location.Accuracy <= _desiredAccuracy && _minMagnitude <= forMagnitude.magnitude)
+			if (location.Accuracy <= _desiredAccuracy && _minMagnitude <= forMagnitude.magnitude
+				&& _maxMagnitude >= forMagnitude.magnitude)
 			{
 				// Node is good to use, return true
 				return true;
@@ -71,7 +75,7 @@
 
 			if (saveNode)
 			{
-				Debug.Log("Saving GPS Node");
+				Debug.Log("Saving GPS Node: " + location.LatitudeLongitude);
 				var latestNode = new Node
 				{
 					LatLon = location.LatitudeLongitude,
