@@ -14,6 +14,9 @@
 		[SerializeField]
 		Transform _player;
 
+		[SerializeField]
+		Transform _arRoot;
+
 		ARInterface.CustomTrackingState _trackingState;
 		ARInterface _arInterface;
 		bool _isTrackingGood, _setUserHeading;
@@ -59,8 +62,8 @@
 
 			if (CheckTracking())
 			{
-				// If tracking is good. Keep map at same pos.. Need to find a way to get a better location...
-				// Assumes initial location is solid.
+				// If tracking is good. Keep map at same pos. Need to find way to update location
+				// if it's better, because this assumes initial location is solid.
 
 				var mapPos = map.GeoToWorldPosition(map.CenterLatitudeLongitude, false);
 				var newPos = new Vector3(mapPos.x, _planePosOnY, mapPos.z);
@@ -99,11 +102,13 @@
 				);
 
 				aligment.Position = _mapMatchNode;
-				aligment.Rotation = currentLocation.DeviceOrientation;
+				aligment.Rotation = GetAverageHeading(_headingValues);
 
 				Unity.Utilities.Console.Instance.Log(string.Format("Aligning map by MapMatchingNode")
 					, "yellow"
 				);
+
+				SetPlayerOnAR(_mapMatchNode);
 
 				OnLocalizationComplete(aligment);
 				return;
@@ -119,6 +124,8 @@
 					newGeoPos.y = _player.position.y - 1f;
 					aligment.Position = newGeoPos;
 					aligment.Rotation = GetAverageHeading(_headingValues);
+
+					SetPlayerOnAR(newGeoPos);
 				}
 			}
 
@@ -129,12 +136,12 @@
 			OnLocalizationComplete(aligment);
 		}
 
-		void SaveHeading(float heading, float bufferDifference)
+		void SaveHeading(float heading, float allowedAngleDifference)
 		{
 			// TODO: Remember to save first heading before checking average.
 			float average = GetAverageHeading(_headingValues);
 
-			if (heading >= (average + bufferDifference) || heading <= (average - bufferDifference))
+			if (heading >= (average + allowedAngleDifference) || heading <= (average - allowedAngleDifference))
 			{
 				Debug.Log("setting new headings");
 				_timeToUpdateHeading = _updateHeadingInterval;
@@ -145,6 +152,16 @@
 
 			Debug.Log("Saving heading");
 			_headingValues.Add(heading);
+		}
+
+		void SetPlayerOnAR(Vector3 pos)
+		{
+			//HACK: This kinda should happen in AligmentStrategy. But only,
+			// when gps aligment is used..
+
+			_player.position = Vector3.zero;
+			_arRoot.position = pos;
+
 		}
 
 		float GetAverageHeading(CircularBuffer<float> headingValues)
