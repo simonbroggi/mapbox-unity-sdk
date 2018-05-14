@@ -8,6 +8,7 @@
 	{
 		[SerializeField]
 		AbstractMap _map;
+
 		bool _isInitialized;
 
 		private void Awake()
