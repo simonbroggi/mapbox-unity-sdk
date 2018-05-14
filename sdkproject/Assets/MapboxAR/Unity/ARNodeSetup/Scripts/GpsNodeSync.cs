@@ -43,8 +43,7 @@
 			var previousNode = _map.GeoToWorldPosition(_nodeBuffer[0].LatLon);
 			var forMagnitude = latestNode - previousNode;
 
-			if (location.Accuracy <= _desiredAccuracy && _minMagnitude <= forMagnitude.magnitude
-				&& _maxMagnitude >= forMagnitude.magnitude)
+			if (location.Accuracy <= _desiredAccuracy && _minMagnitude <= forMagnitude.magnitude)
 			{
 				// Node is good to use, return true
 				return true;
