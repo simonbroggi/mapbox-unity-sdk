@@ -35,7 +35,7 @@
 			_arInterface = ARInterface.GetInterface();
 			_trackingState = new ARInterface.CustomTrackingState();
 			ARInterface.planeAdded += GetPlaneCoords;
-			ARInterface.planeRemoved += GetPlaneCoords;
+			ARInterface.planeUpdated += GetPlaneCoords;
 			_headingValues = new CircularBuffer<float>(20);
 			_timeToUpdateHeading = _updateHeadingInterval;
 		}
