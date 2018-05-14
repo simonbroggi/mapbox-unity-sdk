@@ -126,7 +126,6 @@ GameObject:
   - component: {fileID: 10376834}
   - component: {fileID: 10376833}
   - component: {fileID: 10376832}
-  - component: {fileID: 10376836}
   m_Layer: 10
   m_Name: CentralDataHub
   m_TagString: Untagged
@@ -188,6 +187,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _player: {fileID: 1536869830}
+  _arRoot: {fileID: 536186036}
   _updateHeadingInterval: 10
 --- !u!114 &10376835
 MonoBehaviour:
@@ -210,19 +210,6 @@ MonoBehaviour:
   _initialLocalizationStrategy: {fileID: 10376833}
   _generalLocalizationStrategy: {fileID: 10376834}
   _alignmentStrategy: {fileID: 10376832}
---- !u!114 &10376836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 10376830}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ebb286a8ceffd45da81f700e63b5ae57, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _transform: {fileID: 1536869830}
-  _map: {fileID: 325026587}
 --- !u!1 &109222473
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,7 +370,7 @@ MonoBehaviour:
   _filterNodes: 1
   _desiredAccuracy: 100
   _minMagnitude: 1
-  _maxMagnitude: 0.1
+  _maxMagnitude: 5
 --- !u!114 &113196486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -399,7 +386,7 @@ MonoBehaviour:
   _nodeBase: {fileID: 113196485}
   _color: {r: 0.13235295, g: 0.53326577, b: 1, a: 1}
   _lineWidth: 3
-  _lineHeight: 5
+  _lineHeight: 2
   _nodeMaterial: {fileID: 2100000, guid: 1955ddd6a93c0409ba17d3fbafd416b0, type: 2}
   _map: {fileID: 325026587}
 --- !u!4 &113196487
