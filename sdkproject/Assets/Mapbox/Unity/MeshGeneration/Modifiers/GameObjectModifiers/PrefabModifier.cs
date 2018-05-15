@@ -65,9 +65,9 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				}
 				//go.transform.localScale = Constants.Math.Vector3One;
 
-				if (!_options.scaleDownWithWorld)
+				if (_options.scaleDownWithWorld)
 				{
-					go.transform.localScale = (go.transform.localScale * (1.0f / tile.TileScale));
+					go.transform.localScale = (go.transform.localScale * (tile.TileScale));
 				}
 				return;
 			}
@@ -91,7 +91,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			}
 			//go.transform.localPosition = met;
 			go.transform.SetParent(ve.GameObject.transform, false);
-			go.transform.localScale = Constants.Math.Vector3One;
+			//go.transform.localScale = Constants.Math.Vector3One;
 
 			settable = go.GetComponent<IFeaturePropertySettable>();
 			if (settable != null)
@@ -99,9 +99,9 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				settable.Set(ve.Feature.Properties);
 			}
 
-			if (!_options.scaleDownWithWorld)
+			if (_options.scaleDownWithWorld)
 			{
-				go.transform.localScale = (go.transform.localScale * (1.0f / tile.TileScale));
+				go.transform.localScale = (go.transform.localScale * (tile.TileScale));
 			}
 
 			if (_options.AllPrefabsInstatiated != null)

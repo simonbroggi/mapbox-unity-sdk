@@ -73,6 +73,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 					{
 						var itemProperties = (PrefabItemOptions)item;
 						var prefabModifier = ScriptableObject.CreateInstance<PrefabModifier>();
+						//item.spawnPrefabOptions.scaleDownWithWorld = true;
 						prefabModifier.SetProperties(itemProperties.spawnPrefabOptions);
 						_defaultStack = ScriptableObject.CreateInstance<ModifierStack>();
 						if (_defaultStack.GoModifiers == null)
