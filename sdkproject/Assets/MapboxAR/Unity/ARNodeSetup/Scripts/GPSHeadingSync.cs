@@ -18,13 +18,14 @@
 		{
 			_headingValues = new CircularBuffer<float>(20);
 			LocationProviderFactory.Instance.DeviceLocationProvider.OnLocationUpdated += SaveInitialHeading;
-			LocationProviderFactory.Instance.DeviceLocationProvider.OnLocationUpdated += GetLocationUpdates;
 		}
 
 		void SaveInitialHeading(Location location)
 		{
 			_initialHeading = location.DeviceOrientation;
+			_headingValues.Add(_initialHeading);
 			LocationProviderFactory.Instance.DeviceLocationProvider.OnLocationUpdated -= SaveInitialHeading;
+			LocationProviderFactory.Instance.DeviceLocationProvider.OnLocationUpdated += GetLocationUpdates;
 		}
 
 		void GetLocationUpdates(Location location)
