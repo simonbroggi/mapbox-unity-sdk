@@ -12,23 +12,22 @@
 		public override event Action<Alignment> OnLocalizationComplete;
 
 		[SerializeField]
-		Transform _player;
+		Transform _arFpsCamera;
 
 		[SerializeField]
 		Transform _arRoot;
 
-		ARInterface.CustomTrackingState _trackingState;
-		ARInterface _arInterface;
-		bool _isTrackingGood, _setUserHeading;
-		float _planePosOnY = -.5f;
-
 		[SerializeField]
 		float _updateHeadingInterval = 30;
 
-		private Vector3 _mapMatchNode;
-		private float _timeToUpdateHeading;
-		CircularBuffer<float> _headingValues;
-		private float _cacheHeading, _intialHeading;
+		Vector3 _mapMatchNode;
+		float _timeToUpdateHeading;
+		float _cacheHeading;
+
+		ARInterface.CustomTrackingState _trackingState;
+		ARInterface _arInterface;
+		bool _isTrackingGood;
+		float _planePosOnY = -.5f;
 
 		private void Start()
 		{
@@ -36,7 +35,6 @@
 			_trackingState = new ARInterface.CustomTrackingState();
 			ARInterface.planeAdded += GetPlaneCoords;
 			ARInterface.planeUpdated += GetPlaneCoords;
-			_headingValues = new CircularBuffer<float>(20);
 			_timeToUpdateHeading = _updateHeadingInterval;
 		}
 
@@ -45,20 +43,7 @@
 			var currentLocation = LocationProviderFactory.Instance.DefaultLocationProvider.CurrentLocation;
 			var aligment = new Alignment();
 			var map = centralizedARLocator.CurrentMap;
-
-			if (_setUserHeading)
-			{
-				SaveHeading(currentLocation.DeviceOrientation, 200f);
-			}
-
-			if (!_setUserHeading)
-			{
-				_headingValues.Add(currentLocation.DeviceOrientation);
-				_cacheHeading = currentLocation.DeviceOrientation;
-				Debug.Log("initial heading: " + _cacheHeading);
-				_setUserHeading = true;
-				Debug.Log("testing");
-			}
+			var averageHeading = centralizedARLocator.HeadingSync.ReturnAverageHeading();
 
 			if (CheckTracking())
 			{
@@ -76,10 +61,10 @@
 					Debug.Log("times up");
 
 					// TODO; Get average heading...
-					Debug.Log("average heading: " + GetAverageHeading(_headingValues));
+					Debug.Log("average heading: " + averageHeading);
 					aligment.IsAr = true;
-					aligment.Rotation = GetAverageHeading(_headingValues);
-					aligment.Position = new Vector3(_player.position.x, _planePosOnY, _player.position.z);
+					aligment.Rotation = averageHeading;
+					aligment.Position = new Vector3(_arFpsCamera.position.x, _planePosOnY, _arFpsCamera.position.z);
 					_cacheHeading = aligment.Rotation;
 
 					Unity.Utilities.Console.Instance.Log(string.Format
@@ -104,7 +89,7 @@
 				);
 
 				aligment.Position = _mapMatchNode;
-				aligment.Rotation = GetAverageHeading(_headingValues);
+				aligment.Rotation = averageHeading;
 
 				Unity.Utilities.Console.Instance.Log(string.Format("Aligning map by MapMatchingNode")
 					, "yellow"
@@ -123,9 +108,9 @@
 				{
 					var node = nodeBase.ReturnLatestNode();
 					var newGeoPos = map.GeoToWorldPosition(node.LatLon, false);
-					newGeoPos.y = _player.position.y - 1f;
+					newGeoPos.y = _arFpsCamera.position.y - 1f;
 					aligment.Position = newGeoPos;
-					aligment.Rotation = GetAverageHeading(_headingValues);
+					aligment.Rotation = averageHeading;
 
 					SetPlayerOnAR(newGeoPos);
 				}
@@ -138,60 +123,63 @@
 			OnLocalizationComplete(aligment);
 		}
 
-		void SaveHeading(float heading, float allowedAngleDifference)
-		{
-			// TODO: Remember to save first heading before checking average.
-			float average = GetAverageHeading(_headingValues);
 
-			if (heading >= (average + allowedAngleDifference) || heading <= (average - allowedAngleDifference))
-			{
-				Debug.Log("setting new headings");
-				_timeToUpdateHeading = _updateHeadingInterval;
-				_headingValues = new CircularBuffer<float>(20);
-				_headingValues.Add(heading);
-				return;
-			}
+		// Moved to GPSHeadingSync
 
-			Debug.Log("Saving heading");
-			_headingValues.Add(heading);
-		}
+		//void SaveHeading(float heading, float allowedAngleDifference)
+		//{
+		//	// TODO: Remember to save first heading before checking average.
+		//	float average = GetAverageHeading(_headingValues);
+
+		//	if (heading >= (average + allowedAngleDifference) || heading <= (average - allowedAngleDifference))
+		//	{
+		//		Debug.Log("setting new headings");
+		//		_timeToUpdateHeading = _updateHeadingInterval;
+		//		_headingValues = new CircularBuffer<float>(20);
+		//		_headingValues.Add(heading);
+		//		return;
+		//	}
+
+		//	Debug.Log("Saving heading");
+		//	_headingValues.Add(heading);
+		//}
 
 		void SetPlayerOnAR(Vector3 pos)
 		{
 			//HACK: This kinda should happen in AligmentStrategy. But only,
 			// when gps aligment is used..
 			_arRoot.position = pos;
-			_player.position = Vector3.zero;
+			_arFpsCamera.position = Vector3.zero;
 
 			Unity.Utilities.Console.Instance.Log(
 			string.Format(
 				"Player Pos Reset: {0}, RootPos: {1}"
-				, _player.position
+				, _arFpsCamera.position
 
 				)
 				, "purple"
 			);
 		}
 
-		float GetAverageHeading(CircularBuffer<float> headingValues)
-		{
-			float accuracy = 0;
-			int valuesCount = headingValues.Count;
+		//float GetAverageHeading(CircularBuffer<float> headingValues)
+		//{
+		//	float accuracy = 0;
+		//	int valuesCount = headingValues.Count;
 
-			foreach (var headingVal in headingValues)
-			{
-				accuracy += headingVal;
-			}
+		//	foreach (var headingVal in headingValues)
+		//	{
+		//		accuracy += headingVal;
+		//	}
 
-			var average = accuracy / valuesCount;
-			return average;
-		}
+		//	var average = accuracy / valuesCount;
+		//	return average;
+		//}
 
 		float GetPlayerAngle()
 		{
-			Vector3 targetPos = new Vector3(_player.position.x, _player.position.y - 1f, _player.position.z);
-			Vector3 targetDir = targetPos - _player.position;
-			return Vector3.Angle(targetDir, _player.forward);
+			Vector3 targetPos = new Vector3(_arFpsCamera.position.x, _arFpsCamera.position.y - 1f, _arFpsCamera.position.z);
+			Vector3 targetDir = targetPos - _arFpsCamera.position;
+			return Vector3.Angle(targetDir, _arFpsCamera.forward);
 		}
 
 		private void Update()
