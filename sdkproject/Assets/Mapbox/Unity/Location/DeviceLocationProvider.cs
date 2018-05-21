@@ -5,6 +5,7 @@ namespace Mapbox.Unity.Location
 	using Mapbox.Utils;
 	using Mapbox.CheapRulerCs;
 	using System;
+	using System.Linq;
 
 	/// <summary>
 	/// The DeviceLocationProvider is responsible for providing real world location and heading data,
@@ -20,7 +21,7 @@ namespace Mapbox.Unity.Location
 		/// </summary>
 		[SerializeField]
 		[Tooltip("Using higher value like 500 usually does not require to turn GPS chip on and thus saves battery power. Values like 5-10 could be used for getting best accuracy.")]
-		float _desiredAccuracyInMeters = 5f;
+		float _desiredAccuracyInMeters = 1.0f;
 
 		/// <summary>
 		/// The minimum distance (measured in meters) a device must move laterally before Input.location property is updated. 
@@ -28,12 +29,12 @@ namespace Mapbox.Unity.Location
 		/// </summary>
 		[SerializeField]
 		[Tooltip("The minimum distance (measured in meters) a device must move laterally before Input.location property is updated. Higher values like 500 imply less overhead.")]
-		float _updateDistanceInMeters = 5f;
+		float _updateDistanceInMeters = 0.0f;
 
 
 		[SerializeField]
-		[Tooltip("The minimum time interval between location updates, in milliseconds.")]
-		long _updateTimeInMilliSeconds = 1000;
+		[Tooltip("The minimum time interval between location updates, in milliseconds. It's reasonable to not go below 500ms.")]
+		long _updateTimeInMilliSeconds = 500;
 
 
 		private Coroutine _pollRoutine;
@@ -44,9 +45,16 @@ namespace Mapbox.Unity.Location
 		/// <summary>list of positions to keep for calculations</summary>
 		private CircularBuffer<Vector2d> _lastPositions;
 		/// <summary>number of last positons to keep</summary>
-		private int _maxLastPositions = 3;
+		private int _maxLastPositions = 5;
 		/// <summary>minimum needed distance between oldest and newest position before UserHeading is calculated</summary>
-		private double _minDistanceOldestNewestPosition = 1;
+		private double _minDistanceOldestNewestPosition = 1.5;
+		/// <summary>weights for calculating 'UserHeading'. hardcoded for now. TODO: auto-calc based on time, distance, ...</summary>
+		private float[] _headingWeights = new float[]{
+			0,
+			-0.5f,
+			-1.0f,
+			-1.5f
+		};
 
 
 		// Android 6+ permissions have to be granted during runtime
@@ -61,12 +69,19 @@ namespace Mapbox.Unity.Location
 #endif
 
 
-		void Awake()
+		protected virtual void Awake()
 		{
 			_currentLocation.Provider = "unity";
 			_wait1sec = new WaitForSeconds(1f);
-			_waitUpdateTime = _updateTimeInMilliSeconds < 500 ? new WaitForSeconds(500) : new WaitForSeconds(_updateTimeInMilliSeconds / 1000);
+			_waitUpdateTime = _updateTimeInMilliSeconds < 500 ? new WaitForSeconds(0.5f) : new WaitForSeconds((float)_updateTimeInMilliSeconds / 1000.0f);
+
 			_lastPositions = new CircularBuffer<Vector2d>(_maxLastPositions);
+			// safe measure till we have auto calculated weights
+			// "_maxLastPositions - 1" because we calculate user heading on the fly: nr of angles = nr of positions - 1
+			if (_headingWeights.Length != _maxLastPositions - 1)
+			{
+				throw new Exception("number of last positions NOT equal number of heading weights");
+			}
 
 			if (_pollRoutine == null)
 			{
@@ -154,7 +169,19 @@ namespace Mapbox.Unity.Location
 			while (true)
 			{
 
-				_currentLocation.IsLocationServiceEnabled = Input.location.status == LocationServiceStatus.Running;
+				var lastData = Input.location.lastData;
+				var timestamp = lastData.timestamp;
+
+				///////////////////////////////
+				// oh boy, Unity what are you doing???
+				// on some devices it seems that
+				// Input.location.status != LocationServiceStatus.Running
+				// nevertheless new location is available
+				//////////////////////////////
+				//Debug.LogFormat("Input.location.status: {0}", Input.location.status);
+				_currentLocation.IsLocationServiceEnabled =
+					Input.location.status == LocationServiceStatus.Running
+					|| timestamp > _lastLocationTimestamp;
 
 				_currentLocation.IsUserHeadingUpdated = false;
 				_currentLocation.IsLocationUpdated = false;
@@ -169,11 +196,6 @@ namespace Mapbox.Unity.Location
 				_currentLocation.DeviceOrientation = Input.compass.trueHeading;
 
 
-				var lastData = Input.location.lastData;
-				var timestamp = lastData.timestamp;
-				//Debug.LogFormat("{0:yyyyMMdd-HHmmss} acc:{1:0.00} {2} / {3}", UnixTimestampUtils.From(timestamp), lastData.horizontalAccuracy, lastData.latitude, lastData.longitude);
-
-
 				//_currentLocation.LatitudeLongitude = new Vector2d(lastData.latitude, lastData.longitude);
 				// HACK to get back to double precision, does this even work?
 				// https://forum.unity.com/threads/precision-of-location-longitude-is-worse-when-longitude-is-beyond-100-degrees.133192/#post-1835164
@@ -181,17 +203,36 @@ namespace Mapbox.Unity.Location
 				double longitude = double.Parse(lastData.longitude.ToString("R", invariantCulture), invariantCulture);
 				_currentLocation.LatitudeLongitude = new Vector2d(latitude, longitude);
 
-				_currentLocation.Accuracy = (int)System.Math.Floor(lastData.horizontalAccuracy);
+				_currentLocation.Accuracy = (float)Math.Floor(lastData.horizontalAccuracy);
 				_currentLocation.IsLocationUpdated = timestamp > _lastLocationTimestamp;
 				_currentLocation.Timestamp = timestamp;
 				_lastLocationTimestamp = timestamp;
 
 				if (_currentLocation.IsLocationUpdated)
 				{
-					_lastPositions.Add(_currentLocation.LatitudeLongitude);
+					if (_lastPositions.Count > 0)
+					{
+						// only add position if user has moved +1m
+						CheapRuler cheapRuler = new CheapRuler(_currentLocation.LatitudeLongitude.x, CheapRulerUnits.Meters);
+						Vector2d p = _currentLocation.LatitudeLongitude;
+						double distance = cheapRuler.Distance(
+							new double[] { p.y, p.x },
+							new double[] { _lastPositions[0].y, _lastPositions[0].x }
+						);
+						if (distance > 1.0)
+						{
+							_lastPositions.Add(_currentLocation.LatitudeLongitude);
+						}
+					}
+					else
+					{
+						_lastPositions.Add(_currentLocation.LatitudeLongitude);
+					}
 				}
 
-				// calculate user heading. only if we have enough positions available
+				// if we have enough positions calculate user heading ourselves.
+				// Unity does not provide bearing based on locations, just
+				// device orientation based on Compass.Heading
 				if (_lastPositions.Count < _maxLastPositions)
 				{
 					_currentLocation.UserHeading = 0;
@@ -206,14 +247,42 @@ namespace Mapbox.Unity.Location
 						new double[] { newestPos.y, newestPos.x },
 						new double[] { oldestPos.y, oldestPos.x }
 					);
-					// positions are minimum required distance apart, calculate heading
+					// positions are minimum required distance apart (user is moving), calculate user heading
 					if (distance >= _minDistanceOldestNewestPosition)
 					{
-						_currentLocation.UserHeading = (float)(Math.Atan2(newestPos.y - oldestPos.y, newestPos.x - oldestPos.x) * 180 / Math.PI);
+						// calculate final heading from last positions but give newest headings more weight:
+						// '_lastPositions' contains newest at [0]
+						// formula:
+						// (heading[0] * e^weight[0] + heading[1] * e^weight[1] + .... ) / weight sum
+						float[] lastHeadings = new float[_maxLastPositions - 1];
+						float[] actualWeights = new float[_maxLastPositions - 1];
+						float finalHeading = 0f;
+
+						for (int i = 1; i < _maxLastPositions; i++)
+						{
+							lastHeadings[i - 1] = (float)(Math.Atan2(_lastPositions[i].y - _lastPositions[i - 1].y, _lastPositions[i].x - _lastPositions[i - 1].x) * 180 / Math.PI);
+							// quick fix to take care of 355� and 5� being apart 10� and not 350�
+							if (lastHeadings[i - 1] > 180) { lastHeadings[i - 1] -= 360f; }
+						}
+
+						for (int i = 0; i < lastHeadings.Length; i++)
+						{
+							actualWeights[i] = (float)Math.Exp(_headingWeights[i]);
+							finalHeading += lastHeadings[i] * actualWeights[i];
+						}
+
+						float weightSum = actualWeights.Sum();
+						finalHeading /= weightSum;
+						finalHeading -= 180; //fix heading to have 0� for north, 90� for east, 180� for south and 270� for west
+											 // stay within [0..359] no negative angles
+						if (finalHeading < 0) { finalHeading += 360; }
+
+						_currentLocation.UserHeading = finalHeading;
 						_currentLocation.IsUserHeadingUpdated = true;
 					}
 				}
 
+				_currentLocation.TimestampDevice = UnixTimestampUtils.To(DateTime.UtcNow);
 				SendLocation(_currentLocation);
 
 				yield return _waitUpdateTime;
