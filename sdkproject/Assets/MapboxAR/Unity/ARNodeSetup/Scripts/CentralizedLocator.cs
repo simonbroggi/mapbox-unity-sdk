@@ -34,12 +34,12 @@
 		}
 
 		[SerializeField]
-		HeadingSyncBase[] _headingSyncs;
-		public HeadingSyncBase[] HeadingSyncs
+		HeadingSyncBase _headingSync;
+		public HeadingSyncBase HeadingSync
 		{
 			get
 			{
-				return _headingSyncs;
+				return _headingSync;
 			}
 		}
 
