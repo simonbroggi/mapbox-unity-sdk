@@ -14,7 +14,7 @@
 		AbstractMap _map;
 
 		[SerializeField]
-		CentralizedARLocator _nodeManager;
+		CentralizedLocator _nodeManager;
 
 		[SerializeField]
 		[Geocode]

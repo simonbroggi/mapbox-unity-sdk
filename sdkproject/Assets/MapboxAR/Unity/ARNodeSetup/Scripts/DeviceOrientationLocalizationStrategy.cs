@@ -8,11 +8,11 @@
 	public class DeviceOrientationLocalizationStrategy : ComputeARLocalizationStrategy
 	{
 		public override event Action<Alignment> OnLocalizationComplete;
-		public override void ComputeLocalization(CentralizedARLocator centralizedARLocator)
+		public override void ComputeLocalization(CentralizedLocator centralizedARLocator)
 		{
 			Debug.Log("First Alignment");
 			var deviceHeading = LocationProviderFactory.Instance.DefaultLocationProvider.CurrentLocation.DeviceOrientation;
-
+			Debug.Log("First alignment heading: " + deviceHeading);
 			Alignment alignment = new Alignment
 			{
 				Position = centralizedARLocator.CurrentMap.transform.position,

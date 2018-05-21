@@ -9,7 +9,7 @@
 	using Mapbox.Utils;
 	using Mapbox.Unity.Map;
 
-	public class CentralizedARLocator : MonoBehaviour, ISynchronizationContext
+	public class CentralizedLocator : MonoBehaviour, ISynchronizationContext
 	{
 		// TODO : Snap should happening here for things to happen...
 		// Lol. Snap Snap Snap... after yeach new better GPS val...

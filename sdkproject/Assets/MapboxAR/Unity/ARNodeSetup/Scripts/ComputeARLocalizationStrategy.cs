@@ -6,7 +6,7 @@
 	public interface IComputeARLocalizationStrategy
 	{
 		event Action<Alignment> OnLocalizationComplete;
-		void ComputeLocalization(CentralizedARLocator centralizedARLocator);
+		void ComputeLocalization(CentralizedLocator centralizedARLocator);
 	}
 
 	/// <summary>
@@ -17,7 +17,7 @@
 	{
 		public virtual event Action<Alignment> OnLocalizationComplete;
 
-		public virtual void ComputeLocalization(CentralizedARLocator centralizedARLocator)
+		public virtual void ComputeLocalization(CentralizedLocator centralizedARLocator)
 		{
 			throw new NotImplementedException();
 		}

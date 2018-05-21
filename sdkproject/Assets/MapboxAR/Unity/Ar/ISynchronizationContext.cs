@@ -13,5 +13,7 @@
 	{
 		public Vector3 Position;
 		public float Rotation;
+		public bool IsAr;
+		public float ARPlaneY;
 	}
 }

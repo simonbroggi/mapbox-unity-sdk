@@ -9,6 +9,9 @@
 		[SerializeField]
 		AbstractMap _map;
 
+		[SerializeField]
+		Transform _mapHolder;
+
 		bool _isInitialized;
 
 		private void Awake()
@@ -20,13 +23,21 @@
 		{
 			if (_isInitialized)
 			{
-				var latlon = _map.WorldToGeoPosition(alignment.Position);
-				_map.UpdateMap(latlon, _map.Zoom);
-				var pos = new Vector3(_map.transform.position.x, alignment.Position.y, _map.transform.position.z);
+				// Place map on arplane;
+				var mapPos = _map.transform.position;
+				_map.transform.position = new Vector3(mapPos.x, alignment.ARPlaneY, mapPos.z);
+
+				// Update root pos...
+
 				var rotation = Quaternion.Euler(0, alignment.Rotation, 0);
 				var inverse = Quaternion.Inverse(rotation);
-				_map.transform.SetPositionAndRotation(pos, inverse);
+
 			}
+		}
+
+		Vector3 RotatePointAroundPivot(Vector3 point, Vector3 pivot, Vector3 angles)
+		{
+			return Quaternion.Euler(angles) * (point - pivot) + pivot;
 		}
 	}
 }

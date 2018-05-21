@@ -16,7 +16,7 @@
 		/// Uses a bias to compute the position and roation from the GSP and AR locations. 
 		/// </summary>
 		/// <param name="centralizedARLocator">Centralized ARL ocator.</param>
-		public override void ComputeLocalization(CentralizedARLocator centralizedARLocator)
+		public override void ComputeLocalization(CentralizedLocator centralizedARLocator)
 		{
 			// TODO
 			// I Like this. Computing aligment here. Though we should throw away computing heading only from nodes..

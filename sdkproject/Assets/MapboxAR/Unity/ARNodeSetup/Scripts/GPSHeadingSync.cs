@@ -62,11 +62,6 @@
 			return average;
 		}
 
-		// Think of this.. Because each time you pass in the initial heading..
-		// You must remember if tracking goes bananas you need re-establish the 
-		// Initial new heading and pass that to the offset Method. Where do you do that?
-		// AR Alignment strategy
-
 		public override float ReturnAverageHeading()
 		{
 			return GetAverageHeading(_headingValues);

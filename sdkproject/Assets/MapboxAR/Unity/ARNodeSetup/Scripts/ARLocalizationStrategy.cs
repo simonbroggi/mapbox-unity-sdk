@@ -28,7 +28,7 @@
 		private Vector3 _mapMatchNode;
 		private float _timeToUpdateHeading;
 		CircularBuffer<float> _headingValues;
-		private float _cacheHeading;
+		private float _cacheHeading, _intialHeading;
 
 		private void Start()
 		{
@@ -40,7 +40,7 @@
 			_timeToUpdateHeading = _updateHeadingInterval;
 		}
 
-		public override void ComputeLocalization(CentralizedARLocator centralizedARLocator)
+		public override void ComputeLocalization(CentralizedLocator centralizedARLocator)
 		{
 			var currentLocation = LocationProviderFactory.Instance.DefaultLocationProvider.CurrentLocation;
 			var aligment = new Alignment();
@@ -48,17 +48,17 @@
 
 			if (_setUserHeading)
 			{
-				SaveHeading(currentLocation.DeviceOrientation, 70f);
+				SaveHeading(currentLocation.DeviceOrientation, 200f);
 			}
 
 			if (!_setUserHeading)
 			{
 				_headingValues.Add(currentLocation.DeviceOrientation);
 				_cacheHeading = currentLocation.DeviceOrientation;
+				Debug.Log("initial heading: " + _cacheHeading);
 				_setUserHeading = true;
 				Debug.Log("testing");
 			}
-
 
 			if (CheckTracking())
 			{
@@ -77,7 +77,9 @@
 
 					// TODO; Get average heading...
 					Debug.Log("average heading: " + GetAverageHeading(_headingValues));
+					aligment.IsAr = true;
 					aligment.Rotation = GetAverageHeading(_headingValues);
+					aligment.Position = new Vector3(_player.position.x, _planePosOnY, _player.position.z);
 					_cacheHeading = aligment.Rotation;
 
 					Unity.Utilities.Console.Instance.Log(string.Format
@@ -158,10 +160,17 @@
 		{
 			//HACK: This kinda should happen in AligmentStrategy. But only,
 			// when gps aligment is used..
-
-			_player.position = Vector3.zero;
 			_arRoot.position = pos;
+			_player.position = Vector3.zero;
 
+			Unity.Utilities.Console.Instance.Log(
+			string.Format(
+				"Player Pos Reset: {0}, RootPos: {1}"
+				, _player.position
+
+				)
+				, "purple"
+			);
 		}
 
 		float GetAverageHeading(CircularBuffer<float> headingValues)
@@ -195,7 +204,7 @@
 			_planePosOnY = plane.center.y;
 		}
 
-		bool CanSnatchMapMatchingNode(CentralizedARLocator arLocator, ref Vector3 vector3)
+		bool CanSnatchMapMatchingNode(CentralizedLocator arLocator, ref Vector3 vector3)
 		{
 			foreach (var nodebase in arLocator.SyncNodes)
 			{

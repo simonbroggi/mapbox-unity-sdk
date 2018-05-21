@@ -8,6 +8,10 @@ namespace Mapbox.Unity.Ar
 	{
 		[SerializeField]
 		private AbstractMap _map;
+
+		[SerializeField]
+		SetARPlayerPos _arPlayer;
+
 		bool _isInitialized;
 
 		/// <summary>

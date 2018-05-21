@@ -45,6 +45,4 @@
 		/// </summary>
 		public float Confidence;
 	}
-
-
 }

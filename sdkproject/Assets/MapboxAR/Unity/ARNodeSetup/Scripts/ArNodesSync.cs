@@ -22,6 +22,7 @@
 		AbstractMap _map;
 		CircularBuffer<Node> _nodeBuffer;
 
+
 		public override void InitializeNodeBase(AbstractMap map)
 		{
 			_nodeBuffer = new CircularBuffer<Node>(60);
