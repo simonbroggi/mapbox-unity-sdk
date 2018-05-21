@@ -31,6 +31,11 @@
 		public float DeviceOrientation;
 
 		/// <summary>
+		/// UTC Timestamp (in seconds since 1970) of the device when OnLocationUpdated was fired.
+		/// </summary>
+		public double TimestampDevice;
+
+		/// <summary>
 		/// Timestamp (in seconds since 1970) when location was last updated.
 		/// </summary>
 		public double Timestamp;
