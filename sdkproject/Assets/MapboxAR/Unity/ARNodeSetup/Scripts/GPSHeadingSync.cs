@@ -9,7 +9,7 @@
 	public class GPSHeadingSync : HeadingSyncBase
 	{
 		[SerializeField]
-		float _allowedHeadingChange;
+		float _allowedHeadingChange = 70;
 
 		float _initialHeading;
 		CircularBuffer<float> _headingValues;
