@@ -34,6 +34,16 @@
 		}
 
 		[SerializeField]
+		HeadingSyncBase[] _headingSyncs;
+		public HeadingSyncBase[] HeadingSyncs
+		{
+			get
+			{
+				return _headingSyncs;
+			}
+		}
+
+		[SerializeField]
 		Transform _player;
 
 		[SerializeField]
