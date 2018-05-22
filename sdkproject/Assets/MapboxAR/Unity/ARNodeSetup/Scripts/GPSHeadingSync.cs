@@ -5,6 +5,7 @@
 	using UnityEngine;
 	using Mapbox.Unity.Location;
 	using Mapbox.Utils;
+	using Mapbox.Unity.Map;
 
 	public class GPSHeadingSync : HeadingSyncBase
 	{
@@ -14,10 +15,17 @@
 		float _initialHeading;
 		CircularBuffer<float> _headingValues;
 
+
+		// HACK: should not happen this way. Data should flow from
+		// CentralizedLocator... OR smth..
+		[SerializeField]
+		AbstractMap _map;
+
 		private void Awake()
 		{
 			_headingValues = new CircularBuffer<float>(20);
-			LocationProviderFactory.Instance.DeviceLocationProvider.OnLocationUpdated += SaveInitialHeading;
+			_map.OnInitialized += () =>
+				LocationProviderFactory.Instance.DeviceLocationProvider.OnLocationUpdated += SaveInitialHeading;
 		}
 
 		void SaveInitialHeading(Location location)

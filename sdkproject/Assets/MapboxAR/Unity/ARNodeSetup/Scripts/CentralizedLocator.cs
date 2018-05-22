@@ -11,8 +11,7 @@
 
 	public class CentralizedLocator : MonoBehaviour, ISynchronizationContext
 	{
-		// TODO : Snap should happening here for things to happen...
-		// Lol. Snap Snap Snap... after yeach new better GPS val...
+
 		[SerializeField]
 		AbstractMap _map;
 		public AbstractMap CurrentMap

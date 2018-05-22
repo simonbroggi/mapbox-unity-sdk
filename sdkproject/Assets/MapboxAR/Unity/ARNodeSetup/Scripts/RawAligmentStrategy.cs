@@ -27,11 +27,17 @@
 				var mapPos = _map.transform.position;
 				_map.transform.position = new Vector3(mapPos.x, alignment.ARPlaneY, mapPos.z);
 
-				// Update root pos...
+				var rotation = RotatePointAroundPivot(_map.transform.position, _transform.position, new Vector3(0, alignment.Rotation, 0));
+				//var inverse = Quaternion.Inverse(rotation);
+				_map.transform.eulerAngles = rotation;
 
-				var rotation = Quaternion.Euler(0, alignment.Rotation, 0);
-				var inverse = Quaternion.Inverse(rotation);
+				if (alignment.IsAr)
+				{
+					return;
+				}
 
+				var latlon = _map.WorldToGeoPosition(alignment.Position);
+				_map.UpdateMap(latlon, _map.Zoom);
 			}
 		}
 

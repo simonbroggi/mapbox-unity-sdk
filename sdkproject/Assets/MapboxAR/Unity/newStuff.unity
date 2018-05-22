@@ -122,11 +122,12 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 10376831}
-  - component: {fileID: 10376835}
-  - component: {fileID: 10376834}
+  - component: {fileID: 10376837}
   - component: {fileID: 10376833}
+  - component: {fileID: 10376834}
   - component: {fileID: 10376832}
   - component: {fileID: 10376836}
+  - component: {fileID: 10376835}
   m_Layer: 10
   m_Name: CentralDataHub
   m_TagString: Untagged
@@ -188,30 +189,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05567cf12384a4fa88ebcb2e7f1ac3dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _player: {fileID: 1536869830}
+  _arFpsCamera: {fileID: 1536869830}
   _arRoot: {fileID: 536186036}
   _updateHeadingInterval: 10
 --- !u!114 &10376835
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 114837617324496852, guid: be6be0cb448e54325ac166069c3df29c,
-    type: 2}
+  m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 10376830}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa9943a7f3a094f329e5155298fda0fe, type: 3}
+  m_Script: {fileID: 11500000, guid: a065daf39a2364dbebd3761590492b0b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _allowedHeadingChange: 70
   _map: {fileID: 325026587}
-  _syncNodes:
-  - {fileID: 113196485}
-  - {fileID: 1293501718}
-  - {fileID: 638004851}
-  _player: {fileID: 1905565354}
-  _initialLocalizationStrategy: {fileID: 10376833}
-  _generalLocalizationStrategy: {fileID: 10376834}
-  _alignmentStrategy: {fileID: 10376832}
 --- !u!114 &10376836
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -223,6 +216,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32bad6b92bdd84e00b39f754d2741864, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &10376837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 10376830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf82e978a62544082bef25a8110b8872, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _map: {fileID: 325026587}
+  _syncNodes:
+  - {fileID: 113196485}
+  - {fileID: 1293501718}
+  - {fileID: 638004851}
+  _headingSync: {fileID: 10376835}
+  _player: {fileID: 1905565354}
+  _initialLocalizationStrategy: {fileID: 10376833}
+  _generalLocalizationStrategy: {fileID: 10376834}
+  _alignmentStrategy: {fileID: 10376832}
 --- !u!1 &109222473
 GameObject:
   m_ObjectHideFlags: 0
@@ -660,7 +674,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 325026587}
-  _nodeManager: {fileID: 10376835}
+  _nodeManager: {fileID: 10376837}
   _locationStrings:
   - 60.167432, 24.945885
   _spawnScale: 1
@@ -705,7 +719,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 325026587}
-  _nodeManager: {fileID: 10376835}
+  _nodeManager: {fileID: 10376837}
   _locationStrings:
   - 60.165190, 24.949103
   _spawnScale: 1
@@ -723,7 +737,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 325026587}
-  _nodeManager: {fileID: 10376835}
+  _nodeManager: {fileID: 10376837}
   _locationStrings:
   - 37.7865024,-122.3982807
   _spawnScale: 1
@@ -741,7 +755,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 325026587}
-  _nodeManager: {fileID: 10376835}
+  _nodeManager: {fileID: 10376837}
   _locationStrings:
   - 37.7900831,-122.3969262
   _spawnScale: 1
@@ -759,7 +773,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 325026587}
-  _nodeManager: {fileID: 10376835}
+  _nodeManager: {fileID: 10376837}
   _locationStrings:
   - 37.7893503,-122.4010429
   _spawnScale: 1
