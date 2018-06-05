@@ -1,5 +1,6 @@
 ﻿namespace Mapbox.Unity.Map
 {
+	using System;
 	using System.ComponentModel;
 
 	// Map related enums
@@ -214,16 +215,17 @@
 		AddressOrLatLon,
 	}
 
+	[Flags]
 	public enum LocationPrefabCategories
 	{
 		None = 0,
 		AnyCategory = ~0,
-		ArtsAndEntertainment = 1 << 0,
-		Food = 1 << 1,
-		Nightlife = 1 << 2,
-		OutdoorsAndRecreation = 1 << 3,
-		Services = 1 << 4,
-		Shops = 1 << 5,
-		Transportation = 1 << 6
+		ArtsAndEntertainment = 1,
+		Food = 2,
+		Nightlife = 4,
+		OutdoorsAndRecreation = 8,
+		Services = 16,
+		Shops = 32,
+		Transportation = 64
 	}
 }
