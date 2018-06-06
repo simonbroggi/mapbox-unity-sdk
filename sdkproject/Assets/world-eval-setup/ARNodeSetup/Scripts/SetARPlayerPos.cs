@@ -3,7 +3,6 @@
 	using UnityEngine;
 	using Mapbox.Utils;
 	using Mapbox.Unity.Map;
-	using DG.Tweening;
 
 	public class SetARPlayerPos : MonoBehaviour
 	{
