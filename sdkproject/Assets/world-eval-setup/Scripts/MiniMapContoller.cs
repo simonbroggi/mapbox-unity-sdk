@@ -2,7 +2,7 @@
 {
 	using UnityEngine;
 	using Mapbox.Unity.Map;
-	using DG.Tweening;
+	//using DG.Tweening;
 	using Mapbox.Utils;
 	using Mapbox.Unity.Utilities;
 
@@ -10,7 +10,7 @@
 
 	public class MiniMapContoller : MonoBehaviour
 	{
-
+		// TODO : Update to not use tween engine. 
 		[SerializeField]
 		Transform _camTransform;
 
@@ -41,14 +41,14 @@
 			switch (mode)
 			{
 				case Mode.AR:
-					_camTransform.DOLocalMove(_origCamPos, 1f, false);
-					_debugShaderTransform.DOLocalMove(_origShadeTransformPos, .8f, false);
-					_camTransform.DOLocalRotate(new Vector3(16, 0, 0), 1f, RotateMode.Fast);
+					//_camTransform.DOLocalMove(_origCamPos, 1f, false);
+					//_debugShaderTransform.DOLocalMove(_origShadeTransformPos, .8f, false);
+					//_camTransform.DOLocalRotate(new Vector3(16, 0, 0), 1f, RotateMode.Fast);
 					break;
 				case Mode.TopDown:
-					_camTransform.DOLocalMove(new Vector3(0, _camTransform.localPosition.y, 0), 1f, false);
-					_debugShaderTransform.DOLocalMove(new Vector3(0, _debugShaderTransform.localPosition.y, 0), .8f, false);
-					_camTransform.DOLocalRotate(new Vector3(90, 0, 0), 1f, RotateMode.Fast);
+					//_camTransform.DOLocalMove(new Vector3(0, _camTransform.localPosition.y, 0), 1f, false);
+					//_debugShaderTransform.DOLocalMove(new Vector3(0, _debugShaderTransform.localPosition.y, 0), .8f, false);
+					//_camTransform.DOLocalRotate(new Vector3(90, 0, 0), 1f, RotateMode.Fast);
 					break;
 				default:
 					return;
@@ -60,15 +60,15 @@
 			//inverse
 			heading *= -1;
 			var rot = new Vector3(0, heading, 0);
-			_targetRot.DOKill();
-			_targetRot.DORotate(rot, 1f, RotateMode.Fast);
+			//_targetRot.DOKill();
+			//_targetRot.DORotate(rot, 1f, RotateMode.Fast);
 		}
 
 		public void UpdateMapLocation(Vector2d latlon)
 		{
 			var coords = _map.GeoToWorldPosition(latlon, false);
 			var deltaOffset = _map.transform.position - coords;
-			_map.transform.DOMove(new Vector3(deltaOffset.x, _map.transform.position.y, deltaOffset.z), 1f, false);
+			//_map.transform.DOMove(new Vector3(deltaOffset.x, _map.transform.position.y, deltaOffset.z), 1f, false);
 		}
 
 		// Update is called once per frame

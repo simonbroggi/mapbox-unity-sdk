@@ -1,11 +1,12 @@
 namespace Mapbox.Unity.Ar
 {
 	using UnityEngine;
+	using System;
 
 	public abstract class AbstractAlignmentStrategy : MonoBehaviour
 	{
-		[SerializeField]
-		protected Transform _transform;
+
+		public Action OnAlignmentApplicationComplete = delegate { };
 
 		public void Register(ISynchronizationContext context)
 		{
