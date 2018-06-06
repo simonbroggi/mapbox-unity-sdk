@@ -6,6 +6,8 @@ namespace Mapbox.Unity.Ar
 	public abstract class AbstractAlignmentStrategy : MonoBehaviour
 	{
 
+		[SerializeField]
+		protected Transform _transform;
 		public Action OnAlignmentApplicationComplete = delegate { };
 
 		public void Register(ISynchronizationContext context)
