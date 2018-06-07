@@ -15,5 +15,6 @@
 		public Vector3 Position;
 		public float Rotation;
 		public Vector2d LatLon;
+		public bool isArAlignment;
 	}
 }
