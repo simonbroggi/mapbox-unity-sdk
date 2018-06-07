@@ -88,9 +88,7 @@
 
 			// Initialize all sync-nodes.Make them ready to recieve node data.
 			// Map needs to be generated before init. Otherwise bunch of errors.
-
-			InitializeSyncNodes();
-
+			_map.OnInitialized += () => InitializeSyncNodes();
 			_map.OnInitialized += Map_OnInitialized;
 		}
 
