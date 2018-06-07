@@ -17,12 +17,9 @@
 		CircularBuffer<float> _headingValues;
 
 
-		// HACK: should not happen this way. Data should flow from
-		// CentralizedLocator... OR smth..
-
 		private void Start()
 		{
-			//_headingValues = new CircularBuffer<float>(20);
+			_headingValues = new CircularBuffer<float>(20);
 			LocationProviderFactory.Instance.DefaultLocationProvider.OnLocationUpdated += SaveInitialHeading;
 		}
 

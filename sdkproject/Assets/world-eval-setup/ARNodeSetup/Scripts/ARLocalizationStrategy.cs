@@ -13,24 +13,29 @@
 		public override event Action<Alignment> OnLocalizationComplete;
 
 		[SerializeField]
+		GPSHeadingSync _headingSync;
+
+		[SerializeField]
 		SaveHeadingValues _heading;
 
 		[SerializeField]
-		MiniMapContoller _miniMap;
+		float _setHeadingIntervalTime;
 
 		ARInterface.CustomTrackingState _trackingState;
 		ARInterface _arInterface;
 		Transform _arFpsCamera;
 
-		float _previousAccuracy, _previousHeading;
+		float _previousAccuracy, _previousHeading, _headingUpdateTime;
 
 		NodeSyncBase _gpsNodeSync, _arNodeSync, _mapMatchingNode;
+
 
 		private void Start()
 		{
 			_arInterface = ARInterface.GetInterface();
 			_trackingState = new ARInterface.CustomTrackingState();
 			_arFpsCamera = CentralizedLocator.Instance.ArFirstPerson;
+			_headingUpdateTime = _setHeadingIntervalTime;
 
 			//Awful
 			foreach (var nodeBase in CentralizedLocator.Instance.SyncNodes)
@@ -72,14 +77,16 @@
 				{
 					aligment.Position = map.GeoToWorldPosition(_gpsNodeSync.ReturnLatestNode().LatLon, false);
 					aligment.LatLon = _gpsNodeSync.ReturnLatestNode().LatLon;
+					_previousAccuracy = _gpsNodeSync.ReturnLatestNode().Accuracy;
 				}
 
-				if (location.IsUserHeadingUpdated)
+				if (_headingUpdateTime <= 0)
 				{
-					aligment.Rotation = location.UserHeading;
+					aligment.Rotation = _headingSync.ReturnAverageHeading();
 					Unity.Utilities.Console.Instance.Log(string.Format
 												 ("New UserHeading heading: {0}", aligment.Rotation)
 												 , "red");
+					_headingUpdateTime = _setHeadingIntervalTime;
 				}
 
 				OnLocalizationComplete(aligment);
@@ -92,6 +99,11 @@
 			aligment.Rotation = location.DeviceOrientation;
 			OnLocalizationComplete(aligment);
 
+		}
+
+		private void Update()
+		{
+			_headingUpdateTime -= Time.deltaTime;
 		}
 
 		bool CheckTracking()

@@ -4,4 +4,7 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/world-eval-setup/world-eval-scene.unity
+    guid: efeceafc6512b4deb9c608b954a6ed6e
