@@ -37,7 +37,7 @@
 		/// </summary>
 		public Vector2d LatLon;
 		/// <summary>
-		/// Accuracy of the Node. ARNodes accuracy is determined by the latest and most accurate GPS point.
+		/// Accuracy of the Node.
 		/// </summary>
 		public float Accuracy;
 		/// <summary>
