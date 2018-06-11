@@ -1,7 +1,7 @@
 namespace Mapbox.Unity.Location
 {
 
-
+	using System.Collections.Generic;
 	using System.Collections;
 	using UnityEngine;
 	using Mapbox.Utils;
@@ -9,7 +9,7 @@ namespace Mapbox.Unity.Location
 	using System;
 	using System.Linq;
 
-
+	using Mapbox.Examples.Scripts;
 
 	/// <summary>
 	/// The DeviceLocationProvider is responsible for providing real world location and heading data,
@@ -52,6 +52,14 @@ namespace Mapbox.Unity.Location
 		[SerializeField]
 		[Tooltip("Smoothing strategy to applied to the DeviceOrientation.")]
 		public AngleSmoothingAbstractBase _deviceOrientationSmoothing;
+
+		[SerializeField]
+		public List<AngleSmoothingAbstractBase> _userHeadingSmoothingTestList;
+
+		[SerializeField]
+		public List<AngleSmoothingAbstractBase> _deviceOrientationSmoothingTestList;
+
+		private Location[] _locationsToLog;
 
 
 		[Serializable]
@@ -129,7 +137,9 @@ namespace Mapbox.Unity.Location
 			{
 				_pollRoutine = StartCoroutine(PollLocationRoutine());
 			}
-		}
+
+			_locationsToLog = new Location[3];
+}
 
 
 		/// <summary>
@@ -244,10 +254,6 @@ namespace Mapbox.Unity.Location
 					continue;
 				}
 
-				// device orientation, user heading get calculated below
-				_deviceOrientationSmoothing.Add(Input.compass.trueHeading);
-				_currentLocation.DeviceOrientation = (float)_deviceOrientationSmoothing.Calculate();
-
 
 				//_currentLocation.LatitudeLongitude = new Vector2d(lastData.latitude, lastData.longitude);
 				// HACK to get back to double precision, does this even work?
@@ -263,6 +269,17 @@ namespace Mapbox.Unity.Location
 				_currentLocation.IsLocationUpdated = timestamp > _lastLocationTimestamp || !_currentLocation.LatitudeLongitude.Equals(previousLocation);
 				_currentLocation.Timestamp = timestamp;
 				_lastLocationTimestamp = timestamp;
+				_currentLocation.TimestampDevice = UnixTimestampUtils.To(DateTime.UtcNow);
+
+
+				for (int i = 0; i < _locationsToLog.Length; i++)
+				{
+					_locationsToLog[i].LatitudeLongitude = _currentLocation.LatitudeLongitude;
+					_locationsToLog[i].Accuracy = _currentLocation.Accuracy;
+					_locationsToLog[i].Timestamp = _currentLocation.Timestamp;
+					_locationsToLog[i].IsLocationUpdated = _currentLocation.IsLocationUpdated;
+				}
+
 
 				if (_currentLocation.IsLocationUpdated)
 				{
@@ -295,6 +312,13 @@ namespace Mapbox.Unity.Location
 				{
 					_currentLocation.UserHeading = _currentLocation.DeviceOrientation;
 					_currentLocation.IsUserHeadingUpdated = true;
+
+					for (int i = 0; i < _locationsToLog.Length; i++)
+					{
+						_locationsToLog[i].UserHeading = _currentLocation.DeviceOrientation;
+						_locationsToLog[i].UserHeadingSmoothingStrategy = _userHeadingSmoothingTestList[i].GetType().ToString();
+					}
+
 				}
 				else
 				{
@@ -327,6 +351,20 @@ namespace Mapbox.Unity.Location
 						_userHeadingSmoothing.Add(lastHeadings[0]);
 						float finalHeading = (float)_userHeadingSmoothing.Calculate();
 
+						//log headings for different smoothing strategies
+						if (_userHeadingSmoothingTestList != null)
+						{
+							for (int i = 0; i < _userHeadingSmoothingTestList.Count; i++)
+							{
+								_userHeadingSmoothingTestList[i].Add(lastHeadings[0]);
+
+								var heading = (float)_userHeadingSmoothingTestList[i].Calculate();
+								heading = heading >= 180.0f ? heading - 180.0f : heading + 180.0f;
+								_locationsToLog[i].UserHeading = heading;
+								_locationsToLog[i].UserHeadingSmoothingStrategy = _userHeadingSmoothingTestList[i].GetType().ToString();
+							}
+						}
+
 						//fix heading to have 0° for north, 90° for east, 180° for south and 270° for west
 						finalHeading = finalHeading >= 180.0f ? finalHeading - 180.0f : finalHeading + 180.0f;
 
@@ -336,7 +374,28 @@ namespace Mapbox.Unity.Location
 					}
 				}
 
-				_currentLocation.TimestampDevice = UnixTimestampUtils.To(DateTime.UtcNow);
+				// device orientation, user heading get calculated below
+				_deviceOrientationSmoothing.Add(Input.compass.trueHeading);
+				_currentLocation.DeviceOrientation = (float)_deviceOrientationSmoothing.Calculate();
+
+				//log test orientations
+				if (_deviceOrientationSmoothingTestList != null)
+				{
+					for (int i = 0; i < _deviceOrientationSmoothingTestList.Count; i++)
+					{
+						_deviceOrientationSmoothingTestList[i].Add(Input.compass.trueHeading);
+						_locationsToLog[i].DeviceOrientation = (float)_deviceOrientationSmoothingTestList[i].Calculate();
+						_locationsToLog[i].DeviceOrientationSmoothingStrategy = _deviceOrientationSmoothingTestList[i].GetType().ToString();
+					}
+				}
+
+				for (int i = 0; i < _locationsToLog.Length; i++)
+				{
+					LogLocationProviderData.Instance.LocationProvider_OnLocationUpdated(_locationsToLog[i]);
+				}
+
+				_currentLocation.DeviceOrientationSmoothingStrategy = _deviceOrientationSmoothing.GetType().ToString();
+				_currentLocation.UserHeadingSmoothingStrategy = _userHeadingSmoothing.GetType().ToString();
 				SendLocation(_currentLocation);
 
 				yield return _waitUpdateTime;

@@ -54,7 +54,11 @@ namespace Mapbox.Unity.Location
 			[Description("satellites used")]
 			SatellitesUsed = 15,
 			[Description("satellites in view")]
-			SatellitesInView = 16
+			SatellitesInView = 16,
+			[Description("heading smoothing strategy")]
+			UserHeadingSmoothing = 17,
+			[Description("orientation smoothing strategy")]
+			DeviceOrientationSmoothing = 18
 		}
 
 
