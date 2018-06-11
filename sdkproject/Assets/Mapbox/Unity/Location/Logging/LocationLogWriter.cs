@@ -97,7 +97,9 @@ namespace Mapbox.Unity.Location
 					nullableAsStr<float>(location.SpeedKmPerHour, "{0:0.0}"),
 					nullableAsStr<bool>(location.HasGpsFix, "{0}"),
 					nullableAsStr<int>(location.SatellitesUsed, "{0}"),
-					nullableAsStr<int>(location.SatellitesInView, "{0}")
+					nullableAsStr<int>(location.SatellitesInView, "{0}"),
+					location.UserHeadingSmoothingStrategy,
+					location.DeviceOrientationSmoothingStrategy
 			};
 
 			_lineCount++;

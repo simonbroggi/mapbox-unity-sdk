@@ -108,5 +108,9 @@
 		/// Has the heading changed since last update?
 		/// </summary>
 		public bool IsUserHeadingUpdated;
+
+		public string UserHeadingSmoothingStrategy;
+
+		public string DeviceOrientationSmoothingStrategy;
 	}
 }
