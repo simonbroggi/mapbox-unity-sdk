@@ -93,7 +93,7 @@
 
 				string[] tokens = line.Split(Delimiter.ToCharArray());
 				//simple safety net: check if number of columns matches
-				if (tokens.Length != HeaderNames.Length)
+				if (tokens.Length > HeaderNames.Length)
 				{
 					Debug.LogError("unsupported log file");
 					yield return new Location();
