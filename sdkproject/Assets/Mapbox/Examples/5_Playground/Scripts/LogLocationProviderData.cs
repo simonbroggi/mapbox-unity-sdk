@@ -25,9 +25,14 @@ namespace Mapbox.Examples.Scripts
 		private bool _logToFile = false;
 		private LocationLogWriter _logWriter = null;
 
+		public static LogLocationProviderData Instance;
+
 
 		void Start()
 		{
+
+			Instance = this;
+
 			Screen.sleepTimeout = SleepTimeout.NeverSleep;
 			LocationProviderFactory.Instance.DefaultLocationProvider.OnLocationUpdated += LocationProvider_OnLocationUpdated;
 
@@ -53,7 +58,7 @@ namespace Mapbox.Examples.Scripts
 		}
 
 
-		void LocationProvider_OnLocationUpdated(Location location)
+		public void LocationProvider_OnLocationUpdated(Location location)
 		{
 
 			/////////////// GUI logging //////////////////////
