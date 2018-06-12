@@ -28,7 +28,9 @@
 	{
 		private Dictionary<string, List<LayerVisualizerBase>> _layerBuilder;
 		private Dictionary<UnityTile, VectorTile> _cachedData = new Dictionary<UnityTile, VectorTile>();
-		private Dictionary<UnityTile, VectorTile> _deferredProcessDictionary = new Dictionary<UnityTile, VectorTile>();
+		private Dictionary<UnityTile, VectorTile> _deferredUnprocessedTileDictionary = new Dictionary<UnityTile, VectorTile>();
+		private Dictionary<UnityTile, List<VectorFeatureUnity>> _replacementFeaturesDictionary
+ = new Dictionary<UnityTile, List<VectorFeatureUnity>>();
 		private VectorLayerProperties _properties;
 		private int test = 0;
 		private Action<Dictionary<UnityTile, List<VectorFeatureUnity>>> _tileFeaturesLoaded = delegate {};
@@ -63,6 +65,9 @@
 		{
 			_layerBuilder = new Dictionary<string, List<LayerVisualizerBase>>();
 			_cachedData.Clear();
+			_replacementFeaturesDictionary.Clear();
+			_deferredUnprocessedTileDictionary.Clear();
+
 			DataFetcher = ScriptableObject.CreateInstance<VectorDataFetcher>();
 			DataFetcher.DataRecieved += OnVectorDataRecieved;
 			DataFetcher.FetchingError += OnDataError;
@@ -76,19 +81,7 @@
 			}
 			else
 			{
-				foreach (var item in _properties.locationPrefabList)
-				{
-					LayerVisualizerBase visualizer = CreateInstance<LocationPrefabsLayerVisualizer>();
-					((LocationPrefabsLayerVisualizer)visualizer).SetProperties((PrefabItemOptions)item, _properties.performanceOptions);
-					AddVisualizerToLayerBuilder(visualizer);
-				}
-
-				foreach (var sublayer in _properties.vectorSubLayers)
-				{
-					LayerVisualizerBase visualizer = CreateInstance<VectorLayerVisualizer>();
-					((VectorLayerVisualizer)visualizer).SetProperties(sublayer, _properties.performanceOptions);
-					AddVisualizerToLayerBuilder(visualizer);
-				}
+				CreatePOIAndFeatureVisualizers();
 			}
 		}
 
@@ -110,27 +103,66 @@
 			}
 		}
 
+		/// <summary>
+		/// Event handler method for generated replacement features. Should be called only once per UnityTile instance
+		/// </summary>
+		/// <param name="tile">Tile.</param>
+		/// <param name="featureList">Feature list.</param>
 		void OnReplacementTileFeaturesReady(UnityTile tile, List<VectorFeatureUnity> featureList)
 		{
-			test++;
-			if(test == 9)
+			if(!_replacementFeaturesDictionary.ContainsKey(tile))
 			{
-				foreach (var item in _properties.locationPrefabList)
+				_replacementFeaturesDictionary.Add(tile, featureList);
+			}
+			else
+			{
+				Debug.LogError("Replacement feature list already exists for the UnityTile " + tile);
+			}
+
+			if(_replacementFeaturesDictionary.Count == _deferredUnprocessedTileDictionary.Count)
+			{
+				//remove the current visualizer from _layerBuilder dictionary
+				var _layerBuilderCopy = _layerBuilder;
+				foreach (var layerName in _deferredUnprocessedTileDictionary[tile].Data.LayerNames())
 				{
-					LayerVisualizerBase visualizer = CreateInstance<LocationPrefabsLayerVisualizer>();
-					((LocationPrefabsLayerVisualizer)visualizer).SetProperties((PrefabItemOptions)item, _properties.performanceOptions);
-					AddVisualizerToLayerBuilder(visualizer);
+					if (_layerBuilder.ContainsKey(layerName))
+					{
+						foreach (var visualizer in _layerBuilder[layerName].ToArray())
+						{
+							if (visualizer is ReplacementLayerVisualizer)
+								_layerBuilderCopy[layerName].Remove(visualizer);
+						}
+					}
 				}
 
-				foreach (var sublayer in _properties.vectorSubLayers)
+				_layerBuilder = _layerBuilderCopy;
+
+				CreatePOIAndFeatureVisualizers();
+				foreach(var tileFeatures in _replacementFeaturesDictionary)
 				{
-					LayerVisualizerBase visualizer = CreateInstance<VectorLayerVisualizer>();
-					((VectorLayerVisualizer)visualizer).SetProperties(sublayer, _properties.performanceOptions);
-					AddVisualizerToLayerBuilder(visualizer);
+					var unityTile = tileFeatures.Key;
+					var features = tileFeatures.Value;
+					CreateDeferredMeshes(unityTile, features);
 				}
 			}
 		}
 
+		private void CreatePOIAndFeatureVisualizers()
+		{
+			foreach (var item in _properties.locationPrefabList)
+			{
+				LayerVisualizerBase visualizer = CreateInstance<LocationPrefabsLayerVisualizer>();
+				((LocationPrefabsLayerVisualizer)visualizer).SetProperties((PrefabItemOptions)item, _properties.performanceOptions);
+				AddVisualizerToLayerBuilder(visualizer);
+			}
+
+			foreach (var sublayer in _properties.vectorSubLayers)
+			{
+				LayerVisualizerBase visualizer = CreateInstance<VectorLayerVisualizer>();
+				((VectorLayerVisualizer)visualizer).SetProperties(sublayer, _properties.performanceOptions);
+				AddVisualizerToLayerBuilder(visualizer);
+			}
+		}
 
 		public override void SetOptions(LayerProperties options)
 		{
@@ -198,13 +230,13 @@
 		{
 			Progress--;
 			//caching all vector tiles for deferred processing
-			if (_deferredProcessDictionary.ContainsKey(tile))
+			if (_deferredUnprocessedTileDictionary.ContainsKey(tile))
 			{
-				_deferredProcessDictionary[tile] = vectorTile;
+				_deferredUnprocessedTileDictionary[tile] = vectorTile;
 			}
 			else
 			{
-				_deferredProcessDictionary.Add(tile, vectorTile);
+				_deferredUnprocessedTileDictionary.Add(tile, vectorTile);
 			}
 
 			//regular caching
@@ -302,6 +334,56 @@
 			tile.VectorDataState = TilePropertyState.Loaded;
 			_cachedData.Remove(tile);
 		}
+
+		/// <summary>
+		/// Fetches the vector data and passes each layer to relevant layer visualizers
+		/// </summary>
+		/// <param name="tile"></param>
+		private void CreateDeferredMeshes(UnityTile tile, List<VectorFeatureUnity> features)
+		{
+			tile.OnHeightDataChanged -= DataChangedHandler;
+			tile.OnRasterDataChanged -= DataChangedHandler;
+
+			tile.VectorDataState = TilePropertyState.Loading;
+
+			// TODO: move unitytile state registrations to layer visualizers. Not everyone is interested in this data
+			// and we should not wait for it here!
+			foreach (var layerName in _deferredUnprocessedTileDictionary[tile].Data.LayerNames())
+			{
+				if (_layerBuilder.ContainsKey(layerName))
+				{
+					Debug.Log(layerName);
+					foreach (var builder in _layerBuilder[layerName])
+					{
+						if (builder.Active)
+						{
+							Progress++;
+							builder.Create(_deferredUnprocessedTileDictionary[tile].Data.GetLayer(layerName), tile, DecreaseProgressCounter, features);
+						}
+					}
+				}
+			}
+
+			//emptylayer for visualizers that don't depend on outside data sources
+			string emptyLayer = "";
+			if (_layerBuilder.ContainsKey(emptyLayer))
+			{
+				foreach (var builder in _layerBuilder[emptyLayer])
+				{
+					if (builder.Active)
+					{
+						Progress++;
+						//just pass the first available layer - we should create a static null layer for this
+						builder.Create(_deferredUnprocessedTileDictionary[tile].Data.GetLayer(_deferredUnprocessedTileDictionary[tile].Data.LayerNames()[0]), tile, DecreaseProgressCounter);
+					}
+				}
+			}
+
+			tile.VectorDataState = TilePropertyState.Loaded;
+			_deferredUnprocessedTileDictionary.Remove(tile);
+		}
+
+
 
 		private void DecreaseProgressCounter()
 		{

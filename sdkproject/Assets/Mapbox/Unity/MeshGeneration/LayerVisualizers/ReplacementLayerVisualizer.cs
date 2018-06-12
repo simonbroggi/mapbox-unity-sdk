@@ -14,7 +14,6 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 	public class ReplacementLayerVisualizer : VectorLayerVisualizer
 	{
 		private List<VectorFeatureUnity> _injectedFeaturesList =  new List<VectorFeatureUnity>();
-		private int _entityInCurrentCoroutine = 0;
 		public event Action<UnityTile, List<VectorFeatureUnity>> OnReplacementTileFeaturesReady = delegate { };
 
 		public void SetProperties(ReplacementSubLayerProperties properties, LayerPerformanceOptions performanceOptions)

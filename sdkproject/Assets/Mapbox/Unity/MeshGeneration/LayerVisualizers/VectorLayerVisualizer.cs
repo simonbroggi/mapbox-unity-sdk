@@ -54,7 +54,7 @@
 
 		protected bool isReplacementVisualizer = false;
 
-		int _entityInCurrentCoroutine = 0;
+		protected int _entityInCurrentCoroutine = 0;
 
 		protected ModifierStackBase _defaultStack;
 		private HashSet<ulong> _activeIds;
