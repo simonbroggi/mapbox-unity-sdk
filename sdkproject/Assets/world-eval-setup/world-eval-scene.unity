@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641252, b: 0.574817, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657826, g: 0.49641263, b: 0.57481676, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -657,7 +657,7 @@ Transform:
   - {fileID: 481587010}
   - {fileID: 862860319}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &149718573
 MonoBehaviour:
@@ -2031,8 +2031,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapManager: {fileID: 325026587}
   _deviceLocationProviderUnity: {fileID: 1180214724}
-  _deviceLocationProviderAndroid: {fileID: 1953667679}
-  _editorLocationProvider: {fileID: 2047229867}
+  _deviceLocationProviderAndroid: {fileID: 0}
+  _editorLocationProvider: {fileID: 1180214724}
   _transformLocationProvider: {fileID: 476394215}
   _dontDestroyOnLoad: 0
 --- !u!1 &645579531
@@ -3293,8 +3293,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1180214723}
   - component: {fileID: 1180214724}
-  - component: {fileID: 1180214726}
-  - component: {fileID: 1180214725}
   m_Layer: 9
   m_Name: DefaultDeviceLocationProvider
   m_TagString: Untagged
@@ -3328,11 +3326,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a38712e93231418a84665190b8473d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _desiredAccuracyInMeters: 100
-  _updateDistanceInMeters: 1
-  _updateTimeInMilliSeconds: 1000
-  _userHeadingSmoothing: {fileID: 0}
-  _deviceOrientationSmoothing: {fileID: 0}
+  _desiredAccuracyInMeters: 1
+  _updateDistanceInMeters: 0.1
+  _updateTimeInMilliSeconds: 500
+  _userHeadingSmoothing: {fileID: 736102374}
+  _deviceOrientationSmoothing: {fileID: 1540670505}
   _userHeadingSmoothingTestList:
   - {fileID: 1604648938}
   - {fileID: 1449663301}
@@ -3344,31 +3342,6 @@ MonoBehaviour:
   _editorDebuggingOnly:
     _mockUnityInputLocation: 0
     _locationLogFile: {fileID: 0}
---- !u!114 &1180214725
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1180214722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bc20e719eeb82d448d4698d29d526c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _measurements: 5
-  _smoothingFactor: 0.5
---- !u!114 &1180214726
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1180214722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6843ccbf70c208645a89b4c8c37a4ecf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _measurements: 5
 --- !u!1 &1182903685
 GameObject:
   m_ObjectHideFlags: 0
@@ -3713,7 +3686,7 @@ RectTransform:
   - {fileID: 1086928929}
   - {fileID: 536971212}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -4574,7 +4547,7 @@ Transform:
   - {fileID: 325026590}
   - {fileID: 639135527}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1905565353
 GameObject:
@@ -4672,7 +4645,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1953667678
 Transform:
   m_ObjectHideFlags: 0
