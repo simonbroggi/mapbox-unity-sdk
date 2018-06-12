@@ -801,8 +801,10 @@ MonoBehaviour:
   _updateTimeInMilliSeconds: 500
   _userHeadingSmoothing: {fileID: 802813067}
   _deviceOrientationSmoothing: {fileID: 1410188430}
+  _userHeadingSmoothingTestList: []
+  _deviceOrientationSmoothingTestList: []
   _editorDebuggingOnly:
-    _mockUnityInputLocation: 1
+    _mockUnityInputLocation: 0
     _locationLogFile: {fileID: 4900000, guid: 5e6bb7224cef35c4788a4817b1c9778d, type: 3}
 --- !u!4 &849657522
 Transform:
@@ -1112,7 +1114,7 @@ MonoBehaviour:
   _autoFireEvent: 1
   _updateInterval: 0.5
   _sendEvent: 0
-  _locationLogFile: {fileID: 4900000, guid: 5e6bb7224cef35c4788a4817b1c9778d, type: 3}
+  _locationLogFile: {fileID: 4900000, guid: a8fc80f4aa5474de99e7590b45ae6520, type: 3}
 --- !u!4 &1363590664
 Transform:
   m_ObjectHideFlags: 0
@@ -1513,7 +1515,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _map: {fileID: 1411663281}
-  timeTakenDuringLerp: 1
+  timeTakenDuringLerp: 0.5
 --- !u!114 &1411663284
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1817,7 +1819,7 @@ MonoBehaviour:
   mapManager: {fileID: 1411663281}
   _deviceLocationProviderUnity: {fileID: 849657521}
   _deviceLocationProviderAndroid: {fileID: 2054056459}
-  _editorLocationProvider: {fileID: 1363590663}
+  _editorLocationProvider: {fileID: 849657521}
   _transformLocationProvider: {fileID: 1830401242}
   _dontDestroyOnLoad: 0
 --- !u!4 &1908994634

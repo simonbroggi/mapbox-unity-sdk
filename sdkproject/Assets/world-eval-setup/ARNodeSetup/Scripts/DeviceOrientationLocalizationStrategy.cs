@@ -17,7 +17,7 @@
 			Alignment alignment = new Alignment
 			{
 				Position = centralizedARLocator.CurrentMap.transform.position,
-				Rotation = deviceHeading
+				Rotation = 0,//deviceHeading
 			};
 
 			Debug.Log("Alignment complete");

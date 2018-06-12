@@ -34,7 +34,7 @@
 				if (syncNode.GetType() == typeof(GpsNodeSync))
 				{
 					var gpsNodes = syncNode.ReturnNodes();
-					if (gpsNodes.Length < 2)
+					if (gpsNodes.Length < 3)
 					{
 						Debug.LogFormat("Not enough ({0})GPS node", gpsNodes.Length);
 						return;
@@ -45,7 +45,7 @@
 				if (syncNode.GetType() == typeof(ArNodesSync))
 				{
 					var arNodes = syncNode.ReturnNodes();
-					if (arNodes.Length < 2)
+					if (arNodes.Length < 3)
 					{
 						Debug.LogFormat("Not enough ({0})AR node", arNodes.Length);
 						return;
@@ -90,7 +90,7 @@
 			var originOffset = _previousArLocation - headingQuaternion * _previousLocationPosition;
 
 			// Add the weighted delta.
-			var _position = (_currentLocationPosition * (1 - _bias)) + (_currentArVector * _bias);
+			var _position = (delta * _bias) + originOffset;//(_currentLocationPosition * (1 - _bias)) + (_currentArVector * _bias);
 
 			//_rotation = _gpsNodes[_count - 1].Heading;
 			//_position = _gpsPositions[_count - 1];

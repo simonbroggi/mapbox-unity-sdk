@@ -139,7 +139,7 @@ namespace Mapbox.Unity.Location
 			}
 
 			_locationsToLog = new Location[3];
-}
+		}
 
 
 		/// <summary>
@@ -316,7 +316,11 @@ namespace Mapbox.Unity.Location
 					for (int i = 0; i < _locationsToLog.Length; i++)
 					{
 						_locationsToLog[i].UserHeading = _currentLocation.DeviceOrientation;
-						_locationsToLog[i].UserHeadingSmoothingStrategy = _userHeadingSmoothingTestList[i].GetType().ToString();
+						if (_userHeadingSmoothingTestList.Count > 0)
+						{
+							_locationsToLog[i].UserHeadingSmoothingStrategy = _userHeadingSmoothingTestList[i].GetType().ToString();
+						}
+
 					}
 
 				}

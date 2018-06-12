@@ -36,7 +36,7 @@
 			if (_nodeBuffer.Count > 1)
 			{
 				var previousNodePos = _map.GeoToWorldPosition(_nodeBuffer[0].LatLon, false);
-				var currentMagnitude = _targetTransform.position - previousNodePos;
+				var currentMagnitude = _targetTransform.localPosition - previousNodePos;
 
 				if (currentMagnitude.magnitude >= _minMagnitudeBetween)
 				{
@@ -52,10 +52,10 @@
 				Debug.Log("Saving AR Node");
 				var node = new Node
 				{
-					LatLon = _map.WorldToGeoPosition(_targetTransform.position),
+					LatLon = _map.WorldToGeoPosition(_targetTransform.localPosition),
 					// HACK: Save the map snapped location accuracy to here.
 					Accuracy = 6,
-					Heading = _targetTransform.eulerAngles.y
+					Heading = _targetTransform.localEulerAngles.y
 				};
 
 				_nodeBuffer.Add(node);

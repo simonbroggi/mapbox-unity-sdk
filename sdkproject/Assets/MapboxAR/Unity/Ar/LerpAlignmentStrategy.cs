@@ -8,10 +8,6 @@ namespace Mapbox.Unity.Ar
 	{
 		[SerializeField]
 		private AbstractMap _map;
-
-		[SerializeField]
-		SetARPlayerPos _arPlayer;
-
 		bool _isInitialized;
 
 		/// <summary>
@@ -58,15 +54,11 @@ namespace Mapbox.Unity.Ar
 
 			//We set the start position to the current position
 			_startLatLong = _map.CenterLatitudeLongitude;
+			_endLatlong = _map.WorldToGeoPosition(alignment.Position);
+			_startPosition = _transform.position;
+			_endPosition = alignment.Position;
 
-			//_endLatlong = _map.WorldToGeoPosition(alignment.Position);
-			//_startPosition = _transform.position;
-			//_endPosition = alignment.Position;
-
-			// HACK : Snapping the map here. Lerping causes weird behaviour if the value is same.
-			_map.transform.position = alignment.Position;
-
-			//_startRotation = _transform.rotation;
+			_startRotation = _transform.rotation;
 			_endRotation = Quaternion.Euler(0, alignment.Rotation, 0);
 		}
 
@@ -85,16 +77,10 @@ namespace Mapbox.Unity.Ar
 				//Perform the actual lerping.  Notice that the first two parameters will always be the same
 				//throughout a single lerp-processs (ie. they won't change until we hit the space-bar again
 				//to start another lerp)
+				var position = Vector3.Lerp(_startPosition, _endPosition, percentageComplete);
+				var rotation = Quaternion.Inverse(Quaternion.Lerp(_startRotation, _endRotation, percentageComplete));
 
-				//var position = Vector3.Lerp(_startPosition, _endPosition, percentageComplete);
-				var rotation = Quaternion.Lerp(_startRotation, _endRotation, percentageComplete);
-
-				//var inversed = Quaternion.Inverse(rotation);
-				// Rotate ARoot, but place map on ARPlane.
-				//_transform.rotation = rotation;
-
-				//_map.transform.position = position;
-				//_transform.SetPositionAndRotation(position, rotation);
+				_transform.SetPositionAndRotation(-position, rotation);
 
 				//When we've completed the lerp, we set _isLerping to false
 				if (percentageComplete >= 1.0f)
