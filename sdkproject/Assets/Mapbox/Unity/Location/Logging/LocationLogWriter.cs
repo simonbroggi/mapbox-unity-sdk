@@ -98,8 +98,8 @@ namespace Mapbox.Unity.Location
 					nullableAsStr<bool>(location.HasGpsFix, "{0}"),
 					nullableAsStr<int>(location.SatellitesUsed, "{0}"),
 					nullableAsStr<int>(location.SatellitesInView, "{0}"),
-					location.UserHeadingSmoothingStrategy,
-					location.DeviceOrientationSmoothingStrategy
+					string.Format(_invariantCulture, "{0:0.0}",location.UserHeadingSmoothingStrategy),
+					string.Format(_invariantCulture, "{0:0.0}",location.DeviceOrientationSmoothingStrategy)
 			};
 
 			_lineCount++;
