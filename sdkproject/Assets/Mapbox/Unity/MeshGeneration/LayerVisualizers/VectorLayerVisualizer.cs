@@ -51,6 +51,9 @@
 
 		protected LayerPerformanceOptions _performanceOptions;
 		protected Dictionary<UnityTile, List<int>> _activeCoroutines;
+
+		protected bool isReplacementVisualizer = false;
+
 		int _entityInCurrentCoroutine = 0;
 
 		protected ModifierStackBase _defaultStack;
@@ -303,7 +306,7 @@
 			}
 		}
 
-		public override void Create(VectorTileLayer layer, UnityTile tile, Action callback)
+		public override void Create(VectorTileLayer layer, UnityTile tile, Action callback, List<VectorFeatureUnity> replacementFeatures = null)
 		{
 			if (!_activeCoroutines.ContainsKey(tile))
 				_activeCoroutines.Add(tile, new List<int>());

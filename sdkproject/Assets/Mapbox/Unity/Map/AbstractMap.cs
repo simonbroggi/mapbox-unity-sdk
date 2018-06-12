@@ -70,7 +70,7 @@ namespace Mapbox.Unity.Map
 	public class AbstractMap : MonoBehaviour, IMap
 	{
 		[SerializeField]
-		private List <IFactoryInjectionStrategy> _factoryInjectionStrategies = new List<IFactoryInjectionStrategy>();
+		private ReplacementFactoryInjectionStrategy _factoryInjectionStrategy;
 		/// <summary>
 		/// Setting to trigger map initialization in Unity's Start method.
 		/// if set to false, Initialize method should be called explicitly to initialize the map.
@@ -446,12 +446,9 @@ namespace Mapbox.Unity.Map
 				_mapVisualizer.Factories.Add(_vectorData.Factory);
 			}
 
-			if (_factoryInjectionStrategies != null && _factoryInjectionStrategies.Count != 0)
+			if (_factoryInjectionStrategy != null)
 			{
-				foreach(var iStrategy in _factoryInjectionStrategies)
-				{
-					_mapVisualizer.Factories.Add(iStrategy.CreateFactory());
-				}
+				_mapVisualizer.Factories.Add(_factoryInjectionStrategy.CreateFactory());
 			}
 
 			InitializeMap(_options);

@@ -55,5 +55,6 @@
 		public List<VectorSubLayerProperties> vectorSubLayers = new List<VectorSubLayerProperties>();
 		[NodeEditorElementAttribute("POI Sublayers")]
 		public List<PrefabItemOptions> locationPrefabList = new List<PrefabItemOptions>();
+		public ReplacementSubLayerProperties replacementSubLayerProperties = new ReplacementSubLayerProperties();
 	}
 }

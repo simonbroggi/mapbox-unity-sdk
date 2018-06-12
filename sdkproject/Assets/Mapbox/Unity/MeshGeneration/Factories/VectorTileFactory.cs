@@ -28,7 +28,10 @@
 	{
 		private Dictionary<string, List<LayerVisualizerBase>> _layerBuilder;
 		private Dictionary<UnityTile, VectorTile> _cachedData = new Dictionary<UnityTile, VectorTile>();
+		private Dictionary<UnityTile, VectorTile> _deferredProcessDictionary = new Dictionary<UnityTile, VectorTile>();
 		private VectorLayerProperties _properties;
+		private int test = 0;
+		private Action<Dictionary<UnityTile, List<VectorFeatureUnity>>> _tileFeaturesLoaded = delegate {};
 		public string MapId
 		{
 			get
@@ -41,6 +44,15 @@
 				_properties.sourceOptions.Id = value;
 			}
 		}
+
+		private bool _isValidReplacementLayer
+		{
+			get
+			{
+				return (!string.IsNullOrEmpty(_properties.replacementSubLayerProperties.coreOptions.layerName) && _properties.replacementSubLayerProperties.coreOptions.layerName != "layerName");	
+			}
+		}
+
 		protected VectorDataFetcher DataFetcher;
 
 		#region AbstractFactoryOverrides
@@ -51,54 +63,74 @@
 		{
 			_layerBuilder = new Dictionary<string, List<LayerVisualizerBase>>();
 			_cachedData.Clear();
-
 			DataFetcher = ScriptableObject.CreateInstance<VectorDataFetcher>();
 			DataFetcher.DataRecieved += OnVectorDataRecieved;
 			DataFetcher.FetchingError += OnDataError;
 
-			foreach (var item in _properties.locationPrefabList)
+			if (_isValidReplacementLayer)
 			{
-				LayerVisualizerBase visualizer = CreateInstance<LocationPrefabsLayerVisualizer>();
-				((LocationPrefabsLayerVisualizer)visualizer).SetProperties((PrefabItemOptions)item, _properties.performanceOptions);
-
-				visualizer.Initialize();
-				if (visualizer == null)
-				{
-					continue;
-				}
-
-				if (_layerBuilder.ContainsKey(visualizer.Key))
-				{
-					_layerBuilder[visualizer.Key].Add(visualizer);
-				}
-				else
-				{
-					_layerBuilder.Add(visualizer.Key, new List<LayerVisualizerBase>() { visualizer });
-				}
+				LayerVisualizerBase visualizer = CreateInstance<ReplacementLayerVisualizer>();
+				((ReplacementLayerVisualizer)visualizer).SetProperties(_properties.replacementSubLayerProperties, _properties.performanceOptions);
+				((ReplacementLayerVisualizer)visualizer).OnReplacementTileFeaturesReady += OnReplacementTileFeaturesReady;
+				AddVisualizerToLayerBuilder(visualizer);
 			}
-
-			foreach (var sublayer in _properties.vectorSubLayers)
+			else
 			{
-				//if its of type prefabitemoptions then separate the visualizer type
-				LayerVisualizerBase visualizer = CreateInstance<VectorLayerVisualizer>();
-				((VectorLayerVisualizer)visualizer).SetProperties(sublayer, _properties.performanceOptions);
-
-				visualizer.Initialize();
-				if (visualizer == null)
+				foreach (var item in _properties.locationPrefabList)
 				{
-					continue;
+					LayerVisualizerBase visualizer = CreateInstance<LocationPrefabsLayerVisualizer>();
+					((LocationPrefabsLayerVisualizer)visualizer).SetProperties((PrefabItemOptions)item, _properties.performanceOptions);
+					AddVisualizerToLayerBuilder(visualizer);
 				}
 
-				if (_layerBuilder.ContainsKey(visualizer.Key))
+				foreach (var sublayer in _properties.vectorSubLayers)
 				{
-					_layerBuilder[visualizer.Key].Add(visualizer);
-				}
-				else
-				{
-					_layerBuilder.Add(visualizer.Key, new List<LayerVisualizerBase>() { visualizer });
+					LayerVisualizerBase visualizer = CreateInstance<VectorLayerVisualizer>();
+					((VectorLayerVisualizer)visualizer).SetProperties(sublayer, _properties.performanceOptions);
+					AddVisualizerToLayerBuilder(visualizer);
 				}
 			}
 		}
+
+		void AddVisualizerToLayerBuilder(LayerVisualizerBase visualizer)
+		{
+			visualizer.Initialize();
+			if (visualizer == null)
+			{
+				return;
+			}
+
+			if (_layerBuilder.ContainsKey(visualizer.Key))
+			{
+				_layerBuilder[visualizer.Key].Add(visualizer);
+			}
+			else
+			{
+				_layerBuilder.Add(visualizer.Key, new List<LayerVisualizerBase>() { visualizer });
+			}
+		}
+
+		void OnReplacementTileFeaturesReady(UnityTile tile, List<VectorFeatureUnity> featureList)
+		{
+			test++;
+			if(test == 9)
+			{
+				foreach (var item in _properties.locationPrefabList)
+				{
+					LayerVisualizerBase visualizer = CreateInstance<LocationPrefabsLayerVisualizer>();
+					((LocationPrefabsLayerVisualizer)visualizer).SetProperties((PrefabItemOptions)item, _properties.performanceOptions);
+					AddVisualizerToLayerBuilder(visualizer);
+				}
+
+				foreach (var sublayer in _properties.vectorSubLayers)
+				{
+					LayerVisualizerBase visualizer = CreateInstance<VectorLayerVisualizer>();
+					((VectorLayerVisualizer)visualizer).SetProperties(sublayer, _properties.performanceOptions);
+					AddVisualizerToLayerBuilder(visualizer);
+				}
+			}
+		}
+
 
 		public override void SetOptions(LayerProperties options)
 		{
@@ -157,9 +189,25 @@
 
 
 		#region DataFetcherEvents
+		/// <summary>
+		/// Regular processing of vector data when no valid replacement layer is present
+		/// </summary>
+		/// <param name="tile">Tile.</param>
+		/// <param name="vectorTile">Vector tile.</param>
 		private void OnVectorDataRecieved(UnityTile tile, VectorTile vectorTile)
 		{
 			Progress--;
+			//caching all vector tiles for deferred processing
+			if (_deferredProcessDictionary.ContainsKey(tile))
+			{
+				_deferredProcessDictionary[tile] = vectorTile;
+			}
+			else
+			{
+				_deferredProcessDictionary.Add(tile, vectorTile);
+			}
+
+			//regular caching
 			if (_cachedData.ContainsKey(tile))
 			{
 				_cachedData[tile] = vectorTile;
@@ -224,6 +272,7 @@
 			{
 				if (_layerBuilder.ContainsKey(layerName))
 				{
+					Debug.Log(layerName);
 					foreach (var builder in _layerBuilder[layerName])
 					{
 						if (builder.Active)

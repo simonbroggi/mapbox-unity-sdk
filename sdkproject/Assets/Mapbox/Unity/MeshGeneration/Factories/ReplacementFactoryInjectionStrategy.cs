@@ -8,9 +8,6 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 	[CreateAssetMenu(menuName = "Mapbox/Factory Injection/Replacement Factory Injection")]
 	public class ReplacementFactoryInjectionStrategy : ScriptableObject, IFactoryInjectionStrategy
 	{
-		[SerializeField]
-		private VectorSubLayerProperties props;
-
 		public AbstractTileFactory CreateFactory()
 		{
 			//setting up layer properties through code
