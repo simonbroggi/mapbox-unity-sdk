@@ -72,8 +72,17 @@ namespace Mapbox.Unity.MeshGeneration.Data
 
 			//then check polygon
 			var point = Conversions.LatitudeLongitudeToVectorTilePosition(coord, Tile.InitialZoom);
-			var output = PolygonUtils.PointInPolygon(new Point2d<float>(point.x, point.y), _geom);
+			return ContainsTileSpacePoint(new Point2d<float>(point.x, point.y));
+		}
 
+		/// <summary>
+		/// Checks if the supplied point (tile-space co-ordinate) is present inside the feature
+		/// </summary>
+		/// <returns><c>true</c>, if feature point was containsed, <c>false</c> otherwise.</returns>
+		/// <param name="point">Point.</param>
+		public bool ContainsTileSpacePoint(Point2d<float> point)
+		{
+			var output = PolygonUtils.PointInPolygon(point, _geom);
 			return output;
 		}
  

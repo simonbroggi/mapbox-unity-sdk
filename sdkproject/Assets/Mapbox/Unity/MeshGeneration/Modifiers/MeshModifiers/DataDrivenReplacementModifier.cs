@@ -63,7 +63,7 @@
 			_options = (SpawnPrefabOptions)properties;
 		}
 
-		public override void FeaturePreProcess(VectorFeatureUnity feature)
+		public override void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
 		{
 			int index = -1;
 			foreach (var point in _prefabLocations)
@@ -91,7 +91,7 @@
 		/// </summary>
 		/// <returns><c>true</c>, if the feature overlaps with a lat/lon in the modifier <c>false</c> otherwise.</returns>
 		/// <param name="feature">Feature.</param>
-		public bool ShouldReplaceFeature(VectorFeatureUnity feature)
+		public bool ShouldReplaceFeature(VectorFeatureUnity feature, UnityTile tile)
 		{
 			int index = -1;
 

@@ -37,7 +37,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			{
 				foreach(var criterion in Criteria)
 				{
-					if(criterion.ShouldReplaceFeature(feature))
+					if(criterion.ShouldReplaceFeature(feature, tile))
 					{
 						return;
 					}

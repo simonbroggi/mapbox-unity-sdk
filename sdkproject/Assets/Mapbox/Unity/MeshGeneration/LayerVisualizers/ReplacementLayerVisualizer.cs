@@ -13,12 +13,10 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 {
 	public class ReplacementLayerVisualizer : VectorLayerVisualizer
 	{
-		private List<VectorFeatureUnity> _injectedFeaturesList =  new List<VectorFeatureUnity>();
 		public event Action<UnityTile, List<VectorFeatureUnity>> OnReplacementTileFeaturesReady = delegate { };
 
 		public void SetProperties(ReplacementSubLayerProperties properties, LayerPerformanceOptions performanceOptions)
 		{
-			isReplacementVisualizer = true;
 			SubLayerProperties = properties;
 		}
 
@@ -69,12 +67,13 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 			#region PreProcess & Process. 
 
 			var featureCount = tempLayerProperties.vectorTileLayer.FeatureCount();
-			_injectedFeaturesList.Clear();
+			List<VectorFeatureUnity> _injectedFeaturesTree = new List<VectorFeatureUnity>();
 			do
 			{
 				for (int i = 0; i < featureCount; i++)
 				{
-					AddFeatureToList(i, tile, tempLayerProperties);
+					var feature = GetFeatureinTileAtIndex(i, tile, tempLayerProperties);
+					_injectedFeaturesTree.Add(feature);
 
 					if (IsCoroutineBucketFull)
 					{
@@ -91,7 +90,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 
 			if (OnReplacementTileFeaturesReady != null)
 			{
-				OnReplacementTileFeaturesReady(tile,_injectedFeaturesList);
+				OnReplacementTileFeaturesReady(tile,_injectedFeaturesTree);
 			}
 			#endregion
 
@@ -106,12 +105,6 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 
 			if (callback != null)
 				callback();
-		}
-
-		private void AddFeatureToList(int index, UnityTile tile, VectorLayerVisualizerProperties layerProperties)
-		{
-			var feature = GetFeatureinTileAtIndex(index, tile, layerProperties);
-			_injectedFeaturesList.Add(feature);
 		}
 
 		/// <summary>

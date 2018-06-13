@@ -11,6 +11,7 @@
 	using Mapbox.Unity.Map;
 	using Mapbox.Unity.Utilities;
 	using Mapbox.Unity.MeshGeneration.Filters;
+	using Mapbox.Geocoding;
 
 	public class VectorLayerVisualizerProperties
 	{
@@ -52,15 +53,12 @@
 		protected LayerPerformanceOptions _performanceOptions;
 		protected Dictionary<UnityTile, List<int>> _activeCoroutines;
 
-		protected bool isReplacementVisualizer = false;
-
 		protected int _entityInCurrentCoroutine = 0;
 
 		protected ModifierStackBase _defaultStack;
 		private HashSet<ulong> _activeIds;
 		private Dictionary<UnityTile, List<ulong>> _idPool; //necessary to keep _activeIds list up to date when unloading tiles
 		private string _key;
-
 		public override string Key
 		{
 			get { return _layerProperties.coreOptions.layerName; }
@@ -310,11 +308,13 @@
 		{
 			if (!_activeCoroutines.ContainsKey(tile))
 				_activeCoroutines.Add(tile, new List<int>());
-			_activeCoroutines[tile].Add(Runnable.Run(ProcessLayer(layer, tile, callback)));
+			_activeCoroutines[tile].Add(Runnable.Run(ProcessLayer(layer, tile, callback, replacementFeatures)));
 		}
 
-		protected IEnumerator ProcessLayer(VectorTileLayer layer, UnityTile tile, Action callback = null)
+		protected IEnumerator ProcessLayer(VectorTileLayer layer, UnityTile tile, Action callback = null, List<VectorFeatureUnity> replacementFeatures = null)
 		{
+			Debug.Log(replacementFeatures.Count);
+
 			//HACK to prevent request finishing on same frame which breaks modules started/finished events
 			yield return null;
 
@@ -322,6 +322,7 @@
 			{
 				yield break;
 			}
+			Debug.Log(replacementFeatures.Count);
 
 			VectorLayerVisualizerProperties tempLayerProperties = new VectorLayerVisualizerProperties();
 			tempLayerProperties.vectorTileLayer = layer;
@@ -365,8 +366,7 @@
 			{
 				for (int i = 0; i < featureCount; i++)
 				{
-
-					ProcessFeature(i, tile, tempLayerProperties);
+					ProcessFeature(i, tile, tempLayerProperties, replacementFeatures);
 
 					if (IsCoroutineBucketFull)
 					{
@@ -395,7 +395,7 @@
 				callback();
 		}
 
-		private bool ProcessFeature(int index, UnityTile tile, VectorLayerVisualizerProperties layerProperties)
+		private bool ProcessFeature(int index, UnityTile tile, VectorLayerVisualizerProperties layerProperties, List<VectorFeatureUnity> replacementFeatures = null)
 		{
 			var feature = GetFeatureinTileAtIndex(index, tile, layerProperties);
 
@@ -407,7 +407,7 @@
 					{
 						case FeatureProcessingStage.PreProcess:
 							//pre process features.
-							PreProcessFeatures(feature, tile, tile.gameObject);
+							PreProcessFeatures(feature, tile, tile.gameObject, replacementFeatures);
 							break;
 						case FeatureProcessingStage.Process:
 							//skip existing features, only works on tilesets with unique ids
@@ -447,14 +447,14 @@
 			return true;
 		}
 
-		protected void PreProcessFeatures(VectorFeatureUnity feature, UnityTile tile, GameObject parent)
+		protected void PreProcessFeatures(VectorFeatureUnity feature, UnityTile tile, GameObject parent, List<VectorFeatureUnity> replacementFeatures)
 		{
 			////find any replacement criteria and assign them
 			foreach (var goModifier in _defaultStack.GoModifiers)
 			{
 				if (goModifier is IReplacementCriteria && goModifier.Active)
 				{
-					goModifier.FeaturePreProcess(feature);
+					goModifier.FeaturePreProcess(feature, tile, replacementFeatures);
 				}
 			}
 		}

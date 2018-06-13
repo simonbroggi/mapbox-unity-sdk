@@ -23,7 +23,10 @@
 		[SerializeField]
 		private SpawnPrefabOptions _options;
 		private List<GameObject> _prefabList = new List<GameObject>();
+		private KDTree.KDTree<VectorFeatureUnity> _injectedFeatures = new KDTree.KDTree<VectorFeatureUnity>(2);
 
+		[NonSerialized]
+		Dictionary<UnityTile, List<VectorFeatureUnity>> replacementFeaturesDictionary = new Dictionary<UnityTile, List<VectorFeatureUnity>>();
 		[SerializeField]
 		[Geocode]
 		private List<string> _prefabLocations;
@@ -35,7 +38,9 @@
 		/// We need a list of featureIds per location. 
 		/// A list is required since buildings on tile boundary will have multiple id's for the same feature.
 		/// </summary>
-		private List<List<string>> _featureId;
+		private HashSet<string> overlappingFeatureIdSchema = new HashSet<string>();
+		[NonSerialized]
+		List<UnityTile> tempTileList = new List<UnityTile>() ;
 		private string _tempFeatureId;
 
 		public override void Initialize()
@@ -43,11 +48,6 @@
 			base.Initialize();
 			//duplicate the list of lat/lons to track which coordinates have already been spawned
 			_latLonToSpawn = new List<string>(_prefabLocations);
-			_featureId = new List<List<string>>();
-			for (int i = 0; i < _prefabLocations.Count; i++)
-			{
-				_featureId.Add(new List<string>());
-			}
 			if (_objects == null)
 			{
 				_objects = new Dictionary<GameObject, GameObject>();
@@ -60,7 +60,7 @@
 			_options = (SpawnPrefabOptions)properties;
 		}
 
-		public override void FeaturePreProcess(VectorFeatureUnity feature)
+		public override void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
 		{
 			int index = -1;
 			foreach (var point in _prefabLocations)
@@ -71,49 +71,11 @@
 					var coord = Conversions.StringToLatLon(point);
 					if (feature.ContainsLatLon(coord) && (feature.Data.Id != 0))
 					{
-						_featureId[index] = (_featureId[index] == null) ? new List<string>() : _featureId[index];
 						_tempFeatureId = feature.Data.Id.ToString();
-						_featureId[index].Add(_tempFeatureId.Substring(0, _tempFeatureId.Length - 3));
-					}
-				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Check the feature against the list of lat/lons in the modifier
-		/// </summary>
-		/// <returns><c>true</c>, if the feature overlaps with a lat/lon in the modifier <c>false</c> otherwise.</returns>
-		/// <param name="feature">Feature.</param>
-		public bool ShouldReplaceFeature(VectorFeatureUnity feature)
-		{
-			int index = -1;
-
-			foreach (var point in _prefabLocations)
-			{
-				try
-				{
-					index++;
-					if (_featureId[index] != null)
-					{
-						foreach (var featureId in _featureId[index])
+						//_tempFeatureId = _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
+						if (!overlappingFeatureIdSchema.Contains(_tempFeatureId))
 						{
-							//preventing spawning of explicitly blocked features
-							foreach (var blockedId in _explicitlyBlockedFeatureIds)
-							{
-								if (feature.Data.Id.ToString() == blockedId)
-								{
-									return true;
-								}
-							}
-
-							if (feature.Data.Id.ToString().StartsWith(featureId, StringComparison.CurrentCulture))
-							{
-								return true;
-							}
+							overlappingFeatureIdSchema.Add(_tempFeatureId);
 						}
 					}
 				}
@@ -121,7 +83,89 @@
 				{
 					Debug.LogException(e);
 				}
+			}
 
+			//Meta-data driven replacement
+			if(replacementFeatures == null || replacementFeatures.Count==0)
+			{
+				return;
+			}
+
+			if (!replacementFeaturesDictionary.ContainsKey(tile))
+			{
+				replacementFeaturesDictionary.Add(tile, replacementFeatures); //just to make sure this executes only once per tile
+			}
+
+			return;
+			foreach (var featureItem in replacementFeatures)
+			{
+				if (featureItem.Points != null && featureItem.Points.Count > 0 && featureItem.Points[0].Count > 0)
+				{
+					try
+					{
+						var point = featureItem.Points[0][0];
+						if (feature.ContainsTileSpacePoint(new Point2d<float>(point.x, point.z)))
+						{
+							_tempFeatureId = feature.Data.Id.ToString();
+							//_tempFeatureId = _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
+							if (!overlappingFeatureIdSchema.Contains(_tempFeatureId))
+							{
+								overlappingFeatureIdSchema.Add(_tempFeatureId);
+								Debug.Log(_tempFeatureId);
+							}
+						}
+					}
+					catch (Exception e)
+					{
+						Debug.LogException(e);
+					}
+				}
+				else
+				{
+					Debug.Log(featureItem);
+				}
+			}
+			
+		}
+
+		/// <summary>
+		/// Check the feature against the list of lat/lons in the modifier
+		/// </summary>
+		/// <returns><c>true</c>, if the feature overlaps with a lat/lon in the modifier <c>false</c> otherwise.</returns>
+		/// <param name="feature">Feature.</param>
+		public bool ShouldReplaceFeature(VectorFeatureUnity feature, UnityTile tile)
+		{
+			int index = -1;
+			int count = _prefabLocations.Count + replacementFeaturesDictionary[tile].Count;
+			return false;
+			while(count>0)
+			{
+				count--;
+				try
+				{
+					index++;
+					//preventing spawning of explicitly blocked features
+					foreach (var blockedId in _explicitlyBlockedFeatureIds)
+					{
+						if (feature.Data.Id.ToString() == blockedId)
+						{
+							return true;
+						}
+					}
+
+					if (overlappingFeatureIdSchema.Count > 0)
+					{
+						var featureId = feature.Data.Id.ToString();
+						if (overlappingFeatureIdSchema.Contains(featureId.Substring(0,featureId.Length-3)))
+						{
+							return true;
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+				}
 			}
 			return false;
 		}
@@ -202,6 +246,8 @@
 		/// <param name="feature">Feature.</param>
 		private bool ShouldSpawnFeature(VectorFeatureUnity feature)
 		{
+			return false;
+
 			if (feature == null)
 			{
 				return false;
@@ -214,6 +260,28 @@
 				{
 					_latLonToSpawn.Remove(point);
 					return true;
+				}
+			}
+
+			//metadata driven replacement check
+			if(replacementFeaturesDictionary==null || replacementFeaturesDictionary.Count==0)
+			{
+				return false;
+			}
+			var featureKeys = replacementFeaturesDictionary.Keys;
+			foreach(var featureKey in featureKeys)
+			{
+				var features = replacementFeaturesDictionary[featureKey];
+				foreach(var featureItem in features)
+				{
+					if (featureItem.Points != null && featureItem.Points.Count > 0 && featureItem.Points[0].Count > 0)
+					{
+						var point = featureItem.Points[0][0];
+						if (feature.ContainsTileSpacePoint(new Point2d<float>(point.x, point.z)))
+						{
+							return true;
+						}
+					}
 				}
 			}
 

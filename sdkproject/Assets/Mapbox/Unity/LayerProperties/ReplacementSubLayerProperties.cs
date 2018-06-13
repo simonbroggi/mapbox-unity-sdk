@@ -23,8 +23,8 @@ namespace Mapbox.Unity.Map
 			//Filters
 			LayerFilter layerFilter = new LayerFilter(LayerFilterOperationType.Contains)
 			{
-				Key = "type",
-				PropertyValue = "restaurant"
+				//Key = "type",
+				//PropertyValue = "residential"
 			};
 			List<LayerFilter> filters = new List<LayerFilter>();
 

@@ -55,6 +55,8 @@
 			}
 		}
 
+		private bool poiAndLayerVisualizersGenerated =  false;
+
 		protected VectorDataFetcher DataFetcher;
 
 		#region AbstractFactoryOverrides
@@ -107,48 +109,48 @@
 		/// Event handler method for generated replacement features. Should be called only once per UnityTile instance
 		/// </summary>
 		/// <param name="tile">Tile.</param>
-		/// <param name="featureList">Feature list.</param>
-		void OnReplacementTileFeaturesReady(UnityTile tile, List<VectorFeatureUnity> featureList)
+		/// <param name="replacementFeatures">Feature list.</param>
+		void OnReplacementTileFeaturesReady(UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
 		{
 			if(!_replacementFeaturesDictionary.ContainsKey(tile))
 			{
-				_replacementFeaturesDictionary.Add(tile, featureList);
+				_replacementFeaturesDictionary.Add(tile, replacementFeatures); // just maintaining a copy. not being used anywhere
 			}
 			else
 			{
 				Debug.LogError("Replacement feature list already exists for the UnityTile " + tile);
 			}
 
-			if(_replacementFeaturesDictionary.Count == _deferredUnprocessedTileDictionary.Count)
+			//remove the replacement visualizer from _layerBuilder dictionary
+			var _layerBuilderCopy = _layerBuilder;
+			foreach (var layerName in _deferredUnprocessedTileDictionary[tile].Data.LayerNames())
 			{
-				//remove the current visualizer from _layerBuilder dictionary
-				var _layerBuilderCopy = _layerBuilder;
-				foreach (var layerName in _deferredUnprocessedTileDictionary[tile].Data.LayerNames())
+				if (_layerBuilder.ContainsKey(layerName))
 				{
-					if (_layerBuilder.ContainsKey(layerName))
+					foreach (var visualizer in _layerBuilder[layerName].ToArray())
 					{
-						foreach (var visualizer in _layerBuilder[layerName].ToArray())
+						if (visualizer is ReplacementLayerVisualizer)
 						{
-							if (visualizer is ReplacementLayerVisualizer)
-								_layerBuilderCopy[layerName].Remove(visualizer);
+							_layerBuilderCopy[layerName].Remove(visualizer);
 						}
 					}
 				}
-
-				_layerBuilder = _layerBuilderCopy;
-
-				CreatePOIAndFeatureVisualizers();
-				foreach(var tileFeatures in _replacementFeaturesDictionary)
-				{
-					var unityTile = tileFeatures.Key;
-					var features = tileFeatures.Value;
-					CreateDeferredMeshes(unityTile, features);
-				}
 			}
+
+			_layerBuilder = _layerBuilderCopy;
+
+			CreatePOIAndFeatureVisualizers();
+			CreateDeferredMeshes(tile, replacementFeatures);
+
 		}
 
 		private void CreatePOIAndFeatureVisualizers()
 		{
+			if(poiAndLayerVisualizersGenerated)
+			{
+				return;
+			}
+
 			foreach (var item in _properties.locationPrefabList)
 			{
 				LayerVisualizerBase visualizer = CreateInstance<LocationPrefabsLayerVisualizer>();
@@ -162,6 +164,8 @@
 				((VectorLayerVisualizer)visualizer).SetProperties(sublayer, _properties.performanceOptions);
 				AddVisualizerToLayerBuilder(visualizer);
 			}
+
+			poiAndLayerVisualizersGenerated = true;
 		}
 
 		public override void SetOptions(LayerProperties options)
@@ -304,7 +308,6 @@
 			{
 				if (_layerBuilder.ContainsKey(layerName))
 				{
-					Debug.Log(layerName);
 					foreach (var builder in _layerBuilder[layerName])
 					{
 						if (builder.Active)
@@ -339,7 +342,7 @@
 		/// Fetches the vector data and passes each layer to relevant layer visualizers
 		/// </summary>
 		/// <param name="tile"></param>
-		private void CreateDeferredMeshes(UnityTile tile, List<VectorFeatureUnity> features)
+		private void CreateDeferredMeshes(UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
 		{
 			tile.OnHeightDataChanged -= DataChangedHandler;
 			tile.OnRasterDataChanged -= DataChangedHandler;
@@ -352,13 +355,12 @@
 			{
 				if (_layerBuilder.ContainsKey(layerName))
 				{
-					Debug.Log(layerName);
 					foreach (var builder in _layerBuilder[layerName])
 					{
 						if (builder.Active)
 						{
 							Progress++;
-							builder.Create(_deferredUnprocessedTileDictionary[tile].Data.GetLayer(layerName), tile, DecreaseProgressCounter, features);
+							builder.Create(_deferredUnprocessedTileDictionary[tile].Data.GetLayer(layerName), tile, DecreaseProgressCounter, replacementFeatures);
 						}
 					}
 				}
@@ -374,7 +376,7 @@
 					{
 						Progress++;
 						//just pass the first available layer - we should create a static null layer for this
-						builder.Create(_deferredUnprocessedTileDictionary[tile].Data.GetLayer(_deferredUnprocessedTileDictionary[tile].Data.LayerNames()[0]), tile, DecreaseProgressCounter);
+						builder.Create(_deferredUnprocessedTileDictionary[tile].Data.GetLayer(_deferredUnprocessedTileDictionary[tile].Data.LayerNames()[0]), tile, DecreaseProgressCounter, replacementFeatures);
 					}
 				}
 			}

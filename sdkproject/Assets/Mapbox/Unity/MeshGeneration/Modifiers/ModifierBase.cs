@@ -3,6 +3,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	using UnityEngine;
 	using System;
 	using Mapbox.Unity.MeshGeneration.Data;
+	using System.Collections.Generic;
 
 	[Serializable]
 	public abstract class ModifierProperties
@@ -26,7 +27,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 
 		}
 
-		public virtual void FeaturePreProcess(VectorFeatureUnity feature)
+		public virtual void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
 		{
 
 		}

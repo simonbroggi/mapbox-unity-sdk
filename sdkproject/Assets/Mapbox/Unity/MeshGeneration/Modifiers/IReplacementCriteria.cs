@@ -4,6 +4,6 @@
 
 	public interface IReplacementCriteria
 	{
-		bool ShouldReplaceFeature(VectorFeatureUnity feature);
+		bool ShouldReplaceFeature(VectorFeatureUnity feature, UnityTile tile);
 	}
 }
