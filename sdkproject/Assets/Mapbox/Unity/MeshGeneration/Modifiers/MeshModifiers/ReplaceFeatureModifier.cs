@@ -39,6 +39,9 @@
 		/// A list is required since buildings on tile boundary will have multiple id's for the same feature.
 		/// </summary>
 		private HashSet<string> overlappingFeatureIdSchema = new HashSet<string>();
+		private HashSet<string> confirmedOverlappingFeatures = new HashSet<string>();
+		private HashSet<string> alreadySpawnedFeatures = new HashSet<string>();
+
 		[NonSerialized]
 		List<UnityTile> tempTileList = new List<UnityTile>() ;
 		private string _tempFeatureId;
@@ -73,7 +76,10 @@
 					if (feature.ContainsLatLon(coord) && (feature.Data.Id != 0))
 					{
 						_tempFeatureId = feature.Data.Id.ToString();
-						//_tempFeatureId = _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
+						confirmedOverlappingFeatures.Add(_tempFeatureId);
+
+						_tempFeatureId = _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
+
 						if (!overlappingFeatureIdSchema.Contains(_tempFeatureId))
 						{
 							overlappingFeatureIdSchema.Add(_tempFeatureId);
@@ -108,6 +114,7 @@
 				if (feature.ContainsTileSpacePoint(point) && (feature.Data.Id != 0))
 				{
 					_tempFeatureId = feature.Data.Id.ToString();
+					confirmedOverlappingFeatures.Add(_tempFeatureId);
 					_tempFeatureId = _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
 					if (!overlappingFeatureIdSchema.Contains(_tempFeatureId))
 					{
@@ -249,34 +256,12 @@
 				return false;
 			}
 
-			foreach (var point in _latLonToSpawn)
+			var featureId = feature.Data.Id.ToString();
+			if(confirmedOverlappingFeatures.Contains(featureId) && !alreadySpawnedFeatures.Contains(featureId))
 			{
-				var coord = Conversions.StringToLatLon(point);
-				if (feature.ContainsLatLon(coord))
-				{
-					_latLonToSpawn.Remove(point);
-					return true;
-				}
-			}
-
-			//metadata driven replacement check
-			if(replacementFeaturesDictionary==null || replacementFeaturesDictionary.Count==0)
-			{
-				return false;
-			}
-
-			var featureKDTree = replacementFeaturesDictionary[feature.Tile];
-			var centroidVector = GetFeatureCentroid(feature);
-			var neighboringFeatures = featureKDTree.NearestNeighbors(new double[] { centroidVector.x, centroidVector.z }, 11, 100);
-			while (neighboringFeatures.MoveNext())
-			{
-				var featureItem = neighboringFeatures.Current;
-				var featureItemPoint = featureItem.Data.Geometry<float>()[0][0];
-				if (feature.ContainsTileSpacePoint(featureItemPoint))
-				{
-					Debug.Log(2);
-					return true;
-				}
+				alreadySpawnedFeatures.Add(featureId);
+				Debug.Log(2);
+				return true;
 			}
 
 			return false;
