@@ -40,7 +40,6 @@
 		/// </summary>
 		private HashSet<string> overlappingFeatureIdSchema = new HashSet<string>();
 		private HashSet<string> confirmedOverlappingFeatures = new HashSet<string>();
-		private HashSet<string> alreadySpawnedFeatures = new HashSet<string>();
 
 		[NonSerialized]
 		List<UnityTile> tempTileList = new List<UnityTile>() ;
@@ -65,7 +64,6 @@
 
 		public override void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, KDTree<VectorFeatureUnity> replacementFeatures)
 		{
-			Debug.Log("feature preprocess request");
 			int index = -1;
 			foreach (var point in _prefabLocations)
 			{
@@ -105,25 +103,26 @@
 
 			var centroidVector = GetFeatureCentroid(feature);
 			var neighboringFeatures = replacementFeatures.NearestNeighbors(new double[] { centroidVector.x, centroidVector.z }, 11, 100);
+
 			while(neighboringFeatures.MoveNext())
 			{
-				Debug.Log("process feature now");
 				var featureItem = neighboringFeatures.Current;
 
 				var point = featureItem.Data.Geometry<float>()[0][0];
 				if (feature.ContainsTileSpacePoint(point) && (feature.Data.Id != 0))
 				{
 					_tempFeatureId = feature.Data.Id.ToString();
+
 					confirmedOverlappingFeatures.Add(_tempFeatureId);
 					_tempFeatureId = _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
 					if (!overlappingFeatureIdSchema.Contains(_tempFeatureId))
 					{
 						overlappingFeatureIdSchema.Add(_tempFeatureId);
-						Debug.Log(1);
 					}
+
 				}
 			}
-			
+
 		}
 
 		private Vector3 GetFeatureCentroid(VectorFeatureUnity feature)
@@ -191,7 +190,7 @@
 
 		private void SpawnPrefab(VectorEntity ve, UnityTile tile)
 		{
-			GameObject go = new GameObject();
+			GameObject go;
 
 			if (_objects.ContainsKey(ve.GameObject))
 			{
@@ -257,10 +256,8 @@
 			}
 
 			var featureId = feature.Data.Id.ToString();
-			if(confirmedOverlappingFeatures.Contains(featureId) && !alreadySpawnedFeatures.Contains(featureId))
+			if(confirmedOverlappingFeatures.Contains(featureId))
 			{
-				alreadySpawnedFeatures.Add(featureId);
-				Debug.Log(2);
 				return true;
 			}
 

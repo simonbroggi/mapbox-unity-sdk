@@ -69,8 +69,6 @@ namespace Mapbox.Unity.Map
 	/// </summary>
 	public class AbstractMap : MonoBehaviour, IMap
 	{
-		[SerializeField]
-		private ReplacementFactoryInjectionStrategy _factoryInjectionStrategy;
 		/// <summary>
 		/// Setting to trigger map initialization in Unity's Start method.
 		/// if set to false, Initialize method should be called explicitly to initialize the map.
@@ -444,11 +442,6 @@ namespace Mapbox.Unity.Map
 			if (_vectorData.IsLayerActive)
 			{
 				_mapVisualizer.Factories.Add(_vectorData.Factory);
-			}
-
-			if (_factoryInjectionStrategy != null)
-			{
-				_mapVisualizer.Factories.Add(_factoryInjectionStrategy.CreateFactory());
 			}
 
 			InitializeMap(_options);

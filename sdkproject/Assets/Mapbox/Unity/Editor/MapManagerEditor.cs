@@ -160,7 +160,6 @@
 				EditorGUILayout.HelpBox("Invalid Access Token. Please add a valid access token using the Mapbox  > Setup Menu", MessageType.Error);
 			}
 
-			EditorGUILayout.ObjectField(mapObject.FindProperty("_factoryInjectionStrategy"),new GUIContent(text:"Injected Factory"));
 			EditorGUILayout.LabelField("Location ", GUILayout.Height(_lineHeight));
 
 			EditorGUILayout.PropertyField(property.FindPropertyRelative("locationOptions"));

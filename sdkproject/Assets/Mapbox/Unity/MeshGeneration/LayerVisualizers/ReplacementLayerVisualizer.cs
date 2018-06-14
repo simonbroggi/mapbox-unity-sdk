@@ -81,10 +81,6 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 						var point = feature.Points[0][0];
 						_injectedFeaturesTree.AddPoint(new double[] { point.x, point.z }, feature);
 					}
-					else
-					{
-						Debug.Log(feature);
-					}
 
 					if (IsCoroutineBucketFull)
 					{
