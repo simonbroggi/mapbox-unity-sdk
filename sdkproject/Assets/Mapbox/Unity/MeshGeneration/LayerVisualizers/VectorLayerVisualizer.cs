@@ -12,6 +12,7 @@
 	using Mapbox.Unity.Utilities;
 	using Mapbox.Unity.MeshGeneration.Filters;
 	using Mapbox.Geocoding;
+	using KDTree;
 
 	public class VectorLayerVisualizerProperties
 	{
@@ -304,17 +305,15 @@
 			}
 		}
 
-		public override void Create(VectorTileLayer layer, UnityTile tile, Action callback, List<VectorFeatureUnity> replacementFeatures = null)
+		public override void Create(VectorTileLayer layer, UnityTile tile, Action callback, KDTree<VectorFeatureUnity> replacementFeatures = null)
 		{
 			if (!_activeCoroutines.ContainsKey(tile))
 				_activeCoroutines.Add(tile, new List<int>());
 			_activeCoroutines[tile].Add(Runnable.Run(ProcessLayer(layer, tile, callback, replacementFeatures)));
 		}
 
-		protected IEnumerator ProcessLayer(VectorTileLayer layer, UnityTile tile, Action callback = null, List<VectorFeatureUnity> replacementFeatures = null)
+		protected IEnumerator ProcessLayer(VectorTileLayer layer, UnityTile tile, Action callback = null, KDTree<VectorFeatureUnity> replacementFeatures = null)
 		{
-			Debug.Log(replacementFeatures.Count);
-
 			//HACK to prevent request finishing on same frame which breaks modules started/finished events
 			yield return null;
 
@@ -322,7 +321,6 @@
 			{
 				yield break;
 			}
-			Debug.Log(replacementFeatures.Count);
 
 			VectorLayerVisualizerProperties tempLayerProperties = new VectorLayerVisualizerProperties();
 			tempLayerProperties.vectorTileLayer = layer;
@@ -395,7 +393,7 @@
 				callback();
 		}
 
-		private bool ProcessFeature(int index, UnityTile tile, VectorLayerVisualizerProperties layerProperties, List<VectorFeatureUnity> replacementFeatures = null)
+		private bool ProcessFeature(int index, UnityTile tile, VectorLayerVisualizerProperties layerProperties, KDTree<VectorFeatureUnity> replacementFeatures = null)
 		{
 			var feature = GetFeatureinTileAtIndex(index, tile, layerProperties);
 
@@ -447,7 +445,7 @@
 			return true;
 		}
 
-		protected void PreProcessFeatures(VectorFeatureUnity feature, UnityTile tile, GameObject parent, List<VectorFeatureUnity> replacementFeatures)
+		protected void PreProcessFeatures(VectorFeatureUnity feature, UnityTile tile, GameObject parent, KDTree<VectorFeatureUnity> replacementFeatures)
 		{
 			////find any replacement criteria and assign them
 			foreach (var goModifier in _defaultStack.GoModifiers)
@@ -461,11 +459,11 @@
 
 		protected void Build(VectorFeatureUnity feature, UnityTile tile, GameObject parent)
 		{
-			if (feature.Properties.ContainsKey("extrude") && !Convert.ToBoolean(feature.Properties["extrude"]))
+			if(!IsFeatureValid(feature))
+			{
+				Debug.Log(false);
 				return;
-
-			if (feature.Points.Count < 1)
-				return;
+			}
 
 			//this will be improved in next version and will probably be replaced by filters
 			var styleSelectorKey = _layerProperties.coreOptions.sublayerName;

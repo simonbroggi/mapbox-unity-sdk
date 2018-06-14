@@ -11,7 +11,7 @@
 	using Mapbox.Unity.MeshGeneration.Interfaces;
 	using Mapbox.Unity.MeshGeneration.Factories;
 	using Mapbox.Unity.MeshGeneration.Filters;
-
+	using KDTree;
 
 	/// <summary>
 	/// ReplaceBuildingFeatureModifier takes in POIs and checks if the feature layer has those points and deletes them
@@ -63,7 +63,7 @@
 			_options = (SpawnPrefabOptions)properties;
 		}
 
-		public override void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
+		public override void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, KDTree<VectorFeatureUnity> replacementFeatures)
 		{
 			int index = -1;
 			foreach (var point in _prefabLocations)

@@ -4,7 +4,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	using System;
 	using Mapbox.Unity.MeshGeneration.Data;
 	using System.Collections.Generic;
-
+	using KDTree;
 	[Serializable]
 	public abstract class ModifierProperties
 	{
@@ -27,7 +27,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 
 		}
 
-		public virtual void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
+		public virtual void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, KDTree<VectorFeatureUnity> replacementFeatures)
 		{
 
 		}

@@ -9,7 +9,7 @@
 	using Mapbox.Unity.Utilities;
 	using Mapbox.VectorTile.Geometry;
 	using Mapbox.Unity.MeshGeneration.Interfaces;
-
+	using KDTree;
 
 	/// <summary>
 	/// ReplaceBuildingFeatureModifier takes in POIs and checks if the feature layer has those points and deletes them
@@ -26,7 +26,7 @@
 		private KDTree.KDTree<VectorFeatureUnity> _injectedFeatures = new KDTree.KDTree<VectorFeatureUnity>(2);
 
 		[NonSerialized]
-		Dictionary<UnityTile, List<VectorFeatureUnity>> replacementFeaturesDictionary = new Dictionary<UnityTile, List<VectorFeatureUnity>>();
+		Dictionary<UnityTile, KDTree<VectorFeatureUnity>> replacementFeaturesDictionary = new Dictionary<UnityTile, KDTree<VectorFeatureUnity>>();
 		[SerializeField]
 		[Geocode]
 		private List<string> _prefabLocations;
@@ -60,8 +60,9 @@
 			_options = (SpawnPrefabOptions)properties;
 		}
 
-		public override void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
+		public override void FeaturePreProcess(VectorFeatureUnity feature, UnityTile tile, KDTree<VectorFeatureUnity> replacementFeatures)
 		{
+			Debug.Log("feature preprocess request");
 			int index = -1;
 			foreach (var point in _prefabLocations)
 			{
@@ -86,7 +87,7 @@
 			}
 
 			//Meta-data driven replacement
-			if(replacementFeatures == null || replacementFeatures.Count==0)
+			if(replacementFeatures == null || replacementFeatures.Size==0)
 			{
 				return;
 			}
@@ -96,36 +97,38 @@
 				replacementFeaturesDictionary.Add(tile, replacementFeatures); //just to make sure this executes only once per tile
 			}
 
-			return;
-			foreach (var featureItem in replacementFeatures)
+			var centroidVector = GetFeatureCentroid(feature);
+			var neighboringFeatures = replacementFeatures.NearestNeighbors(new double[] { centroidVector.x, centroidVector.z }, 11, 100);
+			while(neighboringFeatures.MoveNext())
 			{
-				if (featureItem.Points != null && featureItem.Points.Count > 0 && featureItem.Points[0].Count > 0)
+				Debug.Log("process feature now");
+				var featureItem = neighboringFeatures.Current;
+
+				var point = featureItem.Data.Geometry<float>()[0][0];
+				if (feature.ContainsTileSpacePoint(point) && (feature.Data.Id != 0))
 				{
-					try
+					_tempFeatureId = feature.Data.Id.ToString();
+					_tempFeatureId = _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
+					if (!overlappingFeatureIdSchema.Contains(_tempFeatureId))
 					{
-						var point = featureItem.Points[0][0];
-						if (feature.ContainsTileSpacePoint(new Point2d<float>(point.x, point.z)))
-						{
-							_tempFeatureId = feature.Data.Id.ToString();
-							//_tempFeatureId = _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
-							if (!overlappingFeatureIdSchema.Contains(_tempFeatureId))
-							{
-								overlappingFeatureIdSchema.Add(_tempFeatureId);
-								Debug.Log(_tempFeatureId);
-							}
-						}
+						overlappingFeatureIdSchema.Add(_tempFeatureId);
+						Debug.Log(1);
 					}
-					catch (Exception e)
-					{
-						Debug.LogException(e);
-					}
-				}
-				else
-				{
-					Debug.Log(featureItem);
 				}
 			}
 			
+		}
+
+		private Vector3 GetFeatureCentroid(VectorFeatureUnity feature)
+		{
+			var centroidVector = new Vector3();
+			foreach (var point in feature.Points[0])
+			{
+				centroidVector += point;
+			}
+			centroidVector = centroidVector / feature.Points[0].Count;
+
+			return centroidVector;
 		}
 
 		/// <summary>
@@ -136,8 +139,9 @@
 		public bool ShouldReplaceFeature(VectorFeatureUnity feature, UnityTile tile)
 		{
 			int index = -1;
-			int count = _prefabLocations.Count + replacementFeaturesDictionary[tile].Count;
-			return false;
+			int count = _prefabLocations.Count + replacementFeaturesDictionary[tile].Size;
+			var featureId = feature.Data.Id.ToString();
+			featureId = featureId.Substring(0, featureId.Length - 3);
 			while(count>0)
 			{
 				count--;
@@ -155,8 +159,7 @@
 
 					if (overlappingFeatureIdSchema.Count > 0)
 					{
-						var featureId = feature.Data.Id.ToString();
-						if (overlappingFeatureIdSchema.Contains(featureId.Substring(0,featureId.Length-3)))
+						if (overlappingFeatureIdSchema.Contains(featureId))
 						{
 							return true;
 						}
@@ -173,7 +176,7 @@
 		public override void Run(VectorEntity ve, UnityTile tile)
 		{
 			//replace the feature only once per lat/lon
-			if (ShouldSpawnFeature(ve.Feature))
+			if (ShouldSpawnFeature(ve.Feature, tile))
 			{
 				SpawnPrefab(ve, tile);
 			}
@@ -207,12 +210,7 @@
 		{
 			RectTransform goRectTransform;
 			IFeaturePropertySettable settable = null;
-			var centroidVector = new Vector3();
-			foreach (var point in ve.Feature.Points[0])
-			{
-				centroidVector += point;
-			}
-			centroidVector = centroidVector / ve.Feature.Points[0].Count;
+			var centroidVector = GetFeatureCentroid(ve.Feature);
 
 			go.name = ve.Feature.Data.Id.ToString();
 
@@ -244,10 +242,8 @@
 		/// </summary>
 		/// <returns><c>true</c>, if the feature should be spawned <c>false</c> otherwise.</returns>
 		/// <param name="feature">Feature.</param>
-		private bool ShouldSpawnFeature(VectorFeatureUnity feature)
+		private bool ShouldSpawnFeature(VectorFeatureUnity feature, UnityTile tile)
 		{
-			return false;
-
 			if (feature == null)
 			{
 				return false;
@@ -268,20 +264,18 @@
 			{
 				return false;
 			}
-			var featureKeys = replacementFeaturesDictionary.Keys;
-			foreach(var featureKey in featureKeys)
+
+			var featureKDTree = replacementFeaturesDictionary[feature.Tile];
+			var centroidVector = GetFeatureCentroid(feature);
+			var neighboringFeatures = featureKDTree.NearestNeighbors(new double[] { centroidVector.x, centroidVector.z }, 11, 100);
+			while (neighboringFeatures.MoveNext())
 			{
-				var features = replacementFeaturesDictionary[featureKey];
-				foreach(var featureItem in features)
+				var featureItem = neighboringFeatures.Current;
+				var featureItemPoint = featureItem.Data.Geometry<float>()[0][0];
+				if (feature.ContainsTileSpacePoint(featureItemPoint))
 				{
-					if (featureItem.Points != null && featureItem.Points.Count > 0 && featureItem.Points[0].Count > 0)
-					{
-						var point = featureItem.Points[0][0];
-						if (feature.ContainsTileSpacePoint(new Point2d<float>(point.x, point.z)))
-						{
-							return true;
-						}
-					}
+					Debug.Log(2);
+					return true;
 				}
 			}
 

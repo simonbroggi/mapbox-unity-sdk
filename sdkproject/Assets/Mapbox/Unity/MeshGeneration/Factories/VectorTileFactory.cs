@@ -8,7 +8,7 @@
 	using Mapbox.Map;
 	using Mapbox.Unity.Map;
 	using System;
-
+	using KDTree;
 	/// <summary>
 	///	Vector Tile Factory
 	/// Vector data is much more detailed compared to terrain and image data so we have a different structure to process 
@@ -29,8 +29,7 @@
 		private Dictionary<string, List<LayerVisualizerBase>> _layerBuilder;
 		private Dictionary<UnityTile, VectorTile> _cachedData = new Dictionary<UnityTile, VectorTile>();
 		private Dictionary<UnityTile, VectorTile> _deferredUnprocessedTileDictionary = new Dictionary<UnityTile, VectorTile>();
-		private Dictionary<UnityTile, List<VectorFeatureUnity>> _replacementFeaturesDictionary
- = new Dictionary<UnityTile, List<VectorFeatureUnity>>();
+		private Dictionary<UnityTile, KDTree<VectorFeatureUnity>> _replacementFeaturesDictionary = new Dictionary<UnityTile, KDTree<VectorFeatureUnity>>();
 		private VectorLayerProperties _properties;
 		private int test = 0;
 		private Action<Dictionary<UnityTile, List<VectorFeatureUnity>>> _tileFeaturesLoaded = delegate {};
@@ -110,7 +109,7 @@
 		/// </summary>
 		/// <param name="tile">Tile.</param>
 		/// <param name="replacementFeatures">Feature list.</param>
-		void OnReplacementTileFeaturesReady(UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
+		void OnReplacementTileFeaturesReady(UnityTile tile, KDTree<VectorFeatureUnity> replacementFeatures)
 		{
 			if(!_replacementFeaturesDictionary.ContainsKey(tile))
 			{
@@ -342,7 +341,7 @@
 		/// Fetches the vector data and passes each layer to relevant layer visualizers
 		/// </summary>
 		/// <param name="tile"></param>
-		private void CreateDeferredMeshes(UnityTile tile, List<VectorFeatureUnity> replacementFeatures)
+		private void CreateDeferredMeshes(UnityTile tile, KDTree<VectorFeatureUnity> replacementFeatures)
 		{
 			tile.OnHeightDataChanged -= DataChangedHandler;
 			tile.OnRasterDataChanged -= DataChangedHandler;

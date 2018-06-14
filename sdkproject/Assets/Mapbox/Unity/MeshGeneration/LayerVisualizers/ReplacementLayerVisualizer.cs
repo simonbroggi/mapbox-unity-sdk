@@ -8,19 +8,21 @@ using System;
 using Mapbox.Unity.Utilities;
 using Mapbox.Unity.MeshGeneration.Modifiers;
 using System.Linq;
+using KDTree;
+using UnityEngine;
 
 namespace Mapbox.Unity.MeshGeneration.Interfaces
 {
 	public class ReplacementLayerVisualizer : VectorLayerVisualizer
 	{
-		public event Action<UnityTile, List<VectorFeatureUnity>> OnReplacementTileFeaturesReady = delegate { };
+		public event Action<UnityTile, KDTree<VectorFeatureUnity>> OnReplacementTileFeaturesReady = delegate { };
 
 		public void SetProperties(ReplacementSubLayerProperties properties, LayerPerformanceOptions performanceOptions)
 		{
 			SubLayerProperties = properties;
 		}
 
-		public override void Create(VectorTileLayer layer, UnityTile tile, Action callback, List<VectorFeatureUnity> replacementFeatures = null)
+		public override void Create(VectorTileLayer layer, UnityTile tile, Action callback, KDTree<VectorFeatureUnity> replacementFeatures = null)
 		{
 			//base.Create(layer, tile, callback);
 			if (!_activeCoroutines.ContainsKey(tile))
@@ -67,13 +69,22 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 			#region PreProcess & Process. 
 
 			var featureCount = tempLayerProperties.vectorTileLayer.FeatureCount();
-			List<VectorFeatureUnity> _injectedFeaturesTree = new List<VectorFeatureUnity>();
+			KDTree<VectorFeatureUnity> _injectedFeaturesTree = new KDTree<VectorFeatureUnity>(2);
 			do
 			{
 				for (int i = 0; i < featureCount; i++)
 				{
 					var feature = GetFeatureinTileAtIndex(i, tile, tempLayerProperties);
-					_injectedFeaturesTree.Add(feature);
+
+					if (feature.Points != null && feature.Points.Count > 0 && feature.Points[0] != null && feature.Points[0].Count > 0)
+					{
+						var point = feature.Points[0][0];
+						_injectedFeaturesTree.AddPoint(new double[] { point.x, point.z }, feature);
+					}
+					else
+					{
+						Debug.Log(feature);
+					}
 
 					if (IsCoroutineBucketFull)
 					{

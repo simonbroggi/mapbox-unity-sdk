@@ -9,6 +9,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 	using Mapbox.Unity.MeshGeneration.Data;
 	using Mapbox.Unity.Map;
 	using Mapbox.VectorTile;
+	using KDTree;
 
 	public class LocationPrefabsLayerVisualizer : VectorLayerVisualizer
 	{
@@ -224,7 +225,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 			return containingCategories;
 		}
 
-		public override void Create(VectorTileLayer layer, UnityTile tile, Action callback, List<VectorFeatureUnity> replacementFeatures = null)
+		public override void Create(VectorTileLayer layer, UnityTile tile, Action callback, KDTree<VectorFeatureUnity> replacementFeatures = null)
 		{
 			//for layers using specific locations, ignore VectorTileLayer and
 			//pass coordinates to the modifierstack using BuildFeatureFromLatLon.

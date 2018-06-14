@@ -21,6 +21,7 @@ namespace Mapbox.Unity.Map
 			};
 
 			//Filters
+			/*
 			LayerFilter layerFilter = new LayerFilter(LayerFilterOperationType.Contains)
 			{
 				//Key = "type",
@@ -34,6 +35,7 @@ namespace Mapbox.Unity.Map
 				filters = filters,
 				combinerType = LayerFilterCombinerOperationType.Any
 			};
+			*/
 		}
 	}
 }
