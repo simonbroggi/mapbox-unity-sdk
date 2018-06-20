@@ -53,9 +53,9 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 		{
 			if (tile != null)
 			{
-				Progress--;
 				tile.SetRasterData(rasterTile.Data, _properties.rasterOptions.useMipMap, _properties.rasterOptions.useCompression);
 				tile.RasterDataState = TilePropertyState.Loaded;
+				Progress--;
 			}
 		}
 

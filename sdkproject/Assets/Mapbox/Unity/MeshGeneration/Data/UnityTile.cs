@@ -32,6 +32,10 @@ namespace Mapbox.Unity.MeshGeneration.Data
 				if (_meshRenderer == null)
 				{
 					_meshRenderer = GetComponent<MeshRenderer>();
+					if (null == _meshRenderer)
+					{
+						_meshRenderer = gameObject.AddComponent<MeshRenderer>();
+					}
 				}
 				return _meshRenderer;
 			}
@@ -212,6 +216,7 @@ namespace Mapbox.Unity.MeshGeneration.Data
 
 		public void SetRasterData(byte[] data, bool useMipMap, bool useCompression)
 		{
+			Debug.Log("SetRasterData: MeshRenderer==null => " + (MeshRenderer == null));
 			if (MeshRenderer == null || MeshRenderer.material == null)
 			{
 				return;
