@@ -216,7 +216,6 @@ namespace Mapbox.Unity.MeshGeneration.Data
 
 		public void SetRasterData(byte[] data, bool useMipMap, bool useCompression)
 		{
-			Debug.Log("SetRasterData: MeshRenderer==null => " + (MeshRenderer == null));
 			if (MeshRenderer == null || MeshRenderer.material == null)
 			{
 				return;
