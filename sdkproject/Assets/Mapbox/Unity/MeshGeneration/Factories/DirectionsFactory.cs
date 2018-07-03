@@ -10,32 +10,35 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 	using Mapbox.Utils;
 	using Mapbox.Unity.Utilities;
 	using System.Collections;
+	using Mapbox.Examples;
+	using System;
+
+	public enum RouteProfileTypes
+	{
+		Driving,
+		Walking,
+		Cycling
+	}
 
 	public class DirectionsFactory : MonoBehaviour
 	{
 		[SerializeField]
 		AbstractMap _map;
 
-		[SerializeField]
-		MeshModifier[] MeshModifiers;
-		[SerializeField]
-		Material _material;
+		public RouteProfileTypes RouteType;
+		public ModifierStack RouteStyle;
 
 		[SerializeField]
-		Transform[] _waypoints;
-		private List<Vector3> _cachedWaypoints;
-
-		[SerializeField]
-		[Range(1,10)]
-		private float UpdateFrequency = 2;
-
-		
-
+		private DragableDirectionWaypoint[] _waypoints; //taking pin objects through inspector 
+		private List<DragableDirectionWaypoint> _cachedWaypoints; // caching waypoints to detect changes
 		private Directions _directions;
-		private int _counter;
+		private GameObject _resultRouteGameObject;
 
-		GameObject _directionsGO;
-		private bool _recalculateNext; 
+		[SerializeField]
+		private GameObject AnimationObject;
+		[SerializeField]
+		private float _speed;
+		private Coroutine _animCoroutine;
 
 		protected virtual void Awake()
 		{
@@ -50,19 +53,46 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 
 		public void Start()
 		{
-			_cachedWaypoints = new List<Vector3>(_waypoints.Length);
+			if (_map == null)
+			{
+				Debug.Log("Can't find a Mapbox Map in the scene");
+				return;
+			}
+
+			_cachedWaypoints = new List<DragableDirectionWaypoint>(_waypoints.Length);
 			foreach (var item in _waypoints)
 			{
-				_cachedWaypoints.Add(item.position);
+				_cachedWaypoints.Add(item);
+				item.PinDropped += (s, e) =>
+				{
+					Query();
+				};
 			}
-			_recalculateNext = false;
 
-			foreach (var modifier in MeshModifiers)
+			foreach (var modifier in RouteStyle.MeshModifiers)
 			{
 				modifier.Initialize();
 			}
+		}
 
-			StartCoroutine(QueryTimer());
+		public void Update()
+		{
+			if (_waypoints.Length != _cachedWaypoints.Count)
+			{
+				_cachedWaypoints.Clear();
+				foreach (var item in _waypoints)
+				{
+					_cachedWaypoints.Add(item);
+				}
+			}
+		}
+
+		public void OnValidate()
+		{
+			if (_map != null && _directions != null)
+			{
+				Query();
+			}
 		}
 
 		protected virtual void OnDestroy()
@@ -73,36 +103,32 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 
 		void Query()
 		{
+			if (_map == null || _directions == null)
+				return;
+
 			var count = _waypoints.Length;
 			var wp = new Vector2d[count];
 			for (int i = 0; i < count; i++)
 			{
-				wp[i] = _waypoints[i].GetGeoPosition(_map.CenterMercator, _map.WorldRelativeScale);
+				wp[i] = _waypoints[i].transform.GetGeoPosition(_map.CenterMercator, _map.WorldRelativeScale);
 			}
-			var _directionResource = new DirectionResource(wp, RoutingProfile.Driving);
+			var _directionResource = new DirectionResource(wp, GetRouteType(RouteType));
 			_directionResource.Steps = true;
 			_directions.Query(_directionResource, HandleDirectionsResponse);
 		}
 
-		public IEnumerator QueryTimer()
+		private RoutingProfile GetRouteType(RouteProfileTypes routeType)
 		{
-			while (true)
+			switch (routeType)
 			{
-				yield return new WaitForSeconds(UpdateFrequency);
-				for (int i = 0; i < _waypoints.Length; i++)
-				{
-					if (_waypoints[i].position != _cachedWaypoints[i])
-					{
-						_recalculateNext = true;
-						_cachedWaypoints[i] = _waypoints[i].position;
-					}
-				}
-
-				if (_recalculateNext)
-				{
-					Query();
-					_recalculateNext = false;
-				}
+				case RouteProfileTypes.Driving:
+					return RoutingProfile.Driving;
+				case RouteProfileTypes.Walking:
+					return RoutingProfile.Walking;
+				case RouteProfileTypes.Cycling:
+					return RoutingProfile.Cycling;
+				default:
+					return RoutingProfile.Driving;
 			}
 		}
 
@@ -120,45 +146,52 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 				dat.Add(Conversions.GeoToWorldPosition(point.x, point.y, _map.CenterMercator, _map.WorldRelativeScale).ToVector3xz());
 			}
 
+			_cachedWaypoints[0].MoveTarget.transform.position = dat[0];
+			_cachedWaypoints[_cachedWaypoints.Count - 1].MoveTarget.transform.position = dat[dat.Count - 1];
+
 			var feat = new VectorFeatureUnity();
 			feat.Points.Add(dat);
 
-			foreach (MeshModifier mod in MeshModifiers.Where(x => x.Active))
+			if (_resultRouteGameObject != null)
 			{
-				mod.Run(feat, meshData, _map.WorldRelativeScale);
+				Destroy(_resultRouteGameObject);
 			}
 
-			CreateGameObject(meshData);
+			_resultRouteGameObject = RouteStyle.Execute(null, feat, meshData);
+
+			if(_animCoroutine != null)
+			{
+				StopCoroutine(_animCoroutine);
+			}
+			_animCoroutine = StartCoroutine(AnimateRoute(dat));
 		}
 
-		GameObject CreateGameObject(MeshData data)
+		private IEnumerator AnimateRoute(List<Vector3> dat)
 		{
-			if (_directionsGO != null)
-			{
-				Destroy(_directionsGO);
-			}
-			_directionsGO = new GameObject("direction waypoint " + " entity");
-			var mesh = _directionsGO.AddComponent<MeshFilter>().mesh;
-			mesh.subMeshCount = data.Triangles.Count;
+			AnimationObject.transform.position = dat[0];
 
-			mesh.SetVertices(data.Vertices);
-			_counter = data.Triangles.Count;
-			for (int i = 0; i < _counter; i++)
+			for (int i = 0; i < dat.Count; i++)
 			{
-				var triangle = data.Triangles[i];
-				mesh.SetTriangles(triangle, i);
+				while (AnimationObject.transform.position != dat[i])
+				{
+					AnimationObject.transform.position = Vector3.MoveTowards(AnimationObject.transform.position, dat[i], _speed * Time.deltaTime);
+					yield return null;
+				}
 			}
 
-			_counter = data.UV.Count;
-			for (int i = 0; i < _counter; i++)
-			{
-				var uv = data.UV[i];
-				mesh.SetUVs(i, uv);
-			}
-
-			mesh.RecalculateNormals();
-			_directionsGO.AddComponent<MeshRenderer>().material = _material;
-			return _directionsGO;
+			//while(ind < dat.Count - 1)
+			//{
+			//	if(Vector3.Distance(AnimationBall.transform.position, dat[ind + 1]) > 0.2f)
+			//	{
+			//		var vec = Vector3.MoveTowards(AnimationBall.transform.position, dat[ind + 1], _speed);
+			//		AnimationBall.transform.position = vec;
+			//	}
+			//	else
+			//	{
+			//		ind++;
+			//	}
+			//	yield return null;
+			//}
 		}
 	}
 

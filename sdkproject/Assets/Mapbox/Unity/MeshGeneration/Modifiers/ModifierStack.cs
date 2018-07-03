@@ -208,14 +208,19 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				_tempVectorEntity.Mesh.SetUVs(i, meshData.UV[i]);
 			}
 
-			_tempVectorEntity.Transform.SetParent(parent.transform, false);
-
-			if (!_activeObjects.ContainsKey(tile))
+			if (parent != null)
 			{
-				_activeObjects.Add(tile, _listPool.GetObject());
+				_tempVectorEntity.Transform.SetParent(parent.transform, false);
 			}
-			_activeObjects[tile].Add(_tempVectorEntity);
 
+			if (tile != null)
+			{
+				if (!_activeObjects.ContainsKey(tile))
+				{
+					_activeObjects.Add(tile, _listPool.GetObject());
+				}
+				_activeObjects[tile].Add(_tempVectorEntity);
+			}
 
 			_tempVectorEntity.Transform.localPosition = meshData.PositionInTile;
 
