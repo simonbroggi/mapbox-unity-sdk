@@ -42,6 +42,15 @@
 		private List<List<string>> _featureId;
 		private string _tempFeatureId;
 
+		public List<string> ExplicitlyBlockedFeatureIds
+		{
+			get
+			{
+				return _explicitlyBlockedFeatureIds;
+			}
+		}
+
+
 		public override void Initialize()
 		{
 			base.Initialize();
