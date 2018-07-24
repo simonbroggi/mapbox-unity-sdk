@@ -4,7 +4,7 @@ namespace Mapbox.Unity.Map
 	using Mapbox.Map;
 	using System.Collections.Generic;
 	using System.Linq;
-
+	[ExecuteInEditMode]
 	public class RangeTileProvider : AbstractTileProvider
 	{
 		RangeTileProviderOptions _rangeTileProviderOptions;
