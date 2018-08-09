@@ -207,10 +207,15 @@
 
 	public enum SamplePalettes
 	{
+		[Description("City palette features lots of cool greys in a variety of tones and values.")]
 		City,
+		[Description("Urban palette features lots of cool greys in a variety of tones and values.")]
 		Urban,
+		[Description("Warm palette features lots of warm greys and earth tones in a variety of tones and values.")]
 		Warm,
+		[Description("Cool, city palette features lots of cool blues and greens.")]
 		Cool,
+		[Description("Rainbow palette features a wide range of hues for creating a festive, celebratory palette.")]
 		Rainbow
 	}
 
