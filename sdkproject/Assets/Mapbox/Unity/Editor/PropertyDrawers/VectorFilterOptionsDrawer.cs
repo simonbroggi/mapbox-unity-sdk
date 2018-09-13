@@ -41,14 +41,22 @@
 			objectId = property.serializedObject.targetObject.GetInstanceID().ToString();
 
 			showFilters = EditorGUILayout.Foldout(showFilters, new GUIContent { text = "Filters", tooltip = "Filter features in a vector layer based on criterion specified.  " });
+			bool hasChanged = false;
 			if (showFilters)
 			{
 				var propertyFilters = property.FindPropertyRelative("filters");
 
 				for (int i = 0; i < propertyFilters.arraySize; i++)
 				{
-					DrawLayerFilter(property, propertyFilters, i);
+					if(DrawLayerFilter(property, propertyFilters, i))
+					{
+						hasChanged = true;
+					}
 				}
+				//if (hasChanged)
+				//{
+				//	EditorHelper.CheckForModifiedProperty(property);
+				//}
 				if (propertyFilters.arraySize > 0)
 				{
 					EditorGUILayout.PropertyField(property.FindPropertyRelative("combinerType"));
@@ -59,21 +67,43 @@
 				if (GUILayout.Button(new GUIContent("Add New Empty"), (GUIStyle)"minibutton"))
 				{
 					propertyFilters.arraySize++;
-					EditorHelper.CheckForModifiedProperty(property);
-					property.serializedObject.Update();
+					//propertyFilters.
+					hasChanged = true;
+					//EditorHelper.CheckForModifiedProperty(property);
+				}
+				if (hasChanged)
+				{
+					property.serializedObject.ApplyModifiedProperties();
+					MapboxDataProperty mapboxDataProperty = (MapboxDataProperty)EditorHelper.GetTargetObjectOfProperty(property);
+					if(mapboxDataProperty != null)
+					{
+						mapboxDataProperty.HasChanged = true;
+					}
+					//EditorHelper.CheckForModifiedProperty(property);
 				}
 				EditorGUILayout.EndHorizontal();
 				EditorGUI.indentLevel--;
 			}
+
 		}
 		public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
 		{
 			return lineHeight;
 		}
 
-		void DrawLayerFilter(SerializedProperty originalProperty, SerializedProperty propertyFilters, int index)
+		bool DrawLayerFilter(SerializedProperty originalProperty, SerializedProperty propertyFilters, int index)
 		{
+			bool hasChanged = false;
+
 			var property = propertyFilters.GetArrayElementAtIndex(index);
+
+
+			LayerFilter myType = (LayerFilter)EditorHelper.GetTargetObjectOfProperty(property);
+
+			var okok = property.FindPropertyRelative("Key").stringValue;
+
+			Debug.Log(myType.GetType().ToString() + "____" + myType.Key + "/////" + okok + "!!!!!");
+
 			var filterOperatorProp = property.FindPropertyRelative("filterOperator");
 
 			EditorGUILayout.BeginVertical();
@@ -81,7 +111,6 @@
 			EditorGUILayout.BeginHorizontal();
 
 			EditorGUILayout.LabelField(new GUIContent { text = "Key", tooltip = "Name of the property to use as key. This property is case sensitive." }, GUILayout.MaxWidth(150));
-
 
 			switch ((LayerFilterOperationType)filterOperatorProp.enumValueIndex)
 			{
@@ -110,16 +139,20 @@
 			EditorGUILayout.BeginHorizontal();
 			var selectedLayerName = originalProperty.FindPropertyRelative("_selectedLayerName").stringValue;
 
-			DrawPropertyDropDown(originalProperty, property);
+			bool drawPropertyDropDownHasChanged =  DrawPropertyDropDown(originalProperty, property);
+			if(drawPropertyDropDownHasChanged)
+			{
+				hasChanged = true;
+			}
 
 			EditorGUI.BeginChangeCheck();
 			filterOperatorProp.enumValueIndex = EditorGUILayout.Popup(filterOperatorProp.enumValueIndex, filterOperatorProp.enumDisplayNames, GUILayout.MaxWidth(150));
 			if (EditorGUI.EndChangeCheck())
 			{
-				EditorHelper.CheckForModifiedProperty(originalProperty);
+				hasChanged = true;
 			}
 
-			//EditorGUI.BeginChangeCheck();
+			EditorGUI.BeginChangeCheck();
 			switch ((LayerFilterOperationType)filterOperatorProp.enumValueIndex)
 			{
 				case LayerFilterOperationType.IsEqual:
@@ -137,34 +170,42 @@
 				default:
 					break;
 			}
+
 			if (EditorGUI.EndChangeCheck())
 			{
-				EditorHelper.CheckForModifiedProperty(originalProperty);
+				hasChanged = true;
 			}
 
 			if (GUILayout.Button(new GUIContent(" X "), (GUIStyle)"minibuttonright", GUILayout.Width(30)))
 			{
 				propertyFilters.DeleteArrayElementAtIndex(index);
-				EditorHelper.CheckForModifiedProperty(originalProperty);
-				originalProperty.serializedObject.Update();
+				hasChanged = true;
+				//EditorHelper.CheckForModifiedProperty(originalProperty);
+				//originalProperty.serializedObject.ApplyModifiedProperties();
 			}
 			EditorGUILayout.EndHorizontal();
 
 			EditorGUILayout.EndVertical();
 
+			return hasChanged;
 		}
 
-		private void DrawPropertyDropDown(SerializedProperty originalProperty, SerializedProperty filterProperty)
+		private bool DrawPropertyDropDown(SerializedProperty originalProperty, SerializedProperty filterProperty)
 		{
-			originalProperty.serializedObject.Update();
+			bool hasChanged = false;
+
+			//LayerFilter myType = (LayerFilter)EditorHelper.GetTargetObjectOfProperty(filterProperty);
+			//Debug.Log(myType.GetType().ToString() + "____" + myType.Key + "/////");
+			//originalProperty.serializedObject.ApplyModifiedProperties();
 			var selectedLayerName = originalProperty.FindPropertyRelative("_selectedLayerName").stringValue;
+
 			AbstractMap mapObject = (AbstractMap)originalProperty.serializedObject.targetObject;
 			TileJsonData tileJsonData = mapObject.VectorData.LayerProperty.tileJsonData;
 
 			if (string.IsNullOrEmpty(selectedLayerName) || !tileJsonData.PropertyDisplayNames.ContainsKey(selectedLayerName))
 			{
 				DrawWarningMessage();
-				return;
+				return false;
 			}
 
 			var parsedString = "no property selected";
@@ -172,8 +213,21 @@
 			var propertyDisplayNames = tileJsonData.PropertyDisplayNames[selectedLayerName];
 			_propertyNamesList = new List<string>(propertyDisplayNames);
 
+			//THIS PASSES!!!................>>>>
+			Debug.Log("_propertyNamesList ---------------------------------------- > ");
+			for (int i = 0; i < _propertyNamesList.Count; i++)
+			{
+				Debug.Log(_propertyNamesList[i]);
+			}
+			///////WHY IS THIS FAILING?!?!?!?!?!?! =>>>> ?????
+			/// 
+			originalProperty.serializedObject.ApplyModifiedProperties();
 			var propertyString = filterProperty.FindPropertyRelative("Key").stringValue;
+			Debug.Log(propertyString);
 			//check if the selection is valid
+
+
+			/////////THIS IS FALING.... = = = >
 			if (_propertyNamesList.Contains(propertyString))
 			{
 				//if the layer contains the current layerstring, set it's index to match
@@ -193,11 +247,9 @@
 
 				//display popup
 				_propertyIndex = EditorGUILayout.Popup(_propertyIndex, _propertyNameContent, GUILayout.MaxWidth(150));
-
 				//set new string values based on selection
 				parsedString = _propertyNamesList[_propertyIndex].Split(new string[] { tileJsonData.optionalPropertiesString }, System.StringSplitOptions.None)[0].Trim();
 				descriptionString = tileJsonData.LayerPropertyDescriptionDictionary[selectedLayerName][parsedString];
-
 			}
 			else
 			{
@@ -231,15 +283,16 @@
 				//set new string values based on the offset
 				parsedString = _propertyNamesList[_propertyIndex].Split(new string[] { tileJsonData.optionalPropertiesString }, System.StringSplitOptions.None)[0].Trim();
 				descriptionString = "Unavailable in Selected Layer.";
-
 			}
 			EditorGUI.BeginChangeCheck();
 			filterProperty.FindPropertyRelative("Key").stringValue = parsedString;
 			if (EditorGUI.EndChangeCheck())
 			{
-				EditorHelper.CheckForModifiedProperty(originalProperty);
+				hasChanged = true;
 			}
 			filterProperty.FindPropertyRelative("KeyDescription").stringValue = descriptionString;
+
+			return hasChanged;
 		}
 
 		private void DrawWarningMessage()
