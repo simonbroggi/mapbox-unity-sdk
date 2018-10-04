@@ -121,13 +121,14 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 			{
 				layerUpdateArgs.property.PropertyHasChanged -= UpdateVector;
 			}
-			UnbindSubLayerEvents();
+			//UnbindSubLayerEvents("UpdateVector");
 
 			OnUpdateLayerVisualizer(layerUpdateArgs);
 		}
 
-		private void UnbindSubLayerEvents()
+		private void UnbindSubLayerEvents(string methodName)
 		{
+			Debug.Log("UnbindSubLayerEvents, called from " + methodName);
 			foreach (var modifier in _defaultStack.MeshModifiers)
 			{
 				modifier.UnbindProperties();
@@ -744,7 +745,9 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 				}
 				_idPool[tile].Clear();
 			}
-			UnbindSubLayerEvents();
+			//needs to be explicitly called
+			//vectorLayerVisualizer...UnregisterTile 
+			UnbindSubLayerEvents("OnUnregisterTile");
 		}
 	}
 }
