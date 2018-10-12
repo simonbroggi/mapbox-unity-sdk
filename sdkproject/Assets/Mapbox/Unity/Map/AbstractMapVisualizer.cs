@@ -24,23 +24,19 @@ namespace Mapbox.Unity.Map
 	/// </summary>
 	public abstract class AbstractMapVisualizer : ScriptableObject
 	{
-		[SerializeField]
-		[NodeEditorElementAttribute("Factories")]
-		[FormerlySerializedAs("_factories")]
+		[SerializeField] [NodeEditorElementAttribute("Factories")] [FormerlySerializedAs("_factories")]
 		public List<AbstractTileFactory> Factories;
 
 		protected IMapReadable _map;
 		protected Dictionary<UnwrappedTileId, UnityTile> _activeTiles = new Dictionary<UnwrappedTileId, UnityTile>();
-		protected Queue<UnityTile> _inactiveTiles = new Queue<UnityTile>();
+		protected Dictionary<UnwrappedTileId, UnityTile> _inactiveTiles = new Dictionary<UnwrappedTileId, UnityTile>();
 		private int _counter;
 
 		private ModuleState _state;
+
 		public ModuleState State
 		{
-			get
-			{
-				return _state;
-			}
+			get { return _state; }
 			internal set
 			{
 				if (_state != value)
@@ -51,8 +47,16 @@ namespace Mapbox.Unity.Map
 			}
 		}
 
-		public IMapReadable Map { get { return _map; } }
-		public Dictionary<UnwrappedTileId, UnityTile> ActiveTiles { get { return _activeTiles; } }
+		public IMapReadable Map
+		{
+			get { return _map; }
+		}
+
+		public Dictionary<UnwrappedTileId, UnityTile> ActiveTiles
+		{
+			get { return _activeTiles; }
+		}
+
 		public Dictionary<UnwrappedTileId, int> _tileProgress;
 
 		public event Action<ModuleState> OnMapVisualizerStateChanged = delegate { };
@@ -100,6 +104,28 @@ namespace Mapbox.Unity.Map
 			}
 		}
 
+		public void ClearPreloadedTiles()
+		{
+			foreach (var tile in _activeTiles)
+			{
+				foreach (var factory in Factories)
+				{
+					factory.Unregister(tile.Value);
+				}
+
+				Destroy(tile.Value.gameObject);
+			}
+
+			_activeTiles.Clear();
+
+			foreach (var tile in _inactiveTiles)
+			{
+				Destroy(tile.Value.gameObject);
+			}
+
+			_inactiveTiles.Clear();
+		}
+
 		private void RegisterEvents(AbstractTileFactory factory)
 		{
 			//directly relaying to map visualizer event for now, nothing doing special
@@ -138,23 +164,24 @@ namespace Mapbox.Unity.Map
 		}
 
 		#region Factory event callbacks
+
 		//factory event callback, not relaying this up for now
 
 		public virtual void TileStateChanged(UnityTile tile)
 		{
 			bool rasterDone = (tile.RasterDataState == TilePropertyState.None ||
-								tile.RasterDataState == TilePropertyState.Loaded ||
-								tile.RasterDataState == TilePropertyState.Error ||
-								tile.RasterDataState == TilePropertyState.Cancelled);
+			                   tile.RasterDataState == TilePropertyState.Loaded ||
+			                   tile.RasterDataState == TilePropertyState.Error ||
+			                   tile.RasterDataState == TilePropertyState.Cancelled);
 
 			bool terrainDone = (tile.HeightDataState == TilePropertyState.None ||
-								tile.HeightDataState == TilePropertyState.Loaded ||
-								 tile.HeightDataState == TilePropertyState.Error ||
-								 tile.HeightDataState == TilePropertyState.Cancelled);
+			                    tile.HeightDataState == TilePropertyState.Loaded ||
+			                    tile.HeightDataState == TilePropertyState.Error ||
+			                    tile.HeightDataState == TilePropertyState.Cancelled);
 			bool vectorDone = (tile.VectorDataState == TilePropertyState.None ||
-								tile.VectorDataState == TilePropertyState.Loaded ||
-								tile.VectorDataState == TilePropertyState.Error ||
-								tile.VectorDataState == TilePropertyState.Cancelled);
+			                   tile.VectorDataState == TilePropertyState.Loaded ||
+			                   tile.VectorDataState == TilePropertyState.Error ||
+			                   tile.VectorDataState == TilePropertyState.Cancelled);
 
 			if (rasterDone && terrainDone && vectorDone)
 			{
@@ -186,6 +213,7 @@ namespace Mapbox.Unity.Map
 				}
 			}
 		}
+
 		#endregion
 
 		/// <summary>
@@ -196,9 +224,12 @@ namespace Mapbox.Unity.Map
 		{
 			UnityTile unityTile = null;
 
-			if (_inactiveTiles.Count > 0)
+			if (_inactiveTiles.Count > 0 && _inactiveTiles.ContainsKey(tileId))
 			{
-				unityTile = _inactiveTiles.Dequeue();
+				unityTile = _inactiveTiles[tileId];
+				_inactiveTiles.Remove(tileId);
+				ActiveTiles.Add(tileId, unityTile);
+				unityTile.gameObject.SetActive(true);
 			}
 
 			if (unityTile == null)
@@ -206,26 +237,27 @@ namespace Mapbox.Unity.Map
 				unityTile = new GameObject().AddComponent<UnityTile>();
 				unityTile.MeshRenderer.material = _map.TileMaterial;
 				unityTile.transform.SetParent(_map.Root, false);
-			}
 
-			unityTile.Initialize(_map, tileId, _map.WorldRelativeScale, _map.AbsoluteZoom, _map.LoadingTexture);
-			PlaceTile(tileId, unityTile, _map);
+				unityTile.Initialize(_map, tileId, _map.WorldRelativeScale, _map.AbsoluteZoom, _map.LoadingTexture);
+				PlaceTile(tileId, unityTile, _map);
 
-			// Don't spend resources naming objects, as you shouldn't find objects by name anyway!
+				// Don't spend resources naming objects, as you shouldn't find objects by name anyway!
 #if UNITY_EDITOR
-			unityTile.gameObject.name = unityTile.CanonicalTileId.ToString();
+				unityTile.gameObject.name = unityTile.CanonicalTileId.ToString();
 #endif
-			unityTile.OnHeightDataChanged += TileStateChanged;
-			unityTile.OnRasterDataChanged += TileStateChanged;
-			unityTile.OnVectorDataChanged += TileStateChanged;
+				unityTile.OnHeightDataChanged += TileStateChanged;
+				unityTile.OnRasterDataChanged += TileStateChanged;
+				unityTile.OnVectorDataChanged += TileStateChanged;
 
-			unityTile.TileState = MeshGeneration.Enums.TilePropertyState.Loading;
-			ActiveTiles.Add(tileId, unityTile);
+				unityTile.TileState = MeshGeneration.Enums.TilePropertyState.Loading;
+				ActiveTiles.Add(tileId, unityTile);
 
-			foreach (var factory in Factories)
-			{
-				factory.Register(unityTile);
+				foreach (var factory in Factories)
+				{
+					factory.Register(unityTile);
+				}
 			}
+
 
 			return unityTile;
 		}
@@ -234,14 +266,15 @@ namespace Mapbox.Unity.Map
 		{
 			var unityTile = ActiveTiles[tileId];
 
-			foreach (var factory in Factories)
-			{
-				factory.Unregister(unityTile);
-			}
-
-			unityTile.Recycle();
+//			foreach (var factory in Factories)
+//			{
+//				factory.Unregister(unityTile);
+//			}
+//
+//			unityTile.Recycle();
 			ActiveTiles.Remove(tileId);
-			_inactiveTiles.Enqueue(unityTile);
+			unityTile.gameObject.SetActive(false);
+			_inactiveTiles.Add(tileId, unityTile);
 		}
 
 		/// <summary>
@@ -260,11 +293,13 @@ namespace Mapbox.Unity.Map
 		protected abstract void PlaceTile(UnwrappedTileId tileId, UnityTile tile, IMapReadable map);
 
 		#region Events
+
 		/// <summary>
 		/// The  <c>OnTileError</c> event triggers when there's a <c>Tile</c> error.
 		/// Returns a <see cref="T:Mapbox.Map.TileErrorEventArgs"/> instance as a parameter, for the tile on which error occurred.
 		/// </summary>
 		public event EventHandler<TileErrorEventArgs> OnTileError;
+
 		private void Factory_OnTileError(object sender, TileErrorEventArgs e)
 		{
 			EventHandler<TileErrorEventArgs> handler = OnTileError;
@@ -310,6 +345,7 @@ namespace Mapbox.Unity.Map
 			{
 				factory.UnregisterLayer(tileBundle.Value, layerVisualizer);
 			}
+
 			layerVisualizer.UnbindSubLayerEvents();
 			layerVisualizer.SetProperties(layerVisualizer.SubLayerProperties);
 			layerVisualizer.InitializeStack();
@@ -325,6 +361,7 @@ namespace Mapbox.Unity.Map
 			{
 				factory.UnregisterLayer(tileBundle.Value, layerVisualizer);
 			}
+
 			factory.RemoveVectorLayerVisualizer(layerVisualizer);
 		}
 
@@ -351,6 +388,7 @@ namespace Mapbox.Unity.Map
 				abstractTileFactory.Reset();
 			}
 		}
+
 		#endregion
 	}
 }

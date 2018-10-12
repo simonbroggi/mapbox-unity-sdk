@@ -397,6 +397,11 @@ namespace Mapbox.Unity.Map
 				return isAccessTokenValid;
 			}
 		}
+
+		public void ClearPreloadedTiles()
+		{
+			_mapVisualizer.ClearPreloadedTiles();
+		}
 		#endregion
 
 		#region Private/Protected Methods
