@@ -21,6 +21,33 @@ namespace Mapbox.Unity.MeshGeneration.Data
 		private List<Vector3> _newPoints = new List<Vector3>();
 		private List<List<Point2d<float>>> _geom;
 
+		private bool randomValueAssigned;
+		private float randomValue;
+
+		public float RandomValue
+		{
+			get
+			{
+				if(!randomValueAssigned)
+				{
+					GeoRandom geoRandom = Object.FindObjectOfType<GeoRandom>();
+					if(geoRandom == null)
+					{
+						Debug.LogWarning("Warning: No GeoRandom component found in scene");
+						return 0f;
+					}
+					//get first index of geometry in 4096 tile space...
+					float x = _geom[0][0].X;
+					float y = _geom[0][0].Y;
+
+					randomValue = geoRandom.GetRandomValue(x, y);
+
+					randomValueAssigned = true;
+				}
+				return randomValue;
+			}
+		}
+
 		public VectorFeatureUnity()
 		{
 			Points = new List<List<Vector3>>();
@@ -90,7 +117,7 @@ namespace Mapbox.Unity.MeshGeneration.Data
 			////first check tile
 			var coordinateTileId = Conversions.LatitudeLongitudeToTileId(
 				coord.x, coord.y, Tile.CurrentZoom);
-
+			
 			if (Points.Count > 0)
 			{
 				var from = Conversions.LatLonToMeters(coord.x, coord.y);

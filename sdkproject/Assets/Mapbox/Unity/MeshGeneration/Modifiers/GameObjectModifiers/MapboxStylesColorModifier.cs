@@ -29,12 +29,14 @@
 			_detailTWoColorId = Shader.PropertyToID(_DETAIL_TWO_COLOR_NAME);
 		}
 
-		private Color GetRandomColorFromPalette()
+		private Color GetColorFromPalette(float value)
 		{
 			Color color = Color.white;
 			if (m_scriptablePalette.m_colors.Length > 0)
 			{
-				color = m_scriptablePalette.m_colors[Random.Range(0, m_scriptablePalette.m_colors.Length)];
+				int index = (int)(value * (m_scriptablePalette.m_colors.Length - 1));
+
+				color = m_scriptablePalette.m_colors[index];
 			}
 			return color;
 		}
@@ -50,9 +52,9 @@
 
 			ve.MeshRenderer.GetPropertyBlock(propBlock);
 
-			Color baseColor = (m_scriptablePalette.m_setBaseColor_Override) ? m_scriptablePalette.m_baseColor_Override : GetRandomColorFromPalette();
-			Color detailColor1 = (m_scriptablePalette.m_setDetailColor1_Override) ? m_scriptablePalette.m_detailColor1_Override : GetRandomColorFromPalette();
-			Color detailColor2 = (m_scriptablePalette.m_setDetailColor2_Override) ? m_scriptablePalette.m_detailColor2_Override : GetRandomColorFromPalette();
+			Color baseColor = (m_scriptablePalette.m_setBaseColor_Override) ? m_scriptablePalette.m_baseColor_Override : GetColorFromPalette(ve.Feature.RandomValue);
+			Color detailColor1 = (m_scriptablePalette.m_setDetailColor1_Override) ? m_scriptablePalette.m_detailColor1_Override : GetColorFromPalette(ve.Feature.RandomValue);
+			Color detailColor2 = (m_scriptablePalette.m_setDetailColor2_Override) ? m_scriptablePalette.m_detailColor2_Override : GetColorFromPalette(ve.Feature.RandomValue);
 
 			propBlock.SetColor(_baseColorId, baseColor);
 			propBlock.SetColor(_detailOneColorId, detailColor1);
