@@ -36,11 +36,19 @@ namespace Mapbox.Unity.MeshGeneration.Data
 						Debug.LogWarning("Warning: No GeoRandom component found in scene");
 						return 0f;
 					}
+
 					//get first index of geometry in 4096 tile space...
 					float x = _geom[0][0].X;
 					float y = _geom[0][0].Y;
 
+					//what else can we derive value from?
+					//how can we get lat/lon and use that to grab value from 4096 texture?
 					randomValue = geoRandom.GetRandomValue(x, y);
+
+					if (Data.Id.ToString() == "4513369021")
+					{
+						Debug.Log("x : " + x + ", y : " + y + "; randomValue : " + randomValue + "; Points : " + _newPoints[0].x + ", " + _newPoints[0].z);
+					}
 
 					randomValueAssigned = true;
 				}
