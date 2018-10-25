@@ -6,6 +6,8 @@ namespace Mapbox.Unity.MeshGeneration.Data
 	using UnityEngine;
 	using Mapbox.Utils;
 	using Mapbox.Unity.Utilities;
+	using Mapbox.Unity.Map;
+	using Mapbox.Map;
 
 	public class VectorFeatureUnity
 	{
@@ -24,14 +26,21 @@ namespace Mapbox.Unity.MeshGeneration.Data
 		private bool randomValueAssigned;
 		private float randomValue;
 
+		private string latLon;
+
 		public float RandomValue
 		{
 			get
 			{
-				if(!randomValueAssigned)
+				return 0;
+
+				if (!randomValueAssigned)
 				{
 					GeoRandom geoRandom = Object.FindObjectOfType<GeoRandom>();
-					if(geoRandom == null)
+					AbstractMap abstractMap = Object.FindObjectOfType<AbstractMap>();
+
+					//WorldToGeoPosition
+					if (geoRandom == null || abstractMap == null)
 					{
 						Debug.LogWarning("Warning: No GeoRandom component found in scene");
 						return 0f;
@@ -41,13 +50,99 @@ namespace Mapbox.Unity.MeshGeneration.Data
 					float x = _geom[0][0].X;
 					float y = _geom[0][0].Y;
 
+					float maxX = 0f;
+					//float maxZ;
+
+					var centroidVector = new Vector3();
+					foreach (var point in Points[0])
+					{
+						centroidVector += point;
+						maxX += point.x;
+					}
+					//centroidVector = centroidVector / Points[0].Count;
+
+					maxX = Mathf.Abs(maxX) / Tile.TileScale;
+
+					Vector3 firstPoint = Points[0][0];
+					Vector3 tilePos = Tile.transform.position;
+
+					Vector2d _latLon = abstractMap.WorldToGeoPosition(centroidVector);
+
+					Vector2 constantTileCoord = Conversions.LatitudeLongitudeToUnityTilePosition(_latLon, Tile);
+
+					Vector2d constantTileCoordOther = Conversions.LatitudeLongitudeToUnityTilePositionVector2d(_latLon, 16, 0.1635333f);
+
+					Vector2 LatitudeLongitudeToVectorTilePosition = Conversions.LatitudeLongitudeToVectorTilePosition(_latLon, 16);// 16);
+
+					int xx = (int)LatitudeLongitudeToVectorTilePosition.x;
+					int yy = (int)LatitudeLongitudeToVectorTilePosition.y;
+					//var constantTileSpaceCoords = Conversions.LatitudeLongitudeToUnityTilePosition()
+
 					//what else can we derive value from?
 					//how can we get lat/lon and use that to grab value from 4096 texture?
-					randomValue = geoRandom.GetRandomValue(x, y);
 
-					if (Data.Id.ToString() == "4513369021")
+
+					//Debug.Log("FirstPoint : " + firstPoint + ", LatLon: " + _latLon + ", xx: " + xx + ", yy: " + yy + ", Random value : " + randomValue);
+
+					double mult = 1000.0;
+
+					double latLonX_100 = (Mathd.Ceil(_latLon.x * mult)) / mult;
+					double latLonY_100 = (Mathd.Ceil(_latLon.y * mult)) / mult;
+
+
+					UnwrappedTileId myConsistentTileId = Conversions.LatitudeLongitudeToTileId(latLonX_100, latLonY_100, 30);
+
+					
+
+					int tileIdX = (int)Mathf.Repeat(myConsistentTileId.X, 4096);
+					int tileIdY = (int)Mathf.Repeat(myConsistentTileId.Y, 4096);
+
+
+					//randomValue = geoRandom.GetRandomValue(xx, yy);
+					randomValue = geoRandom.GetRandomValue(tileIdX, tileIdY);
+
+
+					Vector3 TilePositionFlat = new Vector3 (Tile.transform.position.x, 0f, Tile.transform.position.z);
+					Vector3 CentroidFlat = new Vector3(centroidVector.x, 0f, centroidVector.z);
+					float distanceFromTileCenter = Vector3.SqrMagnitude(TilePositionFlat - CentroidFlat);
+
+					if(geoRandom.idToQuery == Data.Id.ToString())
+					//if (Data.Id.ToString() == "4513369021")
 					{
-						Debug.Log("x : " + x + ", y : " + y + "; randomValue : " + randomValue + "; Points : " + _newPoints[0].x + ", " + _newPoints[0].z);
+						Debug.Log("---------------------------------------------");
+						Debug.Log(Data.Id.ToString());
+
+						Debug.Log("MaxX : " + maxX);
+
+						Debug.Log("Points[0].Count : " + Points[0].Count);
+
+						/*
+						Debug.Log("Centroid : " +  centroidVector / Tile.TileScale);
+						Debug.Log("DISTANCE = " + distanceFromTileCenter);
+						Debug.Log("LatLon : " + _latLon);
+						Debug.Log("LatLon 100 = " + latLonX_100 + ", " + latLonY_100);
+						Debug.Log("Texture coords - x : " + tileIdX + ", y : " + tileIdY);
+						Debug.Log("Random val = " + randomValue);
+						Debug.Log(myConsistentTileId.ToString());
+						*/
+						//Debug.Log("Zoom : " + abstractMap.Zoom);
+						Debug.Log("TileScale : " + Tile.TileScale);
+						//Debug.Log("FirstPoint : " + firstPoint);
+
+						//Debug.Log("constantTileCoord : " + constantTileCoord);
+						//Debug.Log("constantTileCoordOther : " + constantTileCoordOther);
+						//Debug.Log("LatitudeLongitudeToVectorTilePosition : " + LatitudeLongitudeToVectorTilePosition);
+						//Debug.Log("XX : " + xx);
+						//Debug.Log("YY : " + yy);
+						//Debug.Log("Random Value : " + randomValue);
+
+
+						geoRandom.AddTileId(myConsistentTileId.ToString());
+
+						//Debug.Log("TileScale : " + Tile.TileScale);
+						//Debug.Log("x : " + x + ", y : " + y + "; randomValue : " + randomValue + "; Points : " + _newPoints[0].x + ", " + _newPoints[0].z);
+						//Debug.Log("LatLon : " + _latLon);
+						//Debug.Log("<color=cyan>LatLon : " + _latLon + ", xx : " + xx + ", yy : " + yy + ", random value : " + randomValue + "</color>");
 					}
 
 					randomValueAssigned = true;
@@ -95,7 +190,7 @@ namespace Mapbox.Unity.MeshGeneration.Data
 			}
 		}
 
-		public VectorFeatureUnity(VectorTileFeature feature, List<List<Point2d<float>>> geom, UnityTile tile, float layerExtent, bool buildingsWithUniqueIds = false)
+		public VectorFeatureUnity(VectorTileFeature feature, List<List<Point2d<float>>> geom, UnityTile tile, float layerExtent, bool buildingsWithUniqueIds = false, string _latLon = null)
 		{
 			Data = feature;
 			Properties = Data.GetProperties();
