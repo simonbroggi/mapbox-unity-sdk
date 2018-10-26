@@ -1,4 +1,4 @@
-using Mapbox.VectorTile.Geometry;
+﻿using Mapbox.VectorTile.Geometry;
 
 namespace Mapbox.Unity.MeshGeneration.Interfaces
 {
@@ -59,8 +59,8 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 		int _entityInCurrentCoroutine = 0;
 
 		protected ModifierStackBase _defaultStack;
-		private HashSet<ulong> _activeIds;
-		private Dictionary<UnityTile, List<ulong>> _idPool; //necessary to keep _activeIds list up to date when unloading tiles
+		private HashSet<string> _activeIds;
+		private Dictionary<UnityTile, List<string>> _idPool; //necessary to keep _activeIds list up to date when unloading tiles
 		private string _key;
 
 		public override string Key
@@ -377,14 +377,15 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 		/// <param name="tile">Tile currently being processed.</param>
 		private void AddFeatureToTileObjectPool(VectorFeatureUnity feature, UnityTile tile)
 		{
-			_activeIds.Add(feature.Data.Id);
+			string featureId = feature.Properties["id"].ToString();
+			_activeIds.Add(featureId);
 			if (!_idPool.ContainsKey(tile))
 			{
-				_idPool.Add(tile, new List<ulong>());
+				_idPool.Add(tile, new List<string>());
 			}
 			else
 			{
-				_idPool[tile].Add(feature.Data.Id);
+				_idPool[tile].Add(featureId);
 			}
 		}
 
@@ -429,7 +430,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 		/// </summary>
 		/// <returns><c>true</c>, if feature is already in activeId pool or if the layer has buildingsWithUniqueId flag set to <see langword="true"/>, <c>false</c> otherwise.</returns>
 		/// <param name="featureId">Feature identifier.</param>
-		private bool ShouldSkipProcessingFeatureWithId(ulong featureId, UnityTile tile, VectorLayerVisualizerProperties layerProperties)
+		private bool ShouldSkipProcessingFeatureWithId(string featureId, UnityTile tile, VectorLayerVisualizerProperties layerProperties)
 		{
 			return (layerProperties.buildingsWithUniqueIds && _activeIds.Contains(featureId));
 		}
@@ -460,8 +461,8 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 			base.Initialize();
 			_entityInCurrentCoroutine = 0;
 			_activeCoroutines = new Dictionary<UnityTile, List<int>>();
-			_activeIds = new HashSet<ulong>();
-			_idPool = new Dictionary<UnityTile, List<ulong>>();
+			_activeIds = new HashSet<string>();
+			_idPool = new Dictionary<UnityTile, List<string>>();
 
 			if (_defaultStack != null)
 			{
@@ -609,7 +610,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 							break;
 						case FeatureProcessingStage.Process:
 							//skip existing features, only works on tilesets with unique ids
-							if (ShouldSkipProcessingFeatureWithId(feature.Data.Id, tile, layerProperties))
+							if (ShouldSkipProcessingFeatureWithId(feature.Properties["id"].ToString(), tile, layerProperties))
 							{
 								return false;
 							}

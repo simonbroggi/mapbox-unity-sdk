@@ -21,8 +21,8 @@
 
 		private List<Vector2d> _latLonToSpawn;
 
-		private Dictionary<ulong, GameObject> _objects;
-		private Dictionary<ulong, Vector2d> _objectPosition;
+		private Dictionary<string, GameObject> _objects;
+		private Dictionary<string, Vector2d> _objectPosition;
 		private GameObject _poolGameObject;
 		[SerializeField]
 		private SpawnPrefabOptions _options;
@@ -82,8 +82,8 @@
 			}
 			if (_objects == null)
 			{
-				_objects = new Dictionary<ulong, GameObject>();
-				_objectPosition = new Dictionary<ulong, Vector2d>();
+				_objects = new Dictionary<string, GameObject>();
+				_objectPosition = new Dictionary<string, Vector2d>();
 				_poolGameObject = new GameObject("_inactive_prefabs_pool");
 			}
 			_latLonToSpawn = new List<Vector2d>();
@@ -107,10 +107,11 @@
 				{
 					index++;
 					var coord = Conversions.StringToLatLon(point);
-					if (feature.ContainsLatLon(coord) && (feature.Data.Id != 0))
+					string idString = feature.Properties["id"].ToString();
+					if (feature.ContainsLatLon(coord) && (idString != "0"))
 					{
 						_featureId[index] = (_featureId[index] == null) ? new List<string>() : _featureId[index];
-						_tempFeatureId = feature.Data.Id.ToString();
+						_tempFeatureId = idString;
 						string idCandidate = (_tempFeatureId.Length <= 3) ? _tempFeatureId : _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
 						_featureId[index].Add(idCandidate);
 					}
@@ -130,11 +131,11 @@
 		public bool ShouldReplaceFeature(VectorFeatureUnity feature)
 		{
 			int index = -1;
-
+			string featureId = feature.Properties["id"].ToString();
 			//preventing spawning of explicitly blocked features
 			foreach (var blockedId in _explicitlyBlockedFeatureIds)
 			{
-				if (feature.Data.Id.ToString() == blockedId)
+				if (featureId == blockedId)
 				{
 					return true;
 				}
@@ -147,7 +148,7 @@
 					index++;
 					if (_featureId[index] != null)
 					{
-						foreach (var featureId in _featureId[index])
+						foreach (var idString in _featureId[index])
 						{
 							var latlngVector = Conversions.StringToLatLon(point);
 							var from = Conversions.LatLonToMeters(latlngVector.x, latlngVector.y);
@@ -157,7 +158,7 @@
 							{
 								return false;
 							}
-							if (feature.Data.Id.ToString().StartsWith(featureId, StringComparison.CurrentCulture))
+							if (idString.StartsWith(featureId, StringComparison.CurrentCulture))
 							{
 								return true;
 							}
@@ -187,7 +188,7 @@
 		{
 			GameObject go;
 
-			var featureId = ve.Feature.Data.Id;
+			string featureId = ve.Feature.Properties["id"].ToString();
 			if (_objects.ContainsKey(featureId))
 			{
 				go = _objects[featureId];
@@ -228,7 +229,7 @@
 			latLongPosition = Conversions.LatitudeLongitudeToUnityTilePosition(latLong, tile.CurrentZoom, tile.TileScale, 4096).ToVector3xz();
 			latLongPosition.y = centroidVector.y;
 
-			go.name = ve.Feature.Data.Id.ToString();
+			go.name = ve.Feature.Properties["id"].ToString();
 
 			goRectTransform = go.GetComponent<RectTransform>();
 			if (goRectTransform == null)
@@ -266,9 +267,9 @@
 				return false;
 			}
 
-			if (_objects.ContainsKey(feature.Data.Id))
+			if (_objects.ContainsKey(feature.Properties["id"].ToString()))
 			{
-				_objectPosition.TryGetValue(feature.Data.Id, out latLong);
+				_objectPosition.TryGetValue(feature.Properties["id"].ToString(), out latLong);
 				_latLonToSpawn.Remove(latLong);
 				return true;
 			}
@@ -288,7 +289,7 @@
 		public override void OnPoolItem(VectorEntity vectorEntity)
 		{
 			base.OnPoolItem(vectorEntity);
-			var featureId = vectorEntity.Feature.Data.Id;
+			string featureId = vectorEntity.Feature.Properties["id"].ToString();
 
 			if (!_objects.ContainsKey(featureId))
 			{

@@ -6,6 +6,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	using Mapbox.Unity.Map;
 	using System;
 
+
 	/// <summary>
 	/// Texture Modifier is a basic modifier which simply adds a TextureSelector script to the features.
 	/// Logic is all pushed into this TextureSelector mono behaviour to make it's easier to change it in runtime.
@@ -36,6 +37,13 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		{
 			var min = Math.Min(_options.materials.Length, ve.MeshFilter.mesh.subMeshCount);
 			var mats = new Material[min];
+
+			var parent = ve.Feature.Properties["parent"];
+			var parts = ve.Feature.Properties["parts"];
+
+			Debug.Log("NEW FEATURE : " + ve.Feature.Properties["id"].ToString());
+			Debug.Log("<color=yellow>PARENT: " + parent.ToString() + "</color>");
+			Debug.Log("<color=cyan>PARTS : " + parts.ToString() + "</color>");
 
 			if (_options.style == StyleTypes.Custom)
 			{

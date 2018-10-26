@@ -179,10 +179,11 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			_tempVectorEntity.Mesh.Clear();
 			_tempVectorEntity.Feature = feature;
 
+
 #if UNITY_EDITOR
 			if (feature.Data != null)
 			{
-				_tempVectorEntity.GameObject.name = type + " - " + feature.Data.Id;
+				_tempVectorEntity.GameObject.name = type + " - " + feature.Properties["id"].ToString();
 			}
 			else
 			{

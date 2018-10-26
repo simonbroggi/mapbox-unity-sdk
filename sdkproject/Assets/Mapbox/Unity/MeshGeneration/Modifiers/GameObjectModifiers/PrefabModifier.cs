@@ -1,4 +1,4 @@
-namespace Mapbox.Unity.MeshGeneration.Modifiers
+﻿namespace Mapbox.Unity.MeshGeneration.Modifiers
 {
 	using UnityEngine;
 	using Mapbox.Unity.MeshGeneration.Data;
@@ -70,7 +70,8 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			}
 			centroidVector = centroidVector / ve.Feature.Points[0].Count;
 
-			go.name = ve.Feature.Data.Id.ToString();
+			go.name = ve.Feature.Properties["id"].ToString();
+
 
 			goRectTransform = go.GetComponent<RectTransform>();
 			if (goRectTransform == null)
