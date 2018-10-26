@@ -38,13 +38,6 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			var min = Math.Min(_options.materials.Length, ve.MeshFilter.mesh.subMeshCount);
 			var mats = new Material[min];
 
-			var parent = ve.Feature.Properties["parent"];
-			var parts = ve.Feature.Properties["parts"];
-
-			Debug.Log("NEW FEATURE : " + ve.Feature.Properties["id"].ToString());
-			Debug.Log("<color=yellow>PARENT: " + parent.ToString() + "</color>");
-			Debug.Log("<color=cyan>PARTS : " + parts.ToString() + "</color>");
-
 			if (_options.style == StyleTypes.Custom)
 			{
 				for (int i = 0; i < min; i++)
