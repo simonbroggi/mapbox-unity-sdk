@@ -5,6 +5,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 	using Mapbox.Unity.MeshGeneration.Data;
 	using Mapbox.Unity.Map;
 	using System;
+	using System.Linq;
 
 	[CreateAssetMenu(menuName = "Mapbox/Modifiers/Textured Side Wall Modifier")]
 	public class TextureSideWallModifier : MeshModifier
@@ -107,9 +108,45 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			if (tile != null)
 				_scale = tile.TileScale;
 
+			//cache the feature's id as a string, which will be converted into an int for texture assignment.
+			string textureSelectionReferenceId = feature.Properties["id"].ToString();
+
+			object parent = "";
+
+			//if this feature has a parent property (some do not) that is not null or empty,
+			//then reassign textureSelectionReferenceId to the id of the parent...
+			if (feature.Properties.TryGetValue("parent", out parent))
+			{
+				if(!string.IsNullOrEmpty(parent.ToString()))
+				{
+					textureSelectionReferenceId = parent.ToString();
+				}
+			}
+
+			//create int for referencing texture to assign...
+			int facadeIndex;
+
+			//strip all non-numeric characters from this and return a new string
+			string textureSelectionRefString = new string(textureSelectionReferenceId.Where(c => char.IsDigit(c)).ToArray());
+
+			//attempt to convert this string into an int...
+			int textureSelectionRefInt = 0;
+			if (Int32.TryParse(textureSelectionRefString, out textureSelectionRefInt))
+			{
+				//if int conversion was successful, use mathf.repeat 
+				//to generate an int that is in the atlasInfo.Textures list range...
+				facadeIndex = (int)Mathf.Repeat(textureSelectionRefInt, _options.atlasInfo.Textures.Count - 1);
+			}
+			else
+			{
+				//otherwise, assign it a random value that is in range of the atlasInfo.Textures list...
+				facadeIndex = UnityEngine.Random.Range(0, _options.atlasInfo.Textures.Count);
+			}
+
 			//facade texture to decorate this building
 			_currentFacade =
-				_options.atlasInfo.Textures[UnityEngine.Random.Range(0, _options.atlasInfo.Textures.Count)];
+				_options.atlasInfo.Textures[facadeIndex];
+
 			//rect is a struct so we're caching this
 			_currentTextureRect = _currentFacade.TextureRect;
 
