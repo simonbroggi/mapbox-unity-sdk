@@ -45,6 +45,13 @@
 		private List<List<string>> _featureId;
 		private string _tempFeatureId;
 
+		private string parentIdToBlock;
+		private bool parentIdObtained;
+
+		private List<string> partIdsToBlock = new List<string>();
+
+		private bool debugged;
+
 		public SpawnPrefabOptions SpawnPrefabOptions
 		{
 			set
@@ -73,7 +80,9 @@
 		{
 			base.Initialize();
 			//duplicate the list of lat/lons to track which coordinates have already been spawned
-
+			Debug.Log("Initialize");
+			parentIdToBlock = "";
+			parentIdObtained = false;
 			_featureId = new List<List<string>>();
 
 			for (int i = 0; i < _prefabLocations.Count; i++)
@@ -95,6 +104,7 @@
 
 		public override void SetProperties(ModifierProperties properties)
 		{
+			Debug.Log("SetProperties");
 			_options = (SpawnPrefabOptions)properties;
 		}
 
@@ -108,18 +118,42 @@
 					index++;
 					var coord = Conversions.StringToLatLon(point);
 					string idString = feature.Properties["id"].ToString();
-					if (feature.ContainsLatLon(coord) && (idString != "0"))
+					//if this feature contains the lat lon of the desired spawn location...
+					if (feature.ContainsLatLon(coord))// && (idString != "0"))
 					{
-						_featureId[index] = (_featureId[index] == null) ? new List<string>() : _featureId[index];
-						_tempFeatureId = idString;
-						string idCandidate = (_tempFeatureId.Length <= 3) ? _tempFeatureId : _tempFeatureId.Substring(0, _tempFeatureId.Length - 3);
-						_featureId[index].Add(idCandidate);
+
+						object parent = "";
+						//if I have a parent attribute, cache this...
+						if (feature.Properties.TryGetValue("parent", out parent))
+						{
+							if (!string.IsNullOrEmpty(parent.ToString()))
+							{
+								SetParentIdToBlock(parent.ToString());
+							}
+						}
+						//if I do not have a parent id, then I am the parent, and set the parent id to my id...
+						else
+						{
+							SetParentIdToBlock(idString);
+						}
+
 					}
 				}
 				catch (Exception e)
 				{
 					Debug.LogException(e);
 				}
+
+			}
+		}
+
+		private void SetParentIdToBlock(string id)
+		{
+			if(parentIdObtained == false)
+			{
+				parentIdToBlock = id;
+				Debug.Log("SetParentIdToBlock : " + parentIdToBlock);
+				parentIdObtained = true;
 			}
 		}
 
@@ -136,6 +170,18 @@
 			foreach (var blockedId in _explicitlyBlockedFeatureIds)
 			{
 				if (featureId == blockedId)
+				{
+					return true;
+				}
+			}
+			if(featureId == parentIdToBlock)
+			{
+				return true;
+			}
+			object parent = "";
+			if (feature.Properties.TryGetValue("parent", out parent))
+			{
+				if (parent.ToString() == parentIdToBlock)
 				{
 					return true;
 				}
@@ -286,6 +332,7 @@
 
 			return false;
 		}
+
 		public override void OnPoolItem(VectorEntity vectorEntity)
 		{
 			base.OnPoolItem(vectorEntity);
