@@ -45,12 +45,7 @@
 		private List<List<string>> _featureId;
 		private string _tempFeatureId;
 
-		private string parentIdToBlock;
-		private bool parentIdObtained;
-
-		private List<string> partIdsToBlock = new List<string>();
-
-		private bool debugged;
+		private List<string> parentIdsToBlock = new List<string>();
 
 		public SpawnPrefabOptions SpawnPrefabOptions
 		{
@@ -79,10 +74,8 @@
 		public override void Initialize()
 		{
 			base.Initialize();
-			//duplicate the list of lat/lons to track which coordinates have already been spawned
-			Debug.Log("Initialize");
-			parentIdToBlock = "";
-			parentIdObtained = false;
+			//duplicate the list of lat/lons to track which coordinates have already been spawned;
+			parentIdsToBlock = new List<string>();
 			_featureId = new List<List<string>>();
 
 			for (int i = 0; i < _prefabLocations.Count; i++)
@@ -104,56 +97,45 @@
 
 		public override void SetProperties(ModifierProperties properties)
 		{
-			Debug.Log("SetProperties");
 			_options = (SpawnPrefabOptions)properties;
+		}
+
+		private bool AddToParentIdsToBlock(string id)
+		{
+			if (!string.IsNullOrEmpty(id) && !parentIdsToBlock.Contains(id))
+			{
+				parentIdsToBlock.Add(id);
+				return true;
+			}
+			return false;
 		}
 
 		public override void FeaturePreProcess(VectorFeatureUnity feature)
 		{
-			int index = -1;
-			foreach (var point in _prefabLocations)
+			foreach (var location in _prefabLocations)
 			{
-				try
+				Vector2d coord = Conversions.StringToLatLon(location);
+				if (feature.ContainsLatLon(coord))
 				{
-					index++;
-					var coord = Conversions.StringToLatLon(point);
-					string idString = feature.Properties["id"].ToString();
-					//if this feature contains the lat lon of the desired spawn location...
-					if (feature.ContainsLatLon(coord))// && (idString != "0"))
+					//if I have a parent attribute, add the parent's id to the parentIdsToBlock list...
+					object parent = "";
+					bool parentCheck = false;
+					if (feature.Properties.TryGetValue("parent", out parent))
 					{
-
-						object parent = "";
-						//if I have a parent attribute, cache this...
-						if (feature.Properties.TryGetValue("parent", out parent))
+						string parentString = parent.ToString();
+						parentCheck = AddToParentIdsToBlock(parentString);
+					}
+					if(parentCheck == false)
+					{
+						//otherwise, I must be a parent, so add my id to the parentIdsToBlock list...
+						object id = "";
+						if (feature.Properties.TryGetValue("id", out id))
 						{
-							if (!string.IsNullOrEmpty(parent.ToString()))
-							{
-								SetParentIdToBlock(parent.ToString());
-							}
+							string idString = id.ToString();
+							AddToParentIdsToBlock(idString);
 						}
-						//if I do not have a parent id, then I am the parent, and set the parent id to my id...
-						else
-						{
-							SetParentIdToBlock(idString);
-						}
-
 					}
 				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
-				}
-
-			}
-		}
-
-		private void SetParentIdToBlock(string id)
-		{
-			if(parentIdObtained == false)
-			{
-				parentIdToBlock = id;
-				Debug.Log("SetParentIdToBlock : " + parentIdToBlock);
-				parentIdObtained = true;
 			}
 		}
 
@@ -164,59 +146,26 @@
 		/// <param name="feature">Feature.</param>
 		public bool ShouldReplaceFeature(VectorFeatureUnity feature)
 		{
-			int index = -1;
-			string featureId = feature.Properties["id"].ToString();
-			//preventing spawning of explicitly blocked features
-			foreach (var blockedId in _explicitlyBlockedFeatureIds)
-			{
-				if (featureId == blockedId)
-				{
-					return true;
-				}
-			}
-			if(featureId == parentIdToBlock)
-			{
-				return true;
-			}
+			//if I have a parent attribute, return true if my parent's id is in the parentIdsToBlock list...
 			object parent = "";
 			if (feature.Properties.TryGetValue("parent", out parent))
 			{
-				if (parent.ToString() == parentIdToBlock)
+				if (parentIdsToBlock.Contains(parent.ToString()))
 				{
 					return true;
 				}
 			}
 
-			foreach (var point in _prefabLocations)
+			//otherwise, I must be a parent, so return true if my id is in the parentIdsToBlock list...
+			object id = "";
+			if (feature.Properties.TryGetValue("id", out id))
 			{
-				try
+				if(parentIdsToBlock.Contains(id.ToString()))
 				{
-					index++;
-					if (_featureId[index] != null)
-					{
-						foreach (var idString in _featureId[index])
-						{
-							var latlngVector = Conversions.StringToLatLon(point);
-							var from = Conversions.LatLonToMeters(latlngVector.x, latlngVector.y);
-							var to = new Vector2d((feature.Points[0][0].x / feature.Tile.TileScale) + feature.Tile.Rect.Center.x, (feature.Points[0][0].z / feature.Tile.TileScale) + feature.Tile.Rect.Center.y);
-							var dist = Vector2d.Distance(from, to);
-							if (dist > 500)
-							{
-								return false;
-							}
-							if (idString.StartsWith(featureId, StringComparison.CurrentCulture))
-							{
-								return true;
-							}
-						}
-					}
+					return true;		
 				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
-				}
-
 			}
+
 			return false;
 		}
 
