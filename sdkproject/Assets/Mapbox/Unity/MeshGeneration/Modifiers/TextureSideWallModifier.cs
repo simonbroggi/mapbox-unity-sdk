@@ -110,11 +110,6 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			//facade texture to decorate this building
 			int facade = (int)(feature.RandomValue * (_options.atlasInfo.Textures.Count - 1));
 
-			if (feature.Data.Id.ToString() == "4513369021")
-			{
-				Debug.Log("facade = " + facade);
-			}
-
 			_currentFacade =
 				_options.atlasInfo.Textures[facade];
 			//rect is a struct so we're caching this

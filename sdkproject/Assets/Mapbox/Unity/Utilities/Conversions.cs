@@ -237,6 +237,11 @@ namespace Mapbox.Unity.Utilities
 			return LatitudeLongitudeToUnityTilePosition(coordinate, tile.CurrentZoom, tile.TileScale, layerExtent);
 		}
 
+		public static Vector2d LatitudeLongitudeToUnityTilePositionVector2d(Vector2d coordinate, UnityTile tile, ulong layerExtent = 4096)
+		{
+			return LatitudeLongitudeToUnityTilePositionVector2d(coordinate, tile.CurrentZoom, tile.TileScale, layerExtent);
+		}
+
 		public static Vector2d LatitudeLongitudeToVectorTilePositionVector2d(Vector2d coordinate, int tileZoom, ulong layerExtent = 4096)
 		{
 			var coordinateTileId = Conversions.LatitudeLongitudeToTileId(
@@ -288,8 +293,8 @@ namespace Mapbox.Unity.Utilities
 
 			//UnityTile space
 			var unityTilePoint = new Vector2d();
-			unityTilePoint.x = (float)(vectorTilePoint.x / layerExtent * _rect.Size.x - (_rect.Size.x / 2)) * tileScale;
-			unityTilePoint.y = (float)((layerExtent - vectorTilePoint.y) / layerExtent * _rect.Size.y - (_rect.Size.y / 2)) * tileScale;
+			unityTilePoint.x = (vectorTilePoint.x / layerExtent * _rect.Size.x - (_rect.Size.x / 2)) * tileScale;
+			unityTilePoint.y = ((layerExtent - vectorTilePoint.y) / layerExtent * _rect.Size.y - (_rect.Size.y / 2)) * tileScale;
 											 
 			return unityTilePoint;
 		}

@@ -842,8 +842,17 @@ namespace Mapbox.Unity.Map
 		{
 			// For quadtree implementation of the map, the map scale needs to be compensated for.
 			var scaleFactor = Mathf.Pow(2, (InitialZoom - AbsoluteZoom));
-
+			//double scaleFactor = Math.Pow(2.0, (InitialZoom - AbsoluteZoom));
 			return (Root.InverseTransformPoint(realworldPoint)).GetGeoPosition(CenterMercator, WorldRelativeScale * scaleFactor);
+		}
+
+		public virtual Vector2d WorldToGeoPositionDouble(Vector3 realworldPoint)
+		{
+			// For quadtree implementation of the map, the map scale needs to be compensated for.
+			//var scaleFactor = Mathf.Pow(2, (InitialZoom - AbsoluteZoom));
+			double scaleFactor = Math.Pow(2.0, (InitialZoom - AbsoluteZoom));
+			double worldRelScale = (double)WorldRelativeScale;
+			return (Root.InverseTransformPoint(realworldPoint)).GetGeoPosition(CenterMercator, worldRelScale * scaleFactor);
 		}
 
 		/// <summary>
