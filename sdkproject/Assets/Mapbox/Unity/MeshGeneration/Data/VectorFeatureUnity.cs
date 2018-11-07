@@ -54,7 +54,6 @@ namespace Mapbox.Unity.MeshGeneration.Data
 					}
 					centroidVector = centroidVector / Points[0].Count;
 
-
 					Vector3 tilePos = Tile.transform.position;
 
 					Vector2d _latLon = abstractMap.WorldToGeoPositionDouble(centroidVector);
@@ -72,6 +71,13 @@ namespace Mapbox.Unity.MeshGeneration.Data
 					string latLonX_string = _latLon.x.ToString();
 					string latLonY_string = _latLon.y.ToString();
 
+					string latLonX_subString = latLonX_string.Split('.')[1];
+					string latLonY_subString = latLonY_string.Split('.')[1];
+
+					char smallestX = latLonX_subString[1];
+					char smallestY = latLonY_subString[1];
+
+
 					int tileIdX = (int)Mathf.Repeat(myConsistentTileId.X, 4096);
 					int tileIdY = (int)Mathf.Repeat(myConsistentTileId.Y, 4096);
 
@@ -83,17 +89,49 @@ namespace Mapbox.Unity.MeshGeneration.Data
 					Vector3 TilePositionFlat = new Vector3 (Tile.transform.position.x, 0f, Tile.transform.position.z);
 					Vector3 CentroidFlat = new Vector3(centroidVector.x, 0f, centroidVector.z);
 
+					long height = (long)Data.GetProperties()["height"];
+
+
+					string heightString = height.ToString();
+
+					int total = 1;
+					for (int i = 0; i < heightString.Length; i++)
+					{
+						int s = (int)heightString[i];
+						if(s != 0)
+						{
+							total = total * s;
+						}
+						else
+						{
+							total = 1;
+						}
+					}
+
+					//int heightMultiple = 
+					int lastH = (int)heightString[heightString.Length - 1];
+
+					//int sum = (((int)smallestX * lastH) / ((int)smallestY) / lastH));// + lastH;
+					//Debug.Log(_latLon + ": " + smallestX + ", " + smallestY + ", " + lastH);// + ", " + sum);
+					Debug.Log(total);
 					if (Data.Id.ToString() == "4513369021")
 					{
-						float height = (float)Data.GetProperties()["height"];
+						//long height = (long)Data.GetProperties()["height"];
+						//Debug.Log(height.GetType().ToString());
 						Debug.Log(height);
 						Debug.Log("Deterministic randomness test ---------->");
 						//Debug.Log("Feature ID : " + Data.Id.ToString());
 						Debug.Log("Lat/Lon : " + _latLon);
+						Debug.Log(latLonX_string);
+						Debug.Log(latLonY_string);
+						//Debug.Log(smallestX);
+						//Debug.Log(smallestY);
+						//Debug.Log("LatLon => tile space as Vector2  : " + latlonToUnityTilePosition);
+						//Debug.Log("LatLon => tile space as Vector2d : " + latlonToUnityTilePositionVector2d);
+						//Debug.Log("myConsistentTileId : " + myConsistentTileId.ToString() + "; X/Y : " + myConsistentTileId.X +  ", " + myConsistentTileId.Y);
 
-						Debug.Log("LatLon => tile space as Vector2  : " + latlonToUnityTilePosition);
-						Debug.Log("LatLon => tile space as Vector2d : " + latlonToUnityTilePositionVector2d);
-						Debug.Log("myConsistentTileId : " + myConsistentTileId.ToString() + "; X/Y : " + myConsistentTileId.X +  ", " + myConsistentTileId.Y);
+
+
 						//Debug.Log("Centroid : " +  centroidVector / Tile.TileScale);
 						//Debug.Log("LatLon : " + _latLon);
 						//Debug.Log("LatLon 100 = " + latLonX_100 + ", " + latLonY_100);
