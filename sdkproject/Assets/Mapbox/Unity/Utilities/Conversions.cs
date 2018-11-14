@@ -237,7 +237,6 @@ namespace Mapbox.Unity.Utilities
 			return LatitudeLongitudeToUnityTilePosition(coordinate, tile.CurrentZoom, tile.TileScale, layerExtent);
 		}
 
-
 		/// <summary>
 		/// Get coordinates for a given latitude/longitude in tile-space. Useful when comparing feature geometry to lat/lon coordinates.
 		/// </summary>
@@ -261,7 +260,6 @@ namespace Mapbox.Unity.Utilities
 
 			return unityTilePoint;
 		}
-
 
 		/// <summary>
 		/// Gets the WGS84 longitude of the northwest corner from a tile's X position and zoom level.
