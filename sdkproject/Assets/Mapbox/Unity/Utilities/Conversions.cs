@@ -237,26 +237,7 @@ namespace Mapbox.Unity.Utilities
 			return LatitudeLongitudeToUnityTilePosition(coordinate, tile.CurrentZoom, tile.TileScale, layerExtent);
 		}
 
-		public static Vector2d LatitudeLongitudeToUnityTilePositionVector2d(Vector2d coordinate, UnityTile tile, ulong layerExtent = 4096)
-		{
-			return LatitudeLongitudeToUnityTilePositionVector2d(coordinate, tile.CurrentZoom, tile.TileScale, layerExtent);
-		}
 
-		public static Vector2d LatitudeLongitudeToVectorTilePositionVector2d(Vector2d coordinate, int tileZoom, ulong layerExtent = 4096)
-		{
-			var coordinateTileId = Conversions.LatitudeLongitudeToTileId(
-				coordinate.x, coordinate.y, tileZoom);
-			var _meters = LatLonToMeters(coordinate);
-			var _rect = Conversions.TileBounds(coordinateTileId);
-
-			//vectortile space point (0 - layerExtent)
-			var vectorTilePoint = new Vector2d();
-
-			vectorTilePoint.x = ((_meters - _rect.Min).x / _rect.Size.x) * layerExtent;
-			vectorTilePoint.y = (layerExtent - ((_meters - _rect.Max).y / _rect.Size.y) * layerExtent);
-											 
-			return vectorTilePoint;
-		}
 		/// <summary>
 		/// Get coordinates for a given latitude/longitude in tile-space. Useful when comparing feature geometry to lat/lon coordinates.
 		/// </summary>
@@ -281,23 +262,6 @@ namespace Mapbox.Unity.Utilities
 			return unityTilePoint;
 		}
 
-
-		public static Vector2d LatitudeLongitudeToUnityTilePositionVector2d(Vector2d coordinate, int tileZoom, float tileScale, ulong layerExtent = 4096)
-		{
-			var coordinateTileId = Conversions.LatitudeLongitudeToTileId(
-				coordinate.x, coordinate.y, tileZoom);
-			var _rect = Conversions.TileBounds(coordinateTileId);
-
-			//vectortile space point (0 - layerExtent)
-			var vectorTilePoint = LatitudeLongitudeToVectorTilePosition(coordinate, tileZoom, layerExtent);
-
-			//UnityTile space
-			var unityTilePoint = new Vector2d();
-			unityTilePoint.x = (vectorTilePoint.x / layerExtent * _rect.Size.x - (_rect.Size.x / 2)) * tileScale;
-			unityTilePoint.y = ((layerExtent - vectorTilePoint.y) / layerExtent * _rect.Size.y - (_rect.Size.y / 2)) * tileScale;
-											 
-			return unityTilePoint;
-		}
 
 		/// <summary>
 		/// Gets the WGS84 longitude of the northwest corner from a tile's X position and zoom level.
@@ -355,6 +319,7 @@ namespace Mapbox.Unity.Utilities
 			var center = bb.Center;
 			return new Vector2d(center.x, center.y);
 		}
+
 
 		/// <summary>
 		/// Gets the Web Mercator x/y of the center of a tile.

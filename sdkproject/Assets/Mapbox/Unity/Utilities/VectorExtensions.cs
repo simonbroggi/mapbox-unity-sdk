@@ -131,22 +131,6 @@ namespace Mapbox.Unity.Utilities
 			return Conversions.MetersToLatLon(pos);
 		}
 
-		public static Vector2d GetGeoPosition(this Vector3 position, Vector2d refPoint, double scale = 1.0)
-		{
-			//var pos = refPoint + (position / scale).ToVector2d();
-			double positionX = (double)position.x;
-			double positionZ = (double)position.z;
-			double scaledPosX = positionX / scale;
-			double scaledPosZ = positionZ / scale;
-
-			double sumX = refPoint.x + scaledPosX;
-			double sumZ = refPoint.y + scaledPosZ;
-
-
-			Vector2d pos = new Vector2d(sumX, sumZ);//refPoint + (position / scale).ToVector2d();
-			return Conversions.MetersToLatLon(pos);
-		}
-
 		public static Vector2d GetGeoPosition(this Vector2 position, Vector2d refPoint, float scale = 1)
 		{
 			return position.ToVector3xz().GetGeoPosition(refPoint, scale);
