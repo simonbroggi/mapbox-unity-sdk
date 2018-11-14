@@ -3,6 +3,7 @@
 	using Mapbox.Unity.MeshGeneration.Data;
 	using UnityEngine.Assertions;
 	using UnityEngine;
+	using Mapbox.Utils;
 
 	public class MapboxStylesColorModifier : GameObjectModifier
 	{
@@ -29,12 +30,12 @@
 			_detailTWoColorId = Shader.PropertyToID(_DETAIL_TWO_COLOR_NAME);
 		}
 
-		private Color GetColorFromPalette(float value)
+		private Color GetColorFromPalette(VectorEntity ve)
 		{
 			Color color = Color.white;
 			if (m_scriptablePalette.m_colors.Length > 0)
 			{
-				int index = (int)(value * (m_scriptablePalette.m_colors.Length - 1));
+				int index = ve.Feature.Random.Range(0, m_scriptablePalette.m_colors.Length);
 
 				color = m_scriptablePalette.m_colors[index];
 			}
@@ -52,9 +53,9 @@
 
 			ve.MeshRenderer.GetPropertyBlock(propBlock);
 
-			Color baseColor = (m_scriptablePalette.m_setBaseColor_Override) ? m_scriptablePalette.m_baseColor_Override : GetColorFromPalette(ve.Feature.RandomValue);
-			Color detailColor1 = (m_scriptablePalette.m_setDetailColor1_Override) ? m_scriptablePalette.m_detailColor1_Override : GetColorFromPalette(ve.Feature.RandomValue);
-			Color detailColor2 = (m_scriptablePalette.m_setDetailColor2_Override) ? m_scriptablePalette.m_detailColor2_Override : GetColorFromPalette(ve.Feature.RandomValue);
+			Color baseColor = (m_scriptablePalette.m_setBaseColor_Override) ? m_scriptablePalette.m_baseColor_Override : GetColorFromPalette(ve);
+			Color detailColor1 = (m_scriptablePalette.m_setDetailColor1_Override) ? m_scriptablePalette.m_detailColor1_Override : GetColorFromPalette(ve);
+			Color detailColor2 = (m_scriptablePalette.m_setDetailColor2_Override) ? m_scriptablePalette.m_detailColor2_Override : GetColorFromPalette(ve);
 
 			propBlock.SetColor(_baseColorId, baseColor);
 			propBlock.SetColor(_detailOneColorId, detailColor1);

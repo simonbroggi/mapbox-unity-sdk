@@ -108,7 +108,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				_scale = tile.TileScale;
 
 			//facade texture to decorate this building
-			int facade = (int)(feature.RandomValue * (_options.atlasInfo.Textures.Count - 1));
+			int facade = feature.Random.Range(0, _options.atlasInfo.Textures.Count, (int)feature.Data.Id);
 
 			_currentFacade =
 				_options.atlasInfo.Textures[facade];

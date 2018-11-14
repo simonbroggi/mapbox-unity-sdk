@@ -14,6 +14,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 	using Mapbox.Unity.Utilities;
 	using Mapbox.Unity.MeshGeneration.Filters;
 	using Mapbox.Map;
+	using Mapbox.Utils;
 
 	public class VectorLayerVisualizerProperties
 	{
@@ -62,6 +63,8 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 		private HashSet<ulong> _activeIds;
 		private Dictionary<UnityTile, List<ulong>> _idPool; //necessary to keep _activeIds list up to date when unloading tiles
 		private string _key;
+
+		private MapboxRandom mapboxRandom = new MapboxRandom();
 
 		public override string Key
 		{
@@ -421,6 +424,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 			return new VectorFeatureUnity(layerProperties.vectorTileLayer.GetFeature(index),
 													 tile,
 										  layerProperties.vectorTileLayer.Extent,
+			                              mapboxRandom,
 										  layerProperties.buildingsWithUniqueIds);
 		}
 
@@ -594,6 +598,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 				geom,
 				tile,
 				layerProperties.vectorTileLayer.Extent,
+                mapboxRandom,
 				layerProperties.buildingsWithUniqueIds);
 
 
