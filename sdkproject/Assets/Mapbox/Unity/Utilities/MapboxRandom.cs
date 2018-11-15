@@ -1,4 +1,4 @@
-﻿namespace Mapbox.Utils
+﻿namespace Mapbox.Unity.Utilities
 {
 	using System;
 
