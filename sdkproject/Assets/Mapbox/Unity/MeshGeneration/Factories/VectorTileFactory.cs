@@ -154,7 +154,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 
 		public virtual void RemoveVectorLayerVisualizer(LayerVisualizerBase subLayer)
 		{
-			subLayer.Clear();
+			subLayer.ClearCaches();
 			if (_layerBuilder.ContainsKey(subLayer.Key))
 			{
 				if (Properties.vectorSubLayers.Contains(subLayer.SubLayerProperties))
@@ -234,24 +234,18 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 			}
 		}
 
-		public override void Clear()
+		public override void Reset()
 		{
-			DestroyImmediate(DataFetcher);
-			if (_layerBuilder != null)
+			foreach (var layerList in _layerBuilder.Values)
 			{
-				foreach (var layerList in _layerBuilder.Values)
+				foreach (var layerVisualizerBase in layerList)
 				{
-					foreach (var layerVisualizerBase in layerList)
-					{
-						layerVisualizerBase.Clear();
-						DestroyImmediate(layerVisualizerBase);
-					}
+					layerVisualizerBase.ClearCaches();
 				}
-
-				_layerProgress.Clear();
-				_tilesWaitingResponse.Clear();
-				_tilesWaitingProcessing.Clear();
 			}
+			_layerProgress.Clear();
+			_tilesWaitingResponse.Clear();
+			_tilesWaitingProcessing.Clear();
 		}
 
 		public override void SetOptions(LayerProperties options)
@@ -470,7 +464,7 @@ namespace Mapbox.Unity.MeshGeneration.Factories
 			{
 				foreach (var layerVisualizerBase in pairs.Value)
 				{
-					layerVisualizerBase.Clear();
+					layerVisualizerBase.ClearCaches();
 				}
 			}
 			_layerBuilder.Clear();

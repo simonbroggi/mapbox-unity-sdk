@@ -156,7 +156,6 @@
 			if (GUILayout.Button(new GUIContent(" X "), (GUIStyle)"minibuttonright", GUILayout.Width(30)))
 			{
 				vectorFilterOptions.RemoveFilter(index);
-				propertyFilters.DeleteArrayElementAtIndex(index);
 			}
 
 			EditorGUILayout.EndHorizontal();

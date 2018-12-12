@@ -105,7 +105,7 @@ namespace Mapbox.Unity.MeshGeneration.Interfaces
 						{
 							if (_prefabModifier != null)
 							{
-								_prefabModifier.Clear();
+								_prefabModifier.ClearCaches();
 							}
 							_defaultStack.GoModifiers.Clear();
 						}
