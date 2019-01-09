@@ -19,6 +19,7 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		public override void SetProperties(ModifierProperties properties)
 		{
 			_options = (GeometryMaterialOptions)properties;
+			Debug.Log("_options.darkStyleOpacity : " + _options.darkStyleOpacity);
 			_options.PropertyHasChanged += UpdateModifier;
 		}
 
@@ -36,6 +37,8 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 		{
 			var min = Math.Min(_options.materials.Length, ve.MeshFilter.sharedMesh.subMeshCount);
 			var mats = new Material[min];
+
+			bool useMaterialPropertyBlock = false;
 
 			if (_options.style == StyleTypes.Custom)
 			{
@@ -57,20 +60,25 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 			else
 			{
 				float renderMode = 0.0f;
+
 				switch (_options.style)
 				{
 					case StyleTypes.Light:
 						renderMode = GetRenderMode(_options.lightStyleOpacity);
+						useMaterialPropertyBlock = true;
 						break;
 					case StyleTypes.Dark:
 						renderMode = GetRenderMode(_options.darkStyleOpacity);
+						useMaterialPropertyBlock = true;
 						break;
 					case StyleTypes.Color:
 						renderMode = GetRenderMode(_options.colorStyleColor.a);
+						useMaterialPropertyBlock = true;
 						break;
 					default:
 						break;
 				}
+
 				for (int i = 0; i < min; i++)
 				{
 					mats[i] = _options.materials[i].Materials[UnityEngine.Random.Range(0, _options.materials[i].Materials.Length)];
@@ -78,6 +86,39 @@ namespace Mapbox.Unity.MeshGeneration.Modifiers
 				}
 			}
 			ve.MeshRenderer.materials = mats;
+
+
+			if(useMaterialPropertyBlock)
+			{
+				
+				MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+				ve.MeshRenderer.GetPropertyBlock(propBlock);
+
+				switch (_options.style)
+				{
+					case StyleTypes.Light:
+						//colorToSet = _options.materials[0].Materials[0].color;
+						//colorToSet.a = _options.lightStyleOpacity;
+						propBlock.SetFloat("_Opacity", _options.lightStyleOpacity);
+						//propBlock.SetFloat("_Mode", GetRenderMode(_options.lightStyleOpacity));
+						break;
+					case StyleTypes.Dark:
+						//colorToSet = _options.materials[0].Materials[0].color;
+						//colorToSet.a = _options.darkStyleOpacity;
+						propBlock.SetFloat("_Opacity", _options.darkStyleOpacity);
+						//propBlock.SetFloat("_Mode", GetRenderMode(_options.darkStyleOpacity));
+
+						break;
+					case StyleTypes.Color:
+						propBlock.SetColor("_Color", _options.colorStyleColor);
+						//propBlock.SetFloat("_Mode", GetRenderMode(_options.colorStyleColor.a));
+						//GetRenderMode(_options.colorStyleColor.a);
+						break;
+					default:
+						break;
+				}
+				ve.MeshRenderer.SetPropertyBlock(propBlock);
+			}
 		}
 
 		public override void OnPoolItem(VectorEntity vectorEntity)
